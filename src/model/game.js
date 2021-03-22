@@ -1,6 +1,4 @@
-const Player = require("./player");
-
-module.exports = class Game {
+export default class Game {
   constructor(field, player, winPosition) {
     if (!Array.isArray(field)) {
       throw Error(`Game.constructor field must be Array`);
@@ -8,15 +6,12 @@ module.exports = class Game {
     if (!field.every(arr => Array.isArray(arr))) {
       throw Error(`Game.constructor field must be 2D Array`);
     }
-    if (!player instanceof Player) {
-      throw Error(`Game.constructor player must be object of Player`);
-    }
-    if (!player instanceof Player) {
-      throw Error(`Game.constructor player must be object of Player`);
-    }
-    if (!winPosition instanceof Object) {
-      throw Error(`Game.constructor winPosition must be object`);
-    }
+    // if (!player instanceof Player) {
+    //   throw Error(`Game.constructor player must be object of Player`);
+    // }
+    // if (!winPosition instanceof Object) {
+    //   throw Error(`Game.constructor winPosition must be object`);
+    // }
     if (!Object.keys(winPosition).join('') === 'xy' ) {
       throw Error(`Game.constructor winPosition must contain 'x' and 'y'`);
     }
@@ -45,7 +40,7 @@ module.exports = class Game {
       }
     })
   }
-  get log() {
+  log() {
     const [x, y] = this.player.getPosition();
     console.log({field: this.field, history: this.history, WinPosition: this.winPos, playerX: x, playerY: y});
   }

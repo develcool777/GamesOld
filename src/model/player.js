@@ -1,4 +1,4 @@
-module.exports = class Player {
+export default class Player {
   constructor(x, y) {
     if (typeof x !== 'number' || !Number.isInteger(x)) {
       throw Error(`Player.constructor x must be Integer`);
@@ -27,7 +27,7 @@ module.exports = class Player {
       }
     })
   }
-  get log() {
+  log() {
     console.log({x: this.x, y: this.y});
   }
 
