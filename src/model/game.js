@@ -42,6 +42,9 @@ export default class Game {
       },
       winPos: {
         get: () => winPosition
+      },
+      startPos: {
+        get: () => startPosition
       }
     })
   }
@@ -49,6 +52,7 @@ export default class Game {
     const [x, y] = this.player.getPosition();
     console.log({field: this.field, history: this.history, WinPosition: this.winPos, playerX: x, playerY: y});
   }
+
   printField() {
     console.log(`[`);
     this.field.forEach(arr => {
@@ -65,8 +69,9 @@ export default class Game {
       throw Error(`Game.cheakWin y must be Integer`);
     }
     if (x === this.winPos.x && y === this.winPos.y) {
-      console.log('won');
+      return true;
     }
+    return false;
   }
 
   moves(move) {
@@ -78,28 +83,28 @@ export default class Game {
     }
     const [x, y] = this.player.getPosition();
     if (move === 'W') {
-      if (x > 0 && this.field[x-1][y] === 0) {
+      if (x > 0 && this.field[x-1][y] !== 1) {
         this.player.moveUp();
       } else {
         console.log(`sorry no up`);
       }
     }
    else if (move === 'S' ) {
-      if (x < this.field.length - 1 && this.field[x+1][y] === 0) {
+      if (x < this.field.length - 1 && this.field[x+1][y] !== 1) {
         this.player.moveDown();
       } else {
         console.log(`sorry no down`);
       }
     }
     else if (move === 'A' ) {
-      if (y > 0 && this.field[x][y-1] === 0) {
+      if (y > 0 && this.field[x][y-1] !== 1) {
         this.player.moveLeft();
       } else {
         console.log(`sorry no left`);
       }
     }
     else if (move === 'D') {
-      if (y < this.field.length - 1 && this.field[x][y+1] === 0) {
+      if (y < this.field.length - 1 && this.field[x][y+1] !== 1) {
         this.player.moveRight();
       } else {
         console.log(`sorry no right`);
@@ -132,23 +137,12 @@ export default class Game {
       })
     });
     this.history = [];
-    this.player.x = 0;
-    this.player.y = 0;
+    this.player.x = this.startPos.x;
+    this.player.y = this.startPos.y;
   }
 
   init() {
-    const [x, y] = this.player.getPosition();
-    this.field[x][y] = '@';
-    // this.printField();
-    // this.moves('S');
-    // this.printField();
-    // this.moves('D');
-    // this.printField();
-    // this.moves('D');
-    // this.moves('W');
-    // this.printField();
-    // this.moves('W');
-    // this.clean();
-    // this.log;
+    this.field[this.startPos.x][this.startPos.y] = '@';
+    this.field[this.winPos.x][this.winPos.y] = '';
   }
 }

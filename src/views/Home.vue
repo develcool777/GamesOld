@@ -4,8 +4,8 @@
 </template>
 
 <script>
-import Header from '@/components/Header.vue'
-import Maze from '@/components/Maze.vue'
+import Header from '@/layout/Header.vue'
+import Maze from '@/layout/Maze.vue'
 export default {
   name: 'Home',
   components: {
