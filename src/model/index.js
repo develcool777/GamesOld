@@ -23,6 +23,11 @@ const finish = {
   x: 0,
   y: 2
 }
-const g = new Game(f, new Player(0,0), finish); 
+const start = {
+  x: 0,
+  y: 0
+}
+const g = new Game(f, start, finish); 
 g.init();
 g.clean();
+g.log()

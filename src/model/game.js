@@ -1,23 +1,28 @@
+// const Player = require("./player");
+
+import Player from './player'
 export default class Game {
-  constructor(field, player, winPosition) {
+// module.exports = class Game {
+  constructor(field, startPosition, winPosition) {
     if (!Array.isArray(field)) {
       throw Error(`Game.constructor field must be Array`);
     }
     if (!field.every(arr => Array.isArray(arr))) {
       throw Error(`Game.constructor field must be 2D Array`);
     }
-    // if (!player instanceof Player) {
-    //   throw Error(`Game.constructor player must be object of Player`);
-    // }
-    // if (!winPosition instanceof Object) {
-    //   throw Error(`Game.constructor winPosition must be object`);
-    // }
+    if (!Object.keys(startPosition).join('') === 'xy' ) {
+      throw Error(`Game.constructor startPosition must contain 'x' and 'y'`);
+    }
+    if (!Object.values(startPosition).every(item => Number.isInteger(item) && item >= 0)) {
+      throw Error(`Game.constructor startPosition.x and startPosition.y must be positive Integers`);
+    }
     if (!Object.keys(winPosition).join('') === 'xy' ) {
       throw Error(`Game.constructor winPosition must contain 'x' and 'y'`);
     }
     if (!Object.values(winPosition).every(item => Number.isInteger(item) && item >= 0)) {
       throw Error(`Game.constructor winPosition.x and winPosition.y must be positive Integers`);
     }
+    const player = new Player(startPosition.x, startPosition.y);
     let history = [];
     Object.defineProperties(this, {
       field: {
@@ -134,16 +139,16 @@ export default class Game {
   init() {
     const [x, y] = this.player.getPosition();
     this.field[x][y] = '@';
-    this.printField();
-    this.moves('S');
-    this.printField();
-    this.moves('D');
-    this.printField();
-    this.moves('D');
-    this.moves('W');
-    this.printField();
-    this.moves('W');
-    this.clean();
-    this.log;
+    // this.printField();
+    // this.moves('S');
+    // this.printField();
+    // this.moves('D');
+    // this.printField();
+    // this.moves('D');
+    // this.moves('W');
+    // this.printField();
+    // this.moves('W');
+    // this.clean();
+    // this.log;
   }
 }
