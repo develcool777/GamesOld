@@ -1,5 +1,5 @@
 <template>
-  <div class="maze">
+  <div class="maze" :style="{marginTop: `${-headerHeight}px`}">
     <div class="maze__position">
       <div class="maze__field" key="whatif2">
         <div class="maze__row" v-for="(row, i) in Field" :key="i">
@@ -7,12 +7,26 @@
         </div>
       </div>
     </div>
-    <Instruction class="maze__instruction"/>
+    <Instruction 
+      class="maze__instruction" 
+      :style="{marginTop: `${headerHeight}px`}"
+      :arrow="arrowClicked"
+      :state="stop"
+      :time="Time"
+      :triger="isFinished"
+      v-on:startGame="startLoop()"
+      v-on:stopGame="stopLoop($event)" 
+      v-on:click="keyPressed($event)"
+    />
   </div>
-  <Result :status="isModal" v-on:close="cleanField()"/>
-  <!-- <div class="empty"></div>
-  <div class="block"></div>
-  <div class="player"></div> -->
+  <Result 
+    :result="result"
+    :status="isModal"
+    v-on:close="cleanField()"
+  />
+  <!-- <div class="test"></div> -->
+  <!-- <div class="block"></div> -->
+  <!-- <div class="player"></div>  -->
 </template>
 
 <script>
@@ -29,14 +43,26 @@ export default {
     return {
       Field: field,
       game: {},
-      isModal: false
+      arrowClicked: 0,
+      isModal: false,
+      stop: true,
+      headerHeight: 0,
+      Time: {str: '01:00', seconds: 59},
+      isFinished: false,
+      result: ''
     }
   },
   created() {
     this.createGame();
-    this.gameLoop();
+    this.getHeaderHeight();
   },
   methods: {
+    getHeaderHeight() {
+      this.emitter.on("headerHeight", (h) => {
+        console.log('Maze',h);
+        this.headerHeight = h + 1; // 
+      });
+    },
     createGame() {
       this.game = new Game(...this.getFieldInMatrix());
       this.game.init();
@@ -65,7 +91,9 @@ export default {
           return obj;
         })
       })
+      this.isFinished = false;
       this.Field = field;
+      this.Time = {str: '01:00', seconds: 59};
       this.isModal = false;
     },
     draw(prevX, prevY, curentX, curentY) {
@@ -80,32 +108,55 @@ export default {
       }
       insertClass(prevX, prevY, 'path');
       insertClass(curentX, curentY, 'player');
-      console.log(this.game.history);
     },
-    gameLoop() {
-      document.addEventListener('keyup', function(event){
-        keyPressed(event.key)
-      });
-      const keyPressed = (key) => {
-        const [prevX, prevY] = this.game.player.getPosition();
-        if (key === 'ArrowRight') {
-          this.game.moves('D');
-        }
-        if (key === 'ArrowLeft') {
-          this.game.moves('A');
-        }
-        if (key === 'ArrowDown') {
-          this.game.moves('S');
-        }
-        if (key === 'ArrowUp') {
-          this.game.moves('W');
-        }
-        const [curentX, curentY] = this.game.player.getPosition();
-        this.draw(prevX, prevY, curentX, curentY);
-        if (this.game.cheakWin(curentX, curentY)) {
-          this.isModal = true;
-        }
+    startLoop() {
+      console.log('starloop');
+      this.stop = false;
+      window.addEventListener('keyup', this.keyPressed); 
+    },
+    setterForStop(result) {
+      this.result = result;
+      this.isModal = true;
+      this.isFinished = true;
+    },
+    stopLoop(isLose) {
+      if (isLose) {
+        this.setterForStop('Lose');
       }
+      this.stop = true;
+      window.removeEventListener('keyup', this.keyPressed);
+    },
+    keyPressed(event) {
+      let key;
+      if (typeof event === 'string') {
+        key = event;
+      } else {
+        key = event.key;
+      }
+      const [prevX, prevY] = this.game.player.getPosition();
+      if (key === 'ArrowUp') {
+        this.game.moves('W');
+        this.arrowClicked = 1
+      }
+      if (key === 'ArrowLeft') {
+        this.game.moves('A');
+        this.arrowClicked = 2
+      }
+      if (key === 'ArrowDown') {
+        this.game.moves('S');
+        this.arrowClicked = 3
+      }
+      if (key === 'ArrowRight') {
+        this.game.moves('D');
+        this.arrowClicked = 4
+      }
+      console.log('keyPressed');
+      const [curentX, curentY] = this.game.player.getPosition();
+      this.draw(prevX, prevY, curentX, curentY);
+      if (this.game.cheakWin(curentX, curentY)) {
+        this.setterForStop('Win');
+      }
+      setTimeout(() => { this.arrowClicked = 0 }, 250);
     },
     getFieldInMatrix() {
       const startPos = {};
@@ -128,24 +179,27 @@ export default {
         })
       })
       return [matrix, startPos, endPos];
-    }
+    },
   }
 }
 </script>
 
 <style lang="scss">
 .maze {
-  @include Flex(space-between);
+  display: flex;
+  justify-content: space-between;
   height: 100vh;
-  margin-top: rem(-74); // haeder height
+  // margin-top: rem(-74); // haeder height
   &__row {
     @include Flex(center);
   }
   &__instruction {
-    width: rem(300);
+    flex-basis: rem(265);
+    // margin-top: rem(74); // haeder height
+    border-left: 5px solid $black;
   }
   &__position {
-    width: 100%;
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -189,8 +243,5 @@ export default {
   content: "*";
   font-size: 30px;
 }
-.red {
-  @include Size();
-  background: red;;
-}
+
 </style>

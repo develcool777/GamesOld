@@ -24,6 +24,7 @@ export default class Game {
     }
     const player = new Player(startPosition.x, startPosition.y);
     let history = [];
+    let loop = false;
     Object.defineProperties(this, {
       field: {
         get: () => field,
@@ -45,6 +46,12 @@ export default class Game {
       },
       startPos: {
         get: () => startPosition
+      },
+      loop: {
+        get: () => loop,
+        set: (value) => {
+          loop = value;
+        }
       }
     })
   }
@@ -89,29 +96,27 @@ export default class Game {
         console.log(`sorry no up`);
       }
     }
-   else if (move === 'S' ) {
+   else if (move === 'S') {
       if (x < this.field.length - 1 && this.field[x+1][y] !== 1) {
         this.player.moveDown();
       } else {
         console.log(`sorry no down`);
       }
     }
-    else if (move === 'A' ) {
+    else if (move === 'A') {
       if (y > 0 && this.field[x][y-1] !== 1) {
         this.player.moveLeft();
       } else {
         console.log(`sorry no left`);
       }
     }
-    else if (move === 'D') {
+    else if (move === 'D' ) {
       if (y < this.field.length - 1 && this.field[x][y+1] !== 1) {
         this.player.moveRight();
       } else {
         console.log(`sorry no right`);
       }
-    } else {
-      console.log(`something went wrong`);
-    }
+    } 
     this.history.push(move);
     const [xC, yC] = this.player.getPosition();
     this.draw(x, y, xC, yC);
@@ -140,6 +145,14 @@ export default class Game {
     this.player.x = this.startPos.x;
     this.player.y = this.startPos.y;
   }
+
+  // startGameLoop() {
+  //   this.loop = true;
+  // }
+
+  // stopGameLoop() {
+  //   this.loop = false;
+  // }
 
   init() {
     this.field[this.startPos.x][this.startPos.y] = '@';

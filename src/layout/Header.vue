@@ -1,5 +1,5 @@
 <template>
-  <header class="head">
+  <header class="head" ref="head">
     <div class="head__logo">Games</div>
     <nav class="head__menu">
       <div class="head__link">Maze</div>
@@ -9,7 +9,17 @@
 
 <script>
 export default {
-
+  name: 'Header',
+  mounted() {
+    this.getHeight();
+  },
+  methods: {
+    getHeight() {
+      let headerHeight = this.$refs.head.clientHeight;
+      this.emitter.emit("headerHeight", headerHeight);
+      console.log(headerHeight);
+    }
+  }
 }
 </script>
 

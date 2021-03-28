@@ -6,6 +6,13 @@ $win: green;
 $start: purple;
 $white: white;
 $red: red;
+
+$color-primary-1: #fec180;
+$color-primary-2: #ff8993;
+
+
+$gradient-primary: linear-gradient(to bottom right, $color-primary-1, $color-primary-2);
+$gradient-secondary: linear-gradient(to top left, $color-primary-1, $color-primary-2);
 // z-index
 $mask: 10;
 $modalContent: 20;

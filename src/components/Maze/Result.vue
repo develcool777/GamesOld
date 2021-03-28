@@ -3,7 +3,7 @@
 		<div class="modal" v-if="status">
 			<div class="mask"/>
 			<div class="result center">
-				<div class="result__title">You Won</div>
+				<div class="result__title">You {{result}}</div>
 				<div class="result__btns">
 					<div class="result__btn" @click="close()">Refresh</div>
 				</div>
@@ -15,9 +15,8 @@
 export default {
 	name: "Result",
   props: {
-    status: {
-      type: Boolean
-    }
+    status: Boolean,
+		result: String
   },
 	methods: {
     close() {
