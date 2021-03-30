@@ -17,7 +17,6 @@ export default {
     getHeight() {
       let headerHeight = this.$refs.head.clientHeight;
       this.emitter.emit("headerHeight", headerHeight);
-      console.log(headerHeight);
     }
   }
 }

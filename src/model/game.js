@@ -1,8 +1,7 @@
 // const Player = require("./player");
-
+// module.exports = class Game {
 import Player from './player'
 export default class Game {
-// module.exports = class Game {
   constructor(field, startPosition, winPosition) {
     if (!Array.isArray(field)) {
       throw Error(`Game.constructor field must be Array`);
@@ -54,6 +53,7 @@ export default class Game {
         }
       }
     })
+    Object.freeze(this);
   }
   log() {
     const [x, y] = this.player.getPosition();
@@ -145,14 +145,6 @@ export default class Game {
     this.player.x = this.startPos.x;
     this.player.y = this.startPos.y;
   }
-
-  // startGameLoop() {
-  //   this.loop = true;
-  // }
-
-  // stopGameLoop() {
-  //   this.loop = false;
-  // }
 
   init() {
     this.field[this.startPos.x][this.startPos.y] = '@';

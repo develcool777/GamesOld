@@ -1,12 +1,20 @@
 <template>
-  <div class="instruction">
+  <section class="instruction">
     <div class="instruction__time">
-      <div class="instruction__timer">Timer: {{timeStr}}</div>
+      <div class="instruction__title">Timer: {{timeStr}}</div>
       <div class="instruction__mainBtns">
         <div class="instruction__mainBtn" @click="start()">Start</div>
         <div class="instruction__mainBtn" @click="stop()">Stop</div>
       </div>
     </div>
+    <div class="instruction__levels">
+      <div class="instruction__title">Levels</div>
+      <div class="instruction__row instruction__row--width">
+        <div class="instruction__btn left" @click="changeLevel(-1)"></div>
+         <div class="instruction__">Level: {{level}}</div>
+        <div class="instruction__btn right" @click="changeLevel(1)"></div>
+      </div>
+    </div> 
     <div class="instruction__controls">
       <div class="instruction__title">Controls</div>
       <div class="instruction__text">Use Arrow buttons or your keybord to control</div>
@@ -21,7 +29,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -29,9 +37,10 @@ export default {
   name: 'Instruction',
   props: {
     arrow: Number,
-    state: Boolean,
+    stopClick: Boolean,
     triger: Boolean,
-    time: Object, 
+    time: Object,
+    level: Number 
   },
   watch: {
     triger: function(newVal) {
@@ -72,8 +81,13 @@ export default {
       }, 1000);
     },
     clicked(arrow) {
-      if (!this.state) {
+      if (!this.stopClick) {
         this.$emit('click', arrow);
+      }
+    },
+    changeLevel(step) {
+      if (this.stopClick) {
+        this.$emit('changeLevel', step);
       }
     },
     start() {
@@ -93,15 +107,27 @@ export default {
 .instruction {
   width: rem(300);
   padding: 0 rem(10);
-  &__time, &__mainBtns  {
+  &__mainBtns  {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
   }
-  &__timer {
+  &__controls, &__time, &__levels {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding: rem(20) 0;
+  }
+  &__title {
+    margin-bottom: rem(20);
     font-size: rem(30);
+    text-align: center;
+  }
+  &__text {
+    font-size: rem(15);
+    text-align: center;
+    margin-bottom: rem(30);
   }
   &__mainBtn:nth-child(2) {
     margin-top: rem(15);
@@ -119,22 +145,7 @@ export default {
   }
   &__mainBtn:hover {
     background: $gradient-secondary;
-    transform: scale(0.9);
-  }
-  &__controls {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: rem(30) 0;
-  }
-  &__title {
-    font-size: rem(30);
-    text-align: center;
-  }
-  &__text {
-    font-size: rem(15);
-    text-align: center;
-    padding: rem(10) 0 rem(30);
+    transform: scale(0.98);
   }
   &__btns {
     width: rem(170);
@@ -147,6 +158,9 @@ export default {
     @include Flex(space-between);
     &--center {
       justify-content: center;
+    }
+    &--width {
+      width: rem(200);
     }
   }
   &__btn {

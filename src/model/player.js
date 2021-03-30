@@ -27,6 +27,7 @@ export default class Player {
         }
       }
     })
+    Object.freeze(this);
   }
   log() {
     console.log({x: this.x, y: this.y});
