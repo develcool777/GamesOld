@@ -14,16 +14,19 @@
       :stopClick="stopClickArrows"
       :time="timer"
       :triger="isFinished"
+      :restart="isRestarted"
       :level="level"
       v-on:startGame="startLoop()"
       v-on:stopGame="stopLoop($event)" 
-      v-on:click="keyPressed($event)"
+      v-on:click="actOfUser($event)"
       v-on:changeLevel="changeLevel($event)"
+      v-on:changeRestart="changeRestarted($event)"
     />
   </div>
   <Result 
     :result="result"
-    :status="isFinished"
+    :status="showModal"
+    v-on:restart="restart()"
     v-on:close="cleanField()"
   />
 </template>
@@ -44,12 +47,14 @@ export default {
       field: {},
       game: {},
       fieldForDraw: [],
-      timer: {},
+      timer: 0,
       level: 1,
       arrowClicked: 0,
       stopClickArrows: true,
       headerHeight: 0,
       isFinished: false,
+      isRestarted: false,
+      showModal: false,
       result: ''
     }
   },
@@ -60,23 +65,35 @@ export default {
   },
   methods: {
     getHeaderHeight() {
-      this.emitter.on("headerHeight", (h) => {
+      this.emitter.on("headerHeight", h => {
         this.headerHeight = h + 1; // 
       });
     },
     createGame() {
-      this.fieldForDraw = this.field.generateFieldForDraw();
+      const [field, start, end] = this.field.dataForGame();
+      this.game = new Game(field, start, end);
+      this.fieldForDraw = this.field.generateFieldForDraw(field, start, end);
       this.timer = this.field.time();
       this.level = this.field.level;
-      this.game = new Game(...this.field.dataForGame());
       this.game.init();
     },
+    restart() {
+      this.cleanField();
+      this.changeRestarted(true);
+      this.isFinished = false;
+      this.startLoop();
+    },
+    changeRestarted(value) {
+      this.isRestarted = value;
+    },
     cleanField() {
+      // console.log('MAzE clean');
+      const [field, start, end] = this.field.dataForGame();
       this.game.clean();
       this.game.init();
+      this.fieldForDraw = this.field.generateFieldForDraw(field, start, end);
+      this.showModal = false;
       this.isFinished = false;
-      this.fieldForDraw = this.field.generateFieldForDraw();
-      this.timer = this.field.time();
     },
     changeLevel(step) {
       this.field.changeLevel(step);
@@ -96,23 +113,22 @@ export default {
       insertClass(prevX, prevY, 'path');
       insertClass(curentX, curentY, 'player');
     },
-    setterForStop(result) {
-      this.result = result;
-      this.isFinished = true;
-    },
     startLoop() {
-      console.log('starloop');
+      console.log('startLoop', {isFinished: this.isFinished});     
       this.stopClickArrows = false;
-      window.addEventListener('keyup', this.keyPressed); 
+      window.addEventListener('keyup', this.actOfUser); 
     },
-    stopLoop(isLose) {
-      if (isLose) {
-        this.setterForStop('Lose');
+    stopLoop(isFinished, result="Lose") {
+      console.log('stoploop', {isFinished: this.isFinished});
+      if (isFinished) {
+        this.result = result;
+        this.isFinished = true;
+        this.showModal = true;
       }
       this.stopClickArrows = true;
-      window.removeEventListener('keyup', this.keyPressed);
+      window.removeEventListener('keyup', this.actOfUser);
     },
-    keyPressed(event) {
+    actOfUser(event) {
       const eventChecker = e => {
         if (typeof e === 'string') {
           return e;
@@ -120,6 +136,15 @@ export default {
         return e.key;
       }
       const key = eventChecker(event);
+      const [prevX, prevY] = this.keyPressed(key);
+      const [curentX, curentY] = this.game.player.getPosition();
+      this.draw(prevX, prevY, curentX, curentY);
+      if (this.game.cheakWin(curentX, curentY)) {
+        this.stopLoop(true, 'Win');
+        console.log('Maze WON');
+      }
+    },
+    keyPressed(key) {
       const [prevX, prevY] = this.game.player.getPosition();
       if (key === 'ArrowUp') {
         this.game.moves('W');
@@ -137,12 +162,8 @@ export default {
         this.game.moves('D');
         this.arrowClicked = 4
       }
-      const [curentX, curentY] = this.game.player.getPosition();
-      this.draw(prevX, prevY, curentX, curentY);
-      if (this.game.cheakWin(curentX, curentY)) {
-        this.setterForStop('Win');
-      }
       setTimeout(() => { this.arrowClicked = 0 }, 250);
+      return [prevX, prevY];
     }
   }
 }

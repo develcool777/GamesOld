@@ -3,8 +3,8 @@
     <div class="instruction__time">
       <div class="instruction__title">Timer: {{timeStr}}</div>
       <div class="instruction__mainBtns">
-        <div class="instruction__mainBtn" @click="start()">Start</div>
-        <div class="instruction__mainBtn" @click="stop()">Stop</div>
+        <div class="instruction__mainBtn" @click="startEmit()">Start</div>
+        <div class="instruction__mainBtn" @click="stopEmit(false)">Stop</div>
       </div>
     </div>
     <div class="instruction__levels">
@@ -39,45 +39,59 @@ export default {
     arrow: Number,
     stopClick: Boolean,
     triger: Boolean,
-    time: Object,
-    level: Number 
+    restart: Boolean,
+    level: Number,
+    time: Number
   },
   watch: {
     triger: function(newVal) {
       if (newVal === true) {
         console.log('stop Timer');
+        this.seconds = this.time;
+        this.initTimer();
         this.stop();
-      } else {
-        console.log('start Timer');
+      } 
+      if (this.restart) {
         this.start();
       }
     },
     time: function(newVal) {
-      this.timeStr = newVal.str;
-      this.seconds = newVal.seconds;
-    }
+      this.seconds = newVal;
+      this.initTimer();
+    },
+  },
+  created() {
+    this.initTimer();
   },
   data() {
     return {
-      timeStr: this.time.str,
-      seconds: this.time.seconds,
+      timeStr: '',
+      seconds: this.time,
       idInterval: 0
     }
   },
   methods: {
+    initTimer() {
+      this.timeForPrint(this.seconds);
+      this.seconds--;
+    },
+    timeForPrint(time) {
+      console.log(this.seconds);
+      let minutes = parseInt(time / 60, 10);
+      let seconds = parseInt(time % 60, 10);
+      minutes = minutes < 10 ? "0" + minutes : minutes;
+      seconds = seconds < 10 ? "0" + seconds : seconds;
+      this.timeStr = minutes + ":" + seconds;
+    },
     runTimer(duration) {
-      let timer = duration, minutes, seconds;
+      let timer = duration;
       this.idInterval = setInterval( () => {
-        minutes = parseInt(timer / 60, 10);
-        seconds = parseInt(timer % 60, 10);
-        minutes = minutes < 10 ? "0" + minutes : minutes;
-        seconds = seconds < 10 ? "0" + seconds : seconds;
-        this.timeStr = minutes + ":" + seconds;
+        this.timeForPrint(timer);
+        if (timer <= 0) {
+          this.stopEmit(true);
+        }
         timer--;
         this.seconds = timer;
-        if (timer < 0) {
-          this.stop(true);
-        }
       }, 1000);
     },
     clicked(arrow) {
@@ -92,12 +106,18 @@ export default {
     },
     start() {
       this.runTimer(this.seconds);
+      this.$emit('changeRestart', false);
+    },
+    stop() {
+      clearInterval(this.idInterval);
+    },
+    startEmit() {
+      this.runTimer(this.seconds);
       this.$emit('startGame');
     },
-    stop(isEnd) {
+    stopEmit(isFinished) {
       clearInterval(this.idInterval);
-      let lost = isEnd ? true : false;
-      this.$emit('stopGame', lost);
+      this.$emit('stopGame', isFinished);
     }
   }
 }
