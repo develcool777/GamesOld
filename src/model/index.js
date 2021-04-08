@@ -1,11 +1,12 @@
-// const Game = require('./game');
-// const Player = require('./player');
+const Game = require('./game');
+const Player = require('./player');
 const Field = require('./field');
 const data = require('./../maps/dataForMaze.json');
 
-const f = new Field();
-f.dataForGame(data);
-f.time(data);
+
+const f = new Field(data);
+const fData = f.dataForGame();
+
 
 
 // const f = [

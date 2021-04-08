@@ -69,6 +69,9 @@ export default class Field {
       },
       getEnd: {
         get: () => (data) => data.Levels[level].endPosition
+      },
+      getLevels: {
+        get: () => (data) => Object.keys(data.Levels)
       }
     })
     Object.freeze(this);
@@ -119,5 +122,9 @@ export default class Field {
     if (levels.map(Number).includes(this.level + value)) {
       this.level += value;
     }
+  }
+  amountOfLevels() {
+    const levels = this.getLevels(this.data);
+    return levels.length;
   }
 }

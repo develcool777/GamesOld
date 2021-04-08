@@ -1,33 +1,65 @@
 <template>
 	<transition name="fade">
-		<div class="modal" v-if="status">
+		<div class="modal" v-if="gameFinished">
 			<div class="mask" @click="close()"/>
 			<div class="result center">
 				<div class="result__close" @click="close()"></div>
-				<div class="result__title">You {{result}}</div>
-				<div class="result__btns">
-					<div class="result__btn">Previous level</div>
+				<div class="result__title">You {{getResult}}</div>
+				<div class="result__complete">
+					<div class="result__text" v-if="getResult === 'Win'">Completed in {{ getTimeForReset - getTimer }} seconds</div>
+					<div class="result__text" v-else>Try one more time or choose another level</div>
+				</div>
+				<div class="result__btns" :style="{width: `${width}px`}">
+					<div class="result__btn" v-if="showPrev()" @click="changeLevel(-1)">Previous level</div>
 					<div class="result__btn" @click="restart()">Restart</div>
-					<div class="result__btn">Next level</div>
+					<div class="result__btn" v-if="showNext()" @click="changeLevel(1)">Next level</div>
 				</div>
 			</div>
 		</div>
 	</transition>
 </template>
 <script>
+import { mapActions, mapState, mapGetters } from 'vuex'
 export default {
 	name: "Result",
-  props: {
-    status: Boolean,
-		result: String
-  },
+	data() {
+		return {
+			width: 400,
+		}
+	},
+	created() {
+	},
+	computed: {
+		...mapState(['gameFinished']),
+		...mapGetters(['getLevel', 'getTimer', 'getTimeForReset', 'getResult', 'getAmountOfLevels'])
+	},
 	methods: {
+		...mapActions(['INIT_STATE', 'END_GAME']), /// !!!!
     restart() {
 			this.$emit('restart');
 		},
 		close() {
 			console.log('Result close');
 			this.$emit('close');
+		},
+    changeLevel(step) {
+      this.$emit('changeLevel', step);
+    },
+		showPrev() {
+			if (this.getLevel > 1) {
+				this.width = 400;
+				return true;
+			}
+			this.width = 300;
+			return false;
+		},
+		showNext() {
+			if (this.getLevel < this.getAmountOfLevels) {
+				this.width = 400;
+				return true;
+			}
+			this.width = 300;
+			return false;
 		}
 	}
 }
@@ -46,8 +78,16 @@ export default {
 	&__title {
 		font-size: rem(50);
 	}
+	&__complete {
+		width: rem(400);
+	}
+	&__text {
+		text-align: center;
+		font-size: rem(30);
+	}
 	&__btns {
 		@include Flex(space-between);
+		width: rem(400);
 	}
 	&__btn {
 		padding: rem(10) rem(20);

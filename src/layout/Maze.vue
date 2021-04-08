@@ -10,28 +10,19 @@
     <Instruction 
       class="maze__instruction" 
       :style="{marginTop: `${headerHeight}px`}"
-      :arrow="arrowClicked"
-      :stopClick="stopClickArrows"
-      :time="timer"
-      :triger="isFinished"
-      :restart="isRestarted"
-      :level="level"
-      v-on:startGame="startLoop()"
-      v-on:stopGame="stopLoop($event)" 
-      v-on:click="actOfUser($event)"
       v-on:changeLevel="changeLevel($event)"
-      v-on:changeRestart="changeRestarted($event)"
+      v-on:clicked="actOfUser($event)"
     />
   </div>
-  <Result 
-    :result="result"
-    :status="showModal"
+  <Result
+    v-on:changeLevel="changeLevel($event)"
     v-on:restart="restart()"
     v-on:close="cleanField()"
   />
 </template>
 
 <script>
+import { mapActions, mapState } from 'vuex'
 import DATA from '@/maps/dataForMaze'
 import Field from '@/model/field' 
 import Game from '@/model/game'
@@ -47,15 +38,7 @@ export default {
       field: {},
       game: {},
       fieldForDraw: [],
-      timer: 0,
-      level: 1,
-      arrowClicked: 0,
-      stopClickArrows: true,
-      headerHeight: 0,
-      isFinished: false,
-      isRestarted: false,
-      showModal: false,
-      result: ''
+      headerHeight: 0
     }
   },
   created() {
@@ -63,69 +46,71 @@ export default {
     this.createGame();
     this.getHeaderHeight();
   },
+  watch: {
+    isPlaying: function(newValue) {
+      console.log('MAZE IsPlaying watch');
+      if (newValue) {
+        this.startLoop();
+      } else {
+        this.stopLoop();
+      }
+    }
+  },
+  computed: {
+    ...mapState(['level', 'isPlaying'])
+  },
   methods: {
+    ...mapActions([
+      'INIT_STATE', 'END_GAME', 'CLEAN_GAME', 'CHANGE_ISPLAYING', 
+      'CHANGE_RESTART', 'CHANGE_ARROW', 'CHANGE_STOP_CLICK'
+    ]),
     getHeaderHeight() {
       this.emitter.on("headerHeight", h => {
         this.headerHeight = h + 1; // 
       });
     },
     createGame() {
+      const obj = {
+        field: this.field,
+        level: this.field.level,
+        seconds: this.field.time(),
+        isFinished: false,
+        isPlaying: false,
+        amountOfLevels: this.field.amountOfLevels(),
+        stopClick: true,
+        arrowClicked: 0
+      }
+      console.log({obj});
+      this.INIT_STATE(obj);
       const [field, start, end] = this.field.dataForGame();
-      this.game = new Game(field, start, end);
+      this.game = new Game(field, start, end)
       this.fieldForDraw = this.field.generateFieldForDraw(field, start, end);
-      this.timer = this.field.time();
-      this.level = this.field.level;
-      this.game.init();
-    },
-    restart() {
-      this.cleanField();
-      this.changeRestarted(true);
-      this.isFinished = false;
-      this.startLoop();
-    },
-    changeRestarted(value) {
-      this.isRestarted = value;
-    },
-    cleanField() {
-      // console.log('MAzE clean');
-      const [field, start, end] = this.field.dataForGame();
-      this.game.clean();
-      this.game.init();
-      this.fieldForDraw = this.field.generateFieldForDraw(field, start, end);
-      this.showModal = false;
-      this.isFinished = false;
+      this.game.initGame();
     },
     changeLevel(step) {
       this.field.changeLevel(step);
       this.createGame();
       console.log('changed');
     },
-    draw(prevX, prevY, curentX, curentY) {
-      const insertClass = (x, y, className) => {
-        const classArr = this.fieldForDraw[x][y].class.split(' ');
-        if (classArr.length > 1) {
-          classArr[1] = className;
-          this.fieldForDraw[x][y].class = classArr.join(' ');
-        } else {
-          this.fieldForDraw[x][y].class += ` ${className}`
-        }
-      }
-      insertClass(prevX, prevY, 'path');
-      insertClass(curentX, curentY, 'player');
+    restart() {
+      this.cleanField();
+      this.CHANGE_RESTART(true);
     },
-    startLoop() {
-      console.log('startLoop', {isFinished: this.isFinished});     
-      this.stopClickArrows = false;
+    cleanField() {
+      const [field, start, end] = this.field.dataForGame();
+      this.game.clean();
+      this.game.initGame();
+      this.fieldForDraw = this.field.generateFieldForDraw(field, start, end);
+      this.CLEAN_GAME();
+    },
+    startLoop() {   
+      this.CHANGE_STOP_CLICK(false)
+      console.log('startloop');
       window.addEventListener('keyup', this.actOfUser); 
     },
-    stopLoop(isFinished, result="Lose") {
-      console.log('stoploop', {isFinished: this.isFinished});
-      if (isFinished) {
-        this.result = result;
-        this.isFinished = true;
-        this.showModal = true;
-      }
-      this.stopClickArrows = true;
+    stopLoop() {
+      console.log('stoploop');
+      this.CHANGE_STOP_CLICK(true)
       window.removeEventListener('keyup', this.actOfUser);
     },
     actOfUser(event) {
@@ -140,29 +125,41 @@ export default {
       const [curentX, curentY] = this.game.player.getPosition();
       this.draw(prevX, prevY, curentX, curentY);
       if (this.game.cheakWin(curentX, curentY)) {
-        this.stopLoop(true, 'Win');
-        console.log('Maze WON');
+        this.END_GAME('Win');
       }
+    },
+    draw(prevX, prevY, curentX, curentY) {
+      const insertClass = (x, y, className) => {
+        const classArr = this.fieldForDraw[x][y].class.split(' ');
+        if (classArr.length > 1) {
+          classArr[1] = className;
+          this.fieldForDraw[x][y].class = classArr.join(' ');
+        } else {
+          this.fieldForDraw[x][y].class += ` ${className}`
+        }
+      }
+      insertClass(prevX, prevY, 'path');
+      insertClass(curentX, curentY, 'player');
     },
     keyPressed(key) {
       const [prevX, prevY] = this.game.player.getPosition();
       if (key === 'ArrowUp') {
         this.game.moves('W');
-        this.arrowClicked = 1
+        this.CHANGE_ARROW(1)
       }
       if (key === 'ArrowLeft') {
         this.game.moves('A');
-        this.arrowClicked = 2
+        this.CHANGE_ARROW(2)
       }
       if (key === 'ArrowDown') {
         this.game.moves('S');
-        this.arrowClicked = 3
+        this.CHANGE_ARROW(3)
       }
       if (key === 'ArrowRight') {
         this.game.moves('D');
-        this.arrowClicked = 4
+        this.CHANGE_ARROW(4)
       }
-      setTimeout(() => { this.arrowClicked = 0 }, 250);
+      setTimeout(() => { this.CHANGE_ARROW(0) }, 250);
       return [prevX, prevY];
     }
   }

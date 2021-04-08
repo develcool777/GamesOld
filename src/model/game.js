@@ -53,7 +53,6 @@ export default class Game {
         }
       }
     })
-    Object.freeze(this);
   }
   log() {
     const [x, y] = this.player.getPosition();
@@ -146,7 +145,7 @@ export default class Game {
     this.player.y = this.startPos.y;
   }
 
-  init() {
+  initGame() {
     this.field[this.startPos.x][this.startPos.y] = '@';
     this.field[this.winPos.x][this.winPos.y] = '';
   }

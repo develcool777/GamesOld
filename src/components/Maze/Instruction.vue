@@ -1,17 +1,17 @@
 <template>
   <section class="instruction">
     <div class="instruction__time">
-      <div class="instruction__title">Timer: {{timeStr}}</div>
+      <div class="instruction__title">Timer: {{ timeStr }}</div>
       <div class="instruction__mainBtns">
-        <div class="instruction__mainBtn" @click="startEmit()">Start</div>
-        <div class="instruction__mainBtn" @click="stopEmit(false)">Stop</div>
+        <div class="instruction__mainBtn green" @click.stop=" allowClick ? startGame() : null">Start</div>
+        <div class="instruction__mainBtn red" @click.stop=" !allowClick ? stopGame() : null">Stop</div>
       </div>
     </div>
     <div class="instruction__levels">
       <div class="instruction__title">Levels</div>
       <div class="instruction__row instruction__row--width">
         <div class="instruction__btn left" @click="changeLevel(-1)"></div>
-         <div class="instruction__">Level: {{level}}</div>
+         <div class="instruction__">Level: {{getLevel}}</div>
         <div class="instruction__btn right" @click="changeLevel(1)"></div>
       </div>
     </div> 
@@ -20,12 +20,12 @@
       <div class="instruction__text">Use Arrow buttons or your keybord to control</div>
       <div class="instruction__btns">
         <div class="instruction__row instruction__row--center">
-          <div class="instruction__btn up" :class="{pressed: arrow === 1}" @click="clicked('ArrowUp')"></div>
+          <div class="instruction__btn up" :class="{pressed: arrowClicked === 1}" @click="clicked('ArrowUp')"></div>
         </div>
         <div class="instruction__row">
-          <div class="instruction__btn left" :class="{pressed: arrow === 2}" @click="clicked('ArrowLeft')"></div>
-          <div class="instruction__btn down"  :class="{pressed: arrow === 3}" @click="clicked('ArrowDown')"></div>
-          <div class="instruction__btn right" :class="{pressed: arrow === 4}" @click="clicked('ArrowRight')"></div>
+          <div class="instruction__btn left" :class="{pressed: arrowClicked === 2}" @click="clicked('ArrowLeft')"></div>
+          <div class="instruction__btn down"  :class="{pressed: arrowClicked === 3}" @click="clicked('ArrowDown')"></div>
+          <div class="instruction__btn right" :class="{pressed: arrowClicked === 4}" @click="clicked('ArrowRight')"></div>
         </div>
       </div>
     </div>
@@ -33,91 +33,101 @@
 </template>
 
 <script>
+import { mapGetters, mapActions, mapState } from 'vuex'
 export default {
   name: 'Instruction',
-  props: {
-    arrow: Number,
-    stopClick: Boolean,
-    triger: Boolean,
-    restart: Boolean,
-    level: Number,
-    time: Number
-  },
-  watch: {
-    triger: function(newVal) {
-      if (newVal === true) {
-        console.log('stop Timer');
-        this.seconds = this.time;
-        this.initTimer();
-        this.stop();
-      } 
-      if (this.restart) {
-        this.start();
-      }
-    },
-    time: function(newVal) {
-      this.seconds = newVal;
-      this.initTimer();
-    },
-  },
   created() {
     this.initTimer();
   },
   data() {
     return {
       timeStr: '',
-      seconds: this.time,
-      idInterval: 0
+      idInterval: 0,
+      allowClick: true
     }
   },
+  watch: {
+    gameFinished: function(newValue) {
+      if (newValue) {
+        this.stopGame();
+      }
+    },
+    level: function(newVal) {
+      if (newVal) {
+        this.initTimer();
+      }
+    },
+    timer: function(newVal) {
+      if (newVal === this.timeForReset) {
+        this.initTimer();
+      }
+    },
+    restart: function(newVal) {
+      if (newVal) {
+        this.startGame();
+      }
+    }
+  },
+  computed: {
+    ...mapGetters(['getGameFinished', 'getLevel', 'getTimer']),
+    ...mapState([
+      'gameFinished', 'level', 'timer', 'timeForReset', 
+      'isPlaying', 'restart', 'arrowClicked', 'stopClickArrows'
+    ])
+  },
   methods: {
+    ...mapActions([
+      'CHANGE_LEVEl', 'CHANGE_TIMER', 'CHANGE_ISPLAYING',
+      'END_GAME', 'CHANGE_RESTART'
+    ]),
+    changeLevel(step) {
+      if (this.allowClick) {
+        this.$emit('changeLevel', step);
+        this.initTimer();
+      }
+    },
+    startGame() {
+      console.log('start game');
+      if (this.restart) {
+        this.CHANGE_RESTART(false);
+      }
+      this.CHANGE_ISPLAYING(true);
+      this.allowClick = false;
+      this.idInterval = setInterval(() => {
+        const check = this.getTimer - 1
+        if (check >= 0) {
+          this.CHANGE_TIMER(check);
+          this.timeForPrint(check);
+        } else {
+          this.finishGame();
+        }
+      }, 1000)
+    },
+    stopGame() {
+      this.allowClick = true;
+      this.CHANGE_ISPLAYING(false);
+      console.log('stop',this.isPlaying);
+      clearInterval(this.idInterval);
+    },
+    finishGame() {
+      clearInterval(this.idInterval);
+      this.END_GAME('Lose');
+    },
     initTimer() {
-      this.timeForPrint(this.seconds);
-      this.seconds--;
+      this.timeForPrint(this.getTimer);
+      this.getTimer--;
     },
     timeForPrint(time) {
-      console.log(this.seconds);
       let minutes = parseInt(time / 60, 10);
       let seconds = parseInt(time % 60, 10);
       minutes = minutes < 10 ? "0" + minutes : minutes;
       seconds = seconds < 10 ? "0" + seconds : seconds;
-      this.timeStr = minutes + ":" + seconds;
-    },
-    runTimer(duration) {
-      let timer = duration;
-      this.idInterval = setInterval( () => {
-        this.timeForPrint(timer);
-        if (timer <= 0) {
-          this.stopEmit(true);
-        }
-        timer--;
-        this.seconds = timer;
-      }, 1000);
+      this.timeStr = `${minutes}:${seconds}`;
     },
     clicked(arrow) {
-      if (!this.stopClick) {
-        this.$emit('click', arrow);
+      if (!this.stopClickArrows) {
+        this.$emit('clicked', arrow);
       }
-    },
-    changeLevel(step) {
-      if (this.stopClick) {
-        this.$emit('changeLevel', step);
-      }
-    },
-    start() {
-      this.runTimer(this.seconds);
-      this.$emit('changeRestart', false);
-    },
-    stop() {
-      clearInterval(this.idInterval);
-    },
-    startEmit() {
-      this.runTimer(this.seconds);
-      this.$emit('startGame');
-    },
-    stopEmit(isFinished) {
-      clearInterval(this.idInterval);
-      this.$emit('stopGame', isFinished);
     }
   }
 }
@@ -164,7 +174,7 @@ export default {
     transition-duration: .2s;
   }
   &__mainBtn:hover {
-    background: $gradient-secondary;
+    // background: $gradient-secondary;
     transform: scale(0.98);
   }
   &__btns {
@@ -234,5 +244,11 @@ export default {
 .pressed {
   background: $gradient-secondary;
   transform: scale(0.9);
+}
+.green {
+  background: green;
+}
+.red {
+  background: red;
 }
 </style>
