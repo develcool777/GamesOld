@@ -1,7 +1,7 @@
 <template>
   <div class="maze" :style="{marginTop: `${-headerHeight}px`}">
     <div class="maze__position">
-      <div class="maze__field" key="whatif2">
+      <div class="maze__field">
         <div class="maze__row" v-for="(row, i) in fieldForDraw" :key="i">
           <div :class="cell.class" v-for="(cell, j) in row" :key="j"></div>
         </div>
@@ -12,6 +12,7 @@
       :style="{marginTop: `${headerHeight}px`}"
       v-on:changeLevel="changeLevel($event)"
       v-on:clicked="actOfUser($event)"
+      v-on:restart="restartGame()"
     />
   </div>
   <Result
@@ -20,9 +21,8 @@
     v-on:close="cleanField()"
   />
 </template>
-
 <script>
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState, mapGetters } from 'vuex'
 import DATA from '@/maps/dataForMaze'
 import Field from '@/model/field' 
 import Game from '@/model/game'
@@ -54,10 +54,18 @@ export default {
       } else {
         this.stopLoop();
       }
+    },
+    showPath: function(newValue) {
+      let path = '';
+      if (newValue) {
+        path = 'path';
+      } 
+      this.fieldForDraw = this.field.generateFieldWithPath(this.game.field, path);
     }
   },
   computed: {
-    ...mapState(['level', 'isPlaying'])
+    ...mapState(['level', 'isPlaying', 'showPath']),
+    ...mapGetters(['getShowPath'])
   },
   methods: {
     ...mapActions([
@@ -71,14 +79,9 @@ export default {
     },
     createGame() {
       const obj = {
-        field: this.field,
         level: this.field.level,
         seconds: this.field.time(),
-        isFinished: false,
-        isPlaying: false,
         amountOfLevels: this.field.amountOfLevels(),
-        stopClick: true,
-        arrowClicked: 0
       }
       console.log({obj});
       this.INIT_STATE(obj);
@@ -91,6 +94,10 @@ export default {
       this.field.changeLevel(step);
       this.createGame();
       console.log('changed');
+    },
+    restartGame() {
+      window.removeEventListener('keyup', this.actOfUser);
+      this.restart();
     },
     restart() {
       this.cleanField();
@@ -138,7 +145,11 @@ export default {
           this.fieldForDraw[x][y].class += ` ${className}`
         }
       }
-      insertClass(prevX, prevY, 'path');
+      if (this.getShowPath) {
+        insertClass(prevX, prevY, 'path');
+      } else {
+        insertClass(prevX, prevY, '');
+      }
       insertClass(curentX, curentY, 'player');
     },
     keyPressed(key) {
@@ -159,6 +170,7 @@ export default {
         this.game.moves('D');
         this.CHANGE_ARROW(4)
       }
+      console.log(this.game.field);
       setTimeout(() => { this.CHANGE_ARROW(0) }, 250);
       return [prevX, prevY];
     }
@@ -206,22 +218,30 @@ export default {
 }
 .player::after {
   position: absolute;
+  content: "";
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  content: "@";
-  font-size: 30px;
+  width: rem(15);
+  height: rem(15);
+  border-radius: rem(5);
+  background: darkgreen;
 }
 .path {
   position: relative;
 }
 .path::after {
   position: absolute;
+  content: "";
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  content: "*";
-  font-size: 30px;
+  width: rem(10);
+  height: rem(10);
+  border-radius: 50%;
+  background: green;
+
+  // font-size: 30px;
 }
 
 </style>

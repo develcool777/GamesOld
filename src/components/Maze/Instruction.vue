@@ -3,9 +3,20 @@
     <div class="instruction__time">
       <div class="instruction__title">Timer: {{ timeStr }}</div>
       <div class="instruction__mainBtns">
-        <div class="instruction__mainBtn green" @click.stop=" allowClick ? startGame() : null">Start</div>
-        <div class="instruction__mainBtn red" @click.stop=" !allowClick ? stopGame() : null">Stop</div>
+        <div 
+          class="instruction__mainBtn green" 
+          @click.stop=" allowClick ? startGame() : null"
+        >{{ isPlaying === undefined ? 'Start' : isPlaying ? 'Started' : 'Start'}}</div>
+        <div
+          class="instruction__mainBtn red"
+          @click.stop=" !allowClick ? stopGame() : null"
+          >{{ isPlaying === undefined ? 'Stop' : !isPlaying ? 'Stoped' : 'Stop'}}</div>
       </div>
+      <div class="instruction__mainBtn" @click="restartGame()">Restart</div>
+      <div class="instruction__mainBtn" @click="changeShow()">
+        Show path: <span :style="{color: getShowPath ? 'green' : 'red'}">{{getShowPath ?'ON' : 'OFF'}}</span>
+      </div>
+      <div class="instruction__mainBtn">Show hint</div>
     </div>
     <div class="instruction__levels">
       <div class="instruction__title">Levels</div>
@@ -69,7 +80,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getGameFinished', 'getLevel', 'getTimer']),
+    ...mapGetters(['getGameFinished', 'getLevel', 'getTimer', 'getShowPath']),
     ...mapState([
       'gameFinished', 'level', 'timer', 'timeForReset', 
       'isPlaying', 'restart', 'arrowClicked', 'stopClickArrows'
@@ -78,7 +89,7 @@ export default {
   methods: {
     ...mapActions([
       'CHANGE_LEVEl', 'CHANGE_TIMER', 'CHANGE_ISPLAYING',
-      'END_GAME', 'CHANGE_RESTART'
+      'END_GAME', 'CHANGE_RESTART', 'CHANGE_SHOW_PATH'
     ]),
     changeLevel(step) {
       if (this.allowClick) {
@@ -128,6 +139,14 @@ export default {
       if (!this.stopClickArrows) {
         this.$emit('clicked', arrow);
       }
+    },
+    restartGame() {
+      clearInterval(this.idInterval);
+      console.log('restartGAME');
+      this.$emit('restart');
+    },
+    changeShow() {
+      this.CHANGE_SHOW_PATH(!this.getShowPath)
     }
   }
 }
@@ -147,25 +166,25 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: rem(20) 0;
+    padding: rem(10) 0;
   }
   &__title {
-    margin-bottom: rem(20);
+    margin-bottom: rem(10);
     font-size: rem(30);
     text-align: center;
   }
   &__text {
     font-size: rem(15);
     text-align: center;
-    margin-bottom: rem(30);
+    margin-bottom: rem(20);
   }
-  &__mainBtn:nth-child(2) {
+  &__mainBtn:nth-child(n+2) {
     margin-top: rem(15);
   }
   &__mainBtn {
     font-size: rem(25);
     width: rem(200);
-    padding: rem(20) 0;
+    padding: rem(10) 0;
     text-align: center;
     background: $gradient-primary;
     color: $white;

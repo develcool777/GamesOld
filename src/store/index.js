@@ -3,7 +3,7 @@ import { createStore } from 'vuex'
 export default createStore({
   state: {
     gameFinished: false,
-    isPlaying: false,
+    isPlaying: undefined,
     stopClickArrows: true,
     timer: 0,
     restart: false,
@@ -11,7 +11,9 @@ export default createStore({
     level: 1,
     amountOfLevels: 0,
     arrowClicked: 0,
-    result: ''
+    result: '',
+    showPath: false,
+    showHint: false
   },
   getters: {
     getGameFinished: state => state.gameFinished,
@@ -22,7 +24,9 @@ export default createStore({
     getLevel: state => state.level,
     getAmountOfLevels: state => state.amountOfLevels,
     getArrowClicked: state => state.arrowClicked,
-    getResult: state => state.result
+    getResult: state => state.result,
+    getShowPath: state => state.showPath,
+    getShowHint: state => state.showHint
   },
   mutations: {
     changeGameFinished(state, boolean) {
@@ -52,7 +56,13 @@ export default createStore({
     }, 
     changeResult(state, result='') {
       state.result = result;
-    }, 
+    },
+    changeShowPath(state, boolean) {
+      state.showPath = boolean
+    },
+    changeShowHint(state, boolean) {
+      state.showHint = boolean
+    },
     setAmountOfLevels(state, levels) {
       state.amountOfLevels = levels;
     },
@@ -65,11 +75,13 @@ export default createStore({
       commit('changeLevel', payload.level);
       commit('changeTimer', payload.seconds);
       commit('setTimeForReset');
-      commit('changeGameFinished', payload.isFinished);
-      commit('changeIsPlaying', payload.isPlaying);
+      commit('changeGameFinished', false);
+      commit('changeIsPlaying', undefined);
       commit('setAmountOfLevels', payload.amountOfLevels);
-      commit('changeStopClickArrows', payload.stopClick);
-      commit('changeArrowClicked', payload.arrowClicked);
+      commit('changeStopClickArrows', true);
+      commit('changeArrowClicked', 0);
+      commit('changeShowPath', false);
+      commit('changeShowHint', false);
     },
     CHANGE_LEVEl({commit}, level) {
       commit('changeLevel', level);
@@ -89,6 +101,8 @@ export default createStore({
       commit('changeGameFinished', false);
       commit('changeResult', '');
       commit('changeTimer');
+      commit('changeIsPlaying', undefined);
+      commit('changeShowHint', false);
     },
     CHANGE_RESTART({commit}, boolean) {
       commit('changeRestart', boolean);
@@ -97,7 +111,13 @@ export default createStore({
       commit('changeArrowClicked', arrow);
     },
     CHANGE_STOP_CLICK({commit}, boolean) {
-      commit('changeStopClickArrows', boolean)
+      commit('changeStopClickArrows', boolean);
+    },
+    CHANGE_SHOW_PATH({commit}, boolean) {
+      commit('changeShowPath', boolean);
+    },
+    CHANGE_SHOW_HINT({commit}, boolean) {
+      commit('changeShowHint', boolean);
     }
   }
 })

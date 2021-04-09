@@ -95,7 +95,7 @@ export default class Game {
         console.log(`sorry no up`);
       }
     }
-   else if (move === 'S') {
+    else if (move === 'S') {
       if (x < this.field.length - 1 && this.field[x+1][y] !== 1) {
         this.player.moveDown();
       } else {
@@ -110,7 +110,7 @@ export default class Game {
       }
     }
     else if (move === 'D' ) {
-      if (y < this.field.length - 1 && this.field[x][y+1] !== 1) {
+      if (y < this.field[0].length - 1 && this.field[x][y+1] !== 1) {
         this.player.moveRight();
       } else {
         console.log(`sorry no right`);

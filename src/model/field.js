@@ -34,17 +34,22 @@ export default class Field {
     if (!cheak) {
       throw Error(`Field.constructor every field must be contain elements: 1 and 0`);
     }
+    const cheackPosition = (point1, point2, key) => {
+      const first = Number.isInteger(point1) && point1 >=0 && point1 <= dL[+key].field.length;
+      const second = Number.isInteger(point2) && point2 >=0 && point2 <= dL[+key].field[0].length;
+      return first && second;
+    }
     const cheak2 = Object.keys(dL).every(key => {
       const start = Object.values(dL[+key].startPosition);
       const end = Object.values(dL[+key].endPosition);
-      const cheakStart = start.every(item => Number.isInteger(item) && item >= 0 && item <= dL[+key].field.length);
-      const cheakEnd = end.every(item => Number.isInteger(item) && item >= 0 && item <= dL[+key].field.length);
+      const cheakStart = cheackPosition(...start, key);
+      const cheakEnd = cheackPosition(...end, key);
       return cheakStart && cheakEnd;
     })
     if (!cheak2) {
       throw Error(`Field.constructor every startPosition and endPosition keys(x, y) must be Integers in range of field`)
     }
-    let level = 1;
+    let level = 4;
     Object.defineProperties(this, {
       data: {
         get: () => data
@@ -92,10 +97,37 @@ export default class Field {
           obj.class = 'empty';
         }
         if (start.x === i && start.y === j) {
-          obj.class = 'startPosition player';
+          obj.class = 'empty player';
         }
         if (end.x === i && end.y === j) {
           obj.class = 'winPosition';
+        }
+        return obj;
+      })
+    })
+    return fieldForDraw;
+  }
+
+  generateFieldWithPath(field, path='') {
+    const fieldForDraw = field.map((arr) => {
+      return arr.map((item, j) => {
+        const obj =  {
+          id: j
+        };
+        if (item === 1) {
+          obj.class = 'block';
+        }
+        if (item === 0) {
+          obj.class = 'empty';
+        }
+        if (item === '@') {
+          obj.class = 'empty player';
+        }
+        if (item === '') {
+          obj.class = 'winPosition';
+        }
+        if (item === '*') {
+          obj.class = `empty ${path}`
         }
         return obj;
       })
