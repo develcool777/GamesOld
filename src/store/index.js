@@ -80,7 +80,6 @@ export default createStore({
       commit('setAmountOfLevels', payload.amountOfLevels);
       commit('changeStopClickArrows', true);
       commit('changeArrowClicked', 0);
-      commit('changeShowPath', false);
       commit('changeShowHint', false);
     },
     CHANGE_LEVEl({commit}, level) {

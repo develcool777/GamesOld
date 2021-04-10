@@ -48,7 +48,6 @@ export default {
   },
   watch: {
     isPlaying: function(newValue) {
-      console.log('MAZE IsPlaying watch');
       if (newValue) {
         this.startLoop();
       } else {
@@ -56,16 +55,15 @@ export default {
       }
     },
     showPath: function(newValue) {
-      let path = '';
-      if (newValue) {
-        path = 'path';
-      } 
-      this.fieldForDraw = this.field.generateFieldWithPath(this.game.field, path);
+      this.fieldForDraw = this.field.generateFieldWith(this.game.field, newValue, this.getShowHint);
+    },
+    showHint: function(newVal) {
+      this.fieldForDraw = this.field.generateFieldWith(this.game.field, this.getShowPath, newVal);
     }
   },
   computed: {
-    ...mapState(['level', 'isPlaying', 'showPath']),
-    ...mapGetters(['getShowPath'])
+    ...mapState(['level', 'isPlaying', 'showPath', 'showHint']),
+    ...mapGetters(['getShowPath', 'getShowHint'])
   },
   methods: {
     ...mapActions([
@@ -83,7 +81,6 @@ export default {
         seconds: this.field.time(),
         amountOfLevels: this.field.amountOfLevels(),
       }
-      console.log({obj});
       this.INIT_STATE(obj);
       const [field, start, end] = this.field.dataForGame();
       this.game = new Game(field, start, end)
@@ -93,7 +90,6 @@ export default {
     changeLevel(step) {
       this.field.changeLevel(step);
       this.createGame();
-      console.log('changed');
     },
     restartGame() {
       window.removeEventListener('keyup', this.actOfUser);
@@ -112,11 +108,9 @@ export default {
     },
     startLoop() {   
       this.CHANGE_STOP_CLICK(false)
-      console.log('startloop');
       window.addEventListener('keyup', this.actOfUser); 
     },
     stopLoop() {
-      console.log('stoploop');
       this.CHANGE_STOP_CLICK(true)
       window.removeEventListener('keyup', this.actOfUser);
     },
@@ -145,11 +139,11 @@ export default {
           this.fieldForDraw[x][y].class += ` ${className}`
         }
       }
+      let path = '';
       if (this.getShowPath) {
-        insertClass(prevX, prevY, 'path');
-      } else {
-        insertClass(prevX, prevY, '');
+        path = 'path';
       }
+      insertClass(prevX, prevY, path);
       insertClass(curentX, curentY, 'player');
     },
     keyPressed(key) {
@@ -170,7 +164,7 @@ export default {
         this.game.moves('D');
         this.CHANGE_ARROW(4)
       }
-      console.log(this.game.field);
+      // console.log(this.game.generateWinPath());
       setTimeout(() => { this.CHANGE_ARROW(0) }, 250);
       return [prevX, prevY];
     }
@@ -240,8 +234,20 @@ export default {
   height: rem(10);
   border-radius: 50%;
   background: green;
-
-  // font-size: 30px;
 }
 
+.hint {
+  position: relative;
+}
+.hint::after {
+  position: absolute;
+  content: "";
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: rem(10);
+  height: rem(10);
+  border-radius: 50%;
+  background: red;
+}
 </style>

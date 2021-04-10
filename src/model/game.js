@@ -145,6 +145,20 @@ export default class Game {
     this.player.y = this.startPos.y;
   }
 
+  generateWinPath() {
+    const path = this.field.map((arr, i) => {
+      return arr.map((item, j) => {
+        const obj = {};
+        if (item === '*') {
+          obj.x = i;
+          obj.y = j;
+        }
+        return obj;
+      })
+    })
+    return path.flat().filter(item => item.x !== undefined && item.y !== undefined);
+  }
+
   initGame() {
     this.field[this.startPos.x][this.startPos.y] = '@';
     this.field[this.winPos.x][this.winPos.y] = '';

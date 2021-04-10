@@ -13,10 +13,10 @@
           >{{ isPlaying === undefined ? 'Stop' : !isPlaying ? 'Stoped' : 'Stop'}}</div>
       </div>
       <div class="instruction__mainBtn" @click="restartGame()">Restart</div>
-      <div class="instruction__mainBtn" @click="changeShow()">
+      <div class="instruction__mainBtn" @click="showPath()">
         Show path: <span :style="{color: getShowPath ? 'green' : 'red'}">{{getShowPath ?'ON' : 'OFF'}}</span>
       </div>
-      <div class="instruction__mainBtn">Show hint</div>
+      <div class="instruction__mainBtn" @click="showHint()">{{getShowHint ? 'Hide' : 'Show'}} hint</div>
     </div>
     <div class="instruction__levels">
       <div class="instruction__title">Levels</div>
@@ -80,7 +80,10 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getGameFinished', 'getLevel', 'getTimer', 'getShowPath']),
+    ...mapGetters([
+      'getGameFinished', 'getLevel', 'getTimer', 
+      'getShowPath', 'getShowHint'
+    ]),
     ...mapState([
       'gameFinished', 'level', 'timer', 'timeForReset', 
       'isPlaying', 'restart', 'arrowClicked', 'stopClickArrows'
@@ -89,7 +92,8 @@ export default {
   methods: {
     ...mapActions([
       'CHANGE_LEVEl', 'CHANGE_TIMER', 'CHANGE_ISPLAYING',
-      'END_GAME', 'CHANGE_RESTART', 'CHANGE_SHOW_PATH'
+      'END_GAME', 'CHANGE_RESTART', 'CHANGE_SHOW_PATH',
+      'CHANGE_SHOW_HINT'
     ]),
     changeLevel(step) {
       if (this.allowClick) {
@@ -145,8 +149,11 @@ export default {
       console.log('restartGAME');
       this.$emit('restart');
     },
-    changeShow() {
-      this.CHANGE_SHOW_PATH(!this.getShowPath)
+    showPath() {
+      this.CHANGE_SHOW_PATH(!this.getShowPath);
+    },
+    showHint() {
+      this.CHANGE_SHOW_HINT(!this.getShowHint);
     }
   }
 }
