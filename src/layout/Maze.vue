@@ -1,5 +1,5 @@
 <template>
-  <div class="maze" :style="{marginTop: `${-headerHeight}px`}">
+  <div class="maze">
     <div class="maze__position">
       <div class="maze__field">
         <div class="maze__row" v-for="(row, i) in fieldForDraw" :key="i">
@@ -9,7 +9,6 @@
     </div>
     <Instruction 
       class="maze__instruction" 
-      :style="{marginTop: `${headerHeight}px`}"
       v-on:changeLevel="changeLevel($event)"
       v-on:clicked="actOfUser($event)"
       v-on:restart="restartGame()"
@@ -44,7 +43,6 @@ export default {
   created() {
     this.field = new Field(DATA);
     this.createGame();
-    this.getHeaderHeight();
   },
   watch: {
     isPlaying: function(newValue) {
@@ -70,11 +68,6 @@ export default {
       'INIT_STATE', 'END_GAME', 'CLEAN_GAME', 'CHANGE_ISPLAYING', 
       'CHANGE_RESTART', 'CHANGE_ARROW', 'CHANGE_STOP_CLICK'
     ]),
-    getHeaderHeight() {
-      this.emitter.on("headerHeight", h => {
-        this.headerHeight = h + 1; // 
-      });
-    },
     createGame() {
       const obj = {
         level: this.field.level,
@@ -175,8 +168,6 @@ export default {
 <style lang="scss">
 .maze {
   display: flex;
-  justify-content: space-between;
-  height: 100vh;
   &__row {
     @include Flex(center);
   }
@@ -224,22 +215,12 @@ export default {
 .path {
   position: relative;
 }
-.path::after {
-  position: absolute;
-  content: "";
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: rem(10);
-  height: rem(10);
-  border-radius: 50%;
-  background: green;
-}
 
 .hint {
   position: relative;
 }
-.hint::after {
+
+.path::after, .hint::after {
   position: absolute;
   content: "";
   top: 50%;
@@ -248,6 +229,13 @@ export default {
   width: rem(10);
   height: rem(10);
   border-radius: 50%;
+}
+
+.path::after {
+  background: green;
+}
+
+.hint::after {
   background: red;
 }
 </style>

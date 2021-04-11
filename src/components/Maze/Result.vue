@@ -6,7 +6,7 @@
 				<div class="result__close" @click="close()"></div>
 				<div class="result__title">You {{getResult}}</div>
 				<div class="result__complete">
-					<div class="result__text" v-if="getResult === 'Win'">Completed in {{ getTimeForReset - getTimer }} seconds</div>
+					<div class="result__text" v-if="getResult === 'Win'">{{time}}</div>
 					<div class="result__text" v-else>Try one more time or choose another level</div>
 				</div>
 				<div class="result__btns" :style="{width: `${width}px`}">
@@ -27,11 +27,19 @@ export default {
 			width: 400,
 		}
 	},
-	created() {
-	},
 	computed: {
 		...mapState(['gameFinished']),
-		...mapGetters(['getLevel', 'getTimer', 'getTimeForReset', 'getResult', 'getAmountOfLevels'])
+		...mapGetters(['getLevel', 'getTimer', 'getTimeForReset', 'getResult', 'getAmountOfLevels']),
+		time() {
+			const cheak = (time, str) => time > 1 ? `${str}s` : str;   
+			let seconds = this.getTimeForReset - this.getTimer;
+			if (seconds > 60) {
+				let min = Math.floor(seconds / 60);
+				let sec = seconds % 60;
+				return `Completed in ${min} ${cheak(min, 'minute')} ${sec} ${cheak(sec, 'second')}`;
+			}
+			return `Completed in ${seconds} ${cheak(seconds, 'second')}`;
+		}
 	},
 	methods: {
 		...mapActions(['INIT_STATE', 'END_GAME']), /// !!!!

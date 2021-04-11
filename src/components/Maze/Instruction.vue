@@ -48,7 +48,7 @@ import { mapGetters, mapActions, mapState } from 'vuex'
 export default {
   name: 'Instruction',
   created() {
-    this.initTimer();
+    this.timeForPrint(this.getTimer);
   },
   data() {
     return {
@@ -65,12 +65,12 @@ export default {
     },
     level: function(newVal) {
       if (newVal) {
-        this.initTimer();
+        this.timeForPrint(this.getTimer);
       }
     },
     timer: function(newVal) {
       if (newVal === this.timeForReset) {
-        this.initTimer();
+        this.timeForPrint(newVal);
       }
     },
     restart: function(newVal) {
@@ -81,7 +81,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'getGameFinished', 'getLevel', 'getTimer', 
+      'getLevel', 'getTimer', 
       'getShowPath', 'getShowHint'
     ]),
     ...mapState([
@@ -98,11 +98,10 @@ export default {
     changeLevel(step) {
       if (this.allowClick) {
         this.$emit('changeLevel', step);
-        this.initTimer();
+        this.timeForPrint(this.getTimer);
       }
     },
     startGame() {
-      console.log('start game');
       if (this.restart) {
         this.CHANGE_RESTART(false);
       }
@@ -121,16 +120,11 @@ export default {
     stopGame() {
       this.allowClick = true;
       this.CHANGE_ISPLAYING(false);
-      console.log('stop',this.isPlaying);
       clearInterval(this.idInterval);
     },
     finishGame() {
       clearInterval(this.idInterval);
       this.END_GAME('Lose');
-    },
-    initTimer() {
-      this.timeForPrint(this.getTimer);
-      this.getTimer--;
     },
     timeForPrint(time) {
       let minutes = parseInt(time / 60, 10);
@@ -146,7 +140,6 @@ export default {
     },
     restartGame() {
       clearInterval(this.idInterval);
-      console.log('restartGAME');
       this.$emit('restart');
     },
     showPath() {
@@ -162,6 +155,7 @@ export default {
 <style lang="scss">
 .instruction {
   width: rem(300);
+  height: 100%;
   padding: 0 rem(10);
   &__mainBtns  {
     display: flex;
@@ -200,7 +194,6 @@ export default {
     transition-duration: .2s;
   }
   &__mainBtn:hover {
-    // background: $gradient-secondary;
     transform: scale(0.98);
   }
   &__btns {

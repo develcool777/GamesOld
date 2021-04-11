@@ -1,8 +1,8 @@
 <template>
-  <header class="head" ref="head">
+  <header class="head">
     <div class="head__logo">Games</div>
     <nav class="head__menu">
-      <div class="head__link">Maze</div>
+      <router-link tag="div" class="head__link" v-for="(item, i) in menu" :key="i" :to="item.to">{{item.name}}</router-link>
     </nav>
   </header>
 </template>
@@ -10,13 +10,12 @@
 <script>
 export default {
   name: 'Header',
-  mounted() {
-    this.getHeight();
-  },
-  methods: {
-    getHeight() {
-      let headerHeight = this.$refs.head.clientHeight;
-      this.emitter.emit("headerHeight", headerHeight);
+  data() {
+    return {
+      menu: [
+        {id: 0, name: 'Maze', to: '/maze'},
+        {id: 1, name: 'Memoji', to: '/memoji'}
+      ]
     }
   }
 }
@@ -33,6 +32,15 @@ export default {
   padding: rem(10);
   &__logo {
     font-size: rem(30);
+  }
+  &__menu {
+    width: rem(200);
+    @include Flex(space-between);
+  }
+  &__link {
+    font-size: rem(20);
+    color: $white;
+    text-decoration: none;
   }
 }
 </style>
