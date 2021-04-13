@@ -1,4 +1,4 @@
-# maze
+# Games
 
 ## Project setup
 ```

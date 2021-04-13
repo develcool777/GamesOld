@@ -2,17 +2,20 @@
   <div class="home">
     <Header/>
     <Maze v-if="id === 0"/>
+    <Memoji v-if="id === 1"/>
   </div>
 </template>
 
 <script>
 import Header from '@/layout/Header.vue'
 import Maze from '@/layout/Maze.vue'
+import Memoji from '@/layout/Memoji.vue'
 export default {
   name: 'Home',
   components: {
     Header,
-    Maze
+    Maze,
+    Memoji
   },
   props: {
     id: Number

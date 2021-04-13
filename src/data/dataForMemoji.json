@@ -1,0 +1,8 @@
+{
+  "Levels": {
+    "1": {
+      "time": 20,
+      "cards": ["dog", "lion", "mouse", "hamster", "tiger", "fox-face"]
+    }
+  }
+}

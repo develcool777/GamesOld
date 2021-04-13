@@ -21,10 +21,11 @@
   />
 </template>
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex'
-import DATA from '@/maps/dataForMaze'
-import Field from '@/model/field' 
-import Game from '@/model/game'
+import { createNamespacedHelpers } from 'vuex'
+const { mapActions, mapState, mapGetters } = createNamespacedHelpers('maze');
+import DATA from '@/data/dataForMaze'
+import Field from '@/model/maze/field' 
+import Game from '@/model/maze/game'
 import Result from '@/components/Maze/Result'
 import Instruction from '@/components/Maze/Instruction'
 export default {
@@ -194,10 +195,6 @@ export default {
   @include Size();
   background: $win;
 }
-.startPosition {
-  @include Size();
-  background: $start;
-}
 .player {
   position: relative;
 }
@@ -215,11 +212,9 @@ export default {
 .path {
   position: relative;
 }
-
 .hint {
   position: relative;
 }
-
 .path::after, .hint::after {
   position: absolute;
   content: "";

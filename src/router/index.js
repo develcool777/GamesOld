@@ -3,6 +3,12 @@ import Home from '../views/Home.vue'
 
 const routes = [
   {
+    path: '/',
+    name: 'Home',
+    component: Home,
+    props: {id: null}
+  },
+  {
     path: '/maze',
     name: 'Maze',
     component: Home,

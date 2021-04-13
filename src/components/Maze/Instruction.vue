@@ -44,7 +44,8 @@
 </template>
 
 <script>
-import { mapGetters, mapActions, mapState } from 'vuex'
+import { createNamespacedHelpers } from 'vuex'
+const { mapActions, mapState, mapGetters } = createNamespacedHelpers('maze');
 export default {
   name: 'Instruction',
   created() {

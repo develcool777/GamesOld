@@ -3,14 +3,18 @@ $browser-context: 16;
 $black: black;
 $gray: gray;
 $win: green;
-$start: purple;
 $white: white;
 $red: red;
 
+// memoji
+$firstGradient: #22AB93;
+$secondGradient: #19668D;
+$match: #5AD66F;
+$didNotMatch: #F44336;
+
+
 $color-primary-1: #fec180;
 $color-primary-2: #ff8993;
-
-
 $gradient-primary: linear-gradient(to bottom right, $color-primary-1, $color-primary-2);
 $gradient-secondary: linear-gradient(to top left, $color-primary-1, $color-primary-2);
 // z-index
