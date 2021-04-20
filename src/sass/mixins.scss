@@ -1,121 +1,98 @@
+// px2rem
+@function rem($pixels, $context: $browser-context) {
+  @return #{$pixels/$context}rem;
+}
+
 @mixin Flex($position) {
   display: flex;
   justify-content: $position;
   align-items: center;
 }
 
-// px2rem
-@function rem($pixels, $context: $browser-context) {
-  @return #{$pixels/$context}rem;
+@mixin FlexColumn($verticalPosition, $horizontalPosition) {
+  display: flex;
+  flex-direction: column;
+  justify-content: $verticalPosition;
+  align-items: $horizontalPosition;
 }
 
-@mixin LinkShort($decor, $color) {
-  &__link:visited, &__link:active, &__link {
-    text-decoration: $decor;
-    color: $color;
+@mixin Instruction() {
+  padding: 0 rem(10);
+  &__mainBtns  {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
-}
-
-@mixin Link($FSize, $Fweight, $first, $second) {
-  &__link:visited, &__link:active, &__link {
-    text-decoration: none;
-    color: $black;
+  &__controls, &__time, &__levels {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: rem(10) 0;
   }
-  &__link  {
-    font-size: rem($FSize);
-    font-weight: $Fweight;
-    border: 1px solid $black;
-    border-radius: rem($second);
-    padding: rem($first) rem($second);
-    transition-duration: .5s;
+  &__title {
+    margin-bottom: rem(10);
+    font-size: rem(30);
+    text-align: center;
   }
-  &__link:hover {
-    color: white;
-    background-color: $black;
-    box-shadow: 1px 1px 10px $black;
+  &__text {
+    font-size: rem(15);
+    text-align: center;
+    margin-bottom: rem(20);
   }
-}
-
-@mixin After($height, $color, $px) {
-  display: block;
-  content: "";
-  position: absolute;
-  height: $height;
-  background-color: $color;
-  bottom: rem($px);
-
-  width: 0%;
-  left: 50%;
-  transform: translateX(-50%);
-  transition: width .3s ease-in-out;
-}
-
-@mixin Arrows(){
-  &__next ,&__prev {
-    background-color: transparent;
-    padding: rem(5);
-    position: relative;
-    width: rem(20);
-    height: rem(20);
-    border: 2px solid $arrow;
-    border-radius: rem(20);
-    transition-duration: .5s;
+  &__mainBtn:first-child {
+    background: green;
   }
-  &__next:after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    margin-left: rem(-5);
-    border: 10px solid transparent;
-    border-left: 15px solid $arrow;
-    transition-duration: .5s;
+  &__mainBtn:nth-child(2) {
+    background: red;
   }
-  &__prev:after {
-    content: '';
-    position: absolute;
-    right: 50%;
-    margin-right: rem(-5);
-    border: 10px solid transparent;
-    border-right: 15px solid $arrow;
-    transition-duration: .5s;
+  &__mainBtn:nth-child(n+2) {
+    margin-top: rem(15);
   }
-  &__next:hover:after {
-    border: 10px solid transparent;
-    border-left: 15px solid $white;
-  }
-  &__next:hover {
+  &__mainBtn {
+    font-size: rem(25);
+    width: rem(200);
+    padding: rem(10) 0;
+    text-align: center;
+    background: $gradient-primary;
+    color: $white;
     cursor: pointer;
-    border-color: $white;
+    border-radius: rem(10);
+    transition-duration: .2s;
   }
-  &__prev:hover:after {
-    border: 10px solid transparent;
-    border-right: 15px solid $white;
+  &__mainBtn:hover {
+    transform: scale(0.98);
   }
-  &__prev:hover {
+  &__btns {
+    width: rem(170);
+    height: rem(110);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  &__row {
+    @include Flex(space-between);
+    &--center {
+      justify-content: center;
+    }
+    &--width {
+      width: rem(200);
+    }
+  }
+  &__btn {
+    width: rem(50);
+    height: rem(50);
+    background: $gradient-primary;
     cursor: pointer;
-    border-color: $white;
+    border-radius: rem(10);
+    transition-duration: .2s;
+  }
+  &__btn:hover {
+    background: $gradient-secondary;
+    transform: scale(0.9);
   }
 }
-// used only for text
-// without :hover it wont work 
-// hover {background-position: 0 100%;}
-@mixin ColorDirectionText($col1, $col2, $time, $direction, $position) {
-  background: linear-gradient($direction, $col1 50%, $col2 50%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-size: 200% 100%;
-  background-position: $position;
-  transition: background-position $time ease; 
-}
-// without :hover it wont work 
-// hover {background-position: right bottom;}
-@mixin Color2Right($col1, $col2, $time) {
-  background: linear-gradient(to right, $col1 50%, $col2 50%);
-  background-size: 200% 100%;
-  background-position:left bottom;
-  transition:all $time ease;
-}
+
 
 @mixin boxShadow($opacity) {
   box-shadow: 1px 1px 10px rgba(0, 0, 0, $opacity), -1px -1px 10px rgba(0, 0, 0, $opacity);
@@ -150,78 +127,6 @@
 		height: 3px;
 		background: $red;
 	}
-}
-
-@mixin profileForms() {
-  &__title {
-    font-size: rem(20);
-    font-weight: normal;
-    text-align: center;
-  }
-  &__form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: rem(280);
-    margin: rem(60) auto 0;
-  }
-	&__field {
-		position: relative;
-		width: inherit;
-		height: rem(25);
-		border-bottom: 1px solid $border;
-		transition:all .5s ease;
-	}
-	&__field:hover {
-		border-color: $active !important;
-	}
-	&__input {
-		padding-bottom: 9px;
-		border: none;
-		outline: none;
-		width: 100%;
-		height: 100%;
-		background: transparent;
-		color: $white;
-		font-size: rem(14);
-		font-weight: normal;
-	}
-	&__field:nth-child(2) {
-		margin: rem(25) 0;
-	}
-	&__field:nth-child(3) {
-		margin-bottom: rem(25);
-	}
-	&__btn {
-    display: inline-block;
-		padding: rem(8) rem(15);
-		background-color: $active;
-		font-size: rem(12);
-		font-weight: normal;
-		border-radius: 5px;
-		border: 1px solid transparent;
-		color: $white;
-		cursor: pointer;
-		transition-duration: .5s;
-	}
-	&__btn:hover {
-		border: 1px solid $active;
-		background-color: white;
-		color: $active;
-  }
-  &__group {
-    @include Flex(center);
-    margin-top: rem(20);
-    font-weight: normal;
-    font-size: rem(12);
-  }
-  &__item {
-    cursor: pointer;
-    @include ColorDirectionText($active, $white, 275ms, to right, 100%);
-  }
-  &__item:hover {
-    background-position: 0 100%;
-  }
 }
 
 @mixin Size() {

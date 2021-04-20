@@ -47,11 +47,7 @@ export default {
   },
   watch: {
     isPlaying: function(newValue) {
-      if (newValue) {
-        this.startLoop();
-      } else {
-        this.stopLoop();
-      }
+      return newValue ? this.startLoop() : this.stopLoop();
     },
     showPath: function(newValue) {
       this.fieldForDraw = this.field.generateFieldWith(this.game.field, newValue, this.getShowHint);
@@ -109,12 +105,7 @@ export default {
       window.removeEventListener('keyup', this.actOfUser);
     },
     actOfUser(event) {
-      const eventChecker = e => {
-        if (typeof e === 'string') {
-          return e;
-        } 
-        return e.key;
-      }
+      const eventChecker = e => typeof e === 'string' ? e : e.key;
       const key = eventChecker(event);
       const [prevX, prevY] = this.keyPressed(key);
       const [curentX, curentY] = this.game.player.getPosition();
@@ -133,10 +124,7 @@ export default {
           this.fieldForDraw[x][y].class += ` ${className}`
         }
       }
-      let path = '';
-      if (this.getShowPath) {
-        path = 'path';
-      }
+      let path = this.getShowPath ? 'path' : '';
       insertClass(prevX, prevY, path);
       insertClass(curentX, curentY, 'player');
     },

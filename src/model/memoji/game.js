@@ -33,8 +33,8 @@ export default class Game {
         id: i,
         name: item,
         class: `ec ec-${item} img`,
-        isMatch: false,
-        isFliped: false
+        isMatch: null,
+        isFlipped: null
       }
       arr.push(obj);
     })
@@ -53,17 +53,43 @@ export default class Game {
     return this.cardsData
   }
 
-  changeMatch(id, boolean) {
-    this.cardsData[id].isMatch = boolean;
-  }
-
-  checkMatch(obj1, obj2) {
-    console.log({obj1, obj2});
-    if (obj1.name === obj2.name) {
-      this.changeMatch(obj1.id, true);
-      this.changeMatch(obj2.id, true);
+  checkMatch(card1, card2) {
+    if (card1.name === card2.name) {
+      [card1.id, card2.id].forEach(id => {
+        this.cardsData[id].isMatch = true;
+        this.cardsData[id].isFlipped = true;
+      })
       return true;
     }
+    [card1.id, card2.id].forEach(id => {
+      this.cardsData[id].isFlipped = true;
+      this.cardsData[id].isMatch = false;
+    })
     return false;
+  }
+
+  clickOnCard(card) {
+    this.cardsData[card.id].isFlipped = true;
+  }
+
+  reset(card) {
+    this.cardsData[card.id].isFlipped = null;
+    this.cardsData[card.id].isMatch = null;
+  }
+
+  clean() {
+    this.cardsData = this.cardsData.map(card => {
+      card.isFlipped = null;
+      card.isMatch = null;
+      return card;
+    })
+  }
+
+  showOrHideHint(boolean) {
+    this.cardsData = this.cardsData.map(card => {
+      const value = boolean ? true : card.isMatch ? true : null;
+      card.isFlipped = value;
+      return card;
+    })
   }
 }

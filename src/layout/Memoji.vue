@@ -2,29 +2,47 @@
   <div class="memoji">
     <div class="memoji__position">
       <div class="memoji__field">
-        <div class="scene" v-for="(item, i) in fieldForDraw" :key="i">
-          <div class="card" :class="{isFlipped: item.isMatch}" :id="item.id">
-            <div class="card__face card__face--front" @click="clickedCard(item)"></div>
-            <div class="card__face card__face--back" :class="{match: item.isMatch}" @click="clickedCard(item)">
-              <span :class="item.class"></span>
+        <div class="scene" v-for="(card, i) in fieldForDraw" :key="i">
+          <div 
+            class="card" 
+            :class="displayIsFlipped(card)" 
+            :style="{cursor: getIsPlaying ? 'pointer' : 'default'}"
+          >
+            <div 
+              class="card__face card__face--front" 
+              @click="clickedCard(card)"
+            ></div>
+            <div 
+              class="card__face card__face--back" 
+              :class="displayIsMatch(card)" 
+              @click="clickedCard(card)"
+            >
+              <span :class="card.class"></span>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="memoji__instruction">rgbr</div>
+    <Instruction 
+      class="memoji__instruction"
+      v-on:changeLevel="changeLevel($event)"
+      v-on:restart="restartGame()"
+    />
   </div>
 </template>
 
 <script>
 import { createNamespacedHelpers } from 'vuex'
-//mapState, 
-const { mapActions, mapGetters } = createNamespacedHelpers('memoji');
+const { mapState, mapActions, mapGetters } = createNamespacedHelpers('memoji');
 import DATA from '@/data/dataForMemoji';
 import Field from '@/model/memoji/field';
 import Game from '@/model/memoji/game';
+import Instruction from '@/components/Memoji/Instruction';
 export default {
   name: 'Memoji',
+  components: {
+    Instruction
+  },
   data() {
     return {
       field: {},
@@ -32,19 +50,34 @@ export default {
       fieldForDraw: []
     }
   },
+  watch: {
+    showHint: function(newVal) {
+      if (newVal) {
+        this.hint(true);
+        setTimeout(() => {
+          this.hint(false);
+        }, 1000);
+      }
+    }
+  },
   created() {
     this.field = new Field(DATA);
     this.createGame();
   },
   computed: {
-    ...mapGetters(['getItemsForCompare'])
+    ...mapState(['showHint']),
+    ...mapGetters(['getItemsForCompare', 'getIsPlaying'])
   },
   methods: {
-    ...mapActions(['INIT_STATE', 'ADD_ITEMS_FOR_COMPARE', 'REMOVE_ITEMS_FOR_COMPARE']),
+    ...mapActions([
+      'INIT_STATE', 'ADD_ITEMS_FOR_COMPARE', 
+      'REMOVE_ITEMS_FOR_COMPARE', 'CLEAN_GAME',
+      'CHANGE_SHOW_HINT', 'CHANGE_RESTART'
+    ]),
     createGame() {
       this.game = new Game(this.field.getCardsForGame());
       this.game.setCardData();
-      this.fieldForDraw = this.game.cardsForDraw();
+      this.draw();
       const obj = {
         time: this.field.time(),
         level: this.field.level,
@@ -52,36 +85,61 @@ export default {
       }
       this.INIT_STATE(obj);
     },
-    clickedCard(item) {
-      const card = document.getElementById(`${item.id}`);
-      if (card.classList.length < 2 && this.getItemsForCompare.length < 2) {
-        this.ADD_ITEMS_FOR_COMPARE(item);
-        card.classList.add('isFlipped');
-        if (this.getItemsForCompare.length === 2) {
-          this.check();
-        }
+    clickedCard(card) {
+      if (this.getIsPlaying !== true ) { return }
+      if (this.getItemsForCompare.length < 2) {
+        this.ADD_ITEMS_FOR_COMPARE(card);
+        this.game.clickOnCard(card);
+        this.draw();
+      }
+      if (this.getItemsForCompare.length === 2) {
+        this.check();
       }
     },
+    draw() {
+      this.fieldForDraw = this.game.cardsForDraw();
+    },
     check() {
-      if (this.game.checkMatch(...this.getItemsForCompare)) {
+      const isMatch = this.game.checkMatch(...this.getItemsForCompare);
+      if (isMatch) {
         this.REMOVE_ITEMS_FOR_COMPARE();
-        this.fieldForDraw = this.game.cardsForDraw();
-        return;
+        return this.draw();
       } 
-      const [first, second] = this.getItemsForCompare;
-      const removeClass = item => {
-        const element = document.getElementById(`${item.id}`);
-        element.classList.remove('isFlipped');
-        element.lastChild.classList.remove('noMatch');
-      }
-      const addClass = item => document.getElementById(`${item.id}`).lastChild.classList.add('noMatch');
-      addClass(first);
-      addClass(second);
-      this.REMOVE_ITEMS_FOR_COMPARE();
       setTimeout(() => {
-        removeClass(first);
-        removeClass(second);
+        this.getItemsForCompare.forEach(card => {
+          this.game.reset(card);
+        }) 
+        this.REMOVE_ITEMS_FOR_COMPARE();
+        this.draw();
       }, 750);   
+    },
+    cleanField() {
+      this.game.clean();
+      this.draw();
+      this.CLEAN_GAME();
+    },
+    restartGame() {
+      this.cleanField();
+      this.CHANGE_RESTART(true);
+    },
+    hint(boolean) {
+      this.game.showOrHideHint(boolean);
+      this.draw();
+      if (boolean === false) {
+        this.CHANGE_SHOW_HINT(false);
+      }
+    },
+    displayIsMatch(card) {
+      if (card.isMatch && card.isFlipped) {
+        return 'match';
+      }
+      if (card.isFlipped && card.isMatch === false) {
+        return 'noMatch';
+      }
+      return '';
+    },
+    displayIsFlipped(card) {
+      return card.isFlipped ? 'isFlipped' : '';
     }
   }
 }
@@ -90,12 +148,17 @@ export default {
 <style lang="scss">
 .memoji {
   display: flex;
+  flex: 1;
   &__position {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center; 
+  }
+  &__instruction {
+    flex-basis: rem(265);
+    border-left: 5px solid $black;
   }
   &__field {
     width: calc(130px*4 + 25px*4);
@@ -110,7 +173,7 @@ export default {
   height: rem(130);
   border: 5px solid $white;
   border-radius: 9px;
-  cursor: pointer;
+  // cursor: pointer;
   box-shadow: 1px 1px 5px rgba(0,0,0,0.5);
 }
 
@@ -139,7 +202,6 @@ export default {
 .card {
   transition: transform 1s;
   transform-style: preserve-3d;
-  cursor: pointer;
   position: relative;
 }
 

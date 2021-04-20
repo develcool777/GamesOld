@@ -2,10 +2,11 @@ export default {
   namespaced: true,
   state: {
     gameFinished: false,
-    isPlaying: false,
+    isPlaying: undefined,
+    restart: false,
+    showHint: false,
     level: null,
     amountOfLevels: null,
-    // amountOfClicks: 0,
     timer: null,
     timeForReset: null,
     itemsForCompare: []
@@ -13,9 +14,9 @@ export default {
   getters: {
     getGameFinished: state => state.gameFinished,
     getIsPlaying: state => state.isPlaying,
+    getShowHint: state => state.showHint,
     getLevel: state => state.level,
     getAmountOfLevels: state => state.amountOfLevels,
-    // getAmountOfClicks: state => state.amountOfClicks,
     getTimer: state => state.timer,
     getTimeForReset: state => state.timeForReset,
     getItemsForCompare: state => state.itemsForCompare
@@ -27,17 +28,24 @@ export default {
     changeIsPlaying(state, boolean) {
       state.isPlaying = boolean;
     },
+    changeRestart(state, boolean) {
+      state.restart = boolean;
+    },
+    changeShowHint(state, boolean) {
+      state.showHint = boolean;
+    },
     changeLevel(state, level) {
       state.level = level;
     },
     setAmountOfLevels(state, levels) {
       state.amountOfLevels = levels;
     },
-    // changeAmountOfClicks(state, number) {
-    //   state.amountOfClicks = number;
-    // },
     changeTimer(state, seconds) {
-      state.timer = seconds;
+      if (seconds === undefined) {
+        state.timer = state.timeForReset;
+      } else {
+        state.timer = seconds;
+      }
     },
     setTimeForReset(state, seconds) {
       state.timeForReset = seconds;
@@ -55,19 +63,37 @@ export default {
       commit('changeTimer', payload.time);
       commit('changeLevel', payload.level);
       commit('setAmountOfLevels', payload.levels);
-      // commit('changeAmountOfClicks', 0);
-      commit('changeIsPlaying', false);
+      commit('changeIsPlaying', undefined);
       commit('changeGameFinished', false);
       commit('removeItemsForCompare');
     },
-    // CHANGE_AMOUNT_OF_CLICKS({commit}, number) {
-    //   commit('changeAmountOfClicks', number);
-    // },
     ADD_ITEMS_FOR_COMPARE({commit}, item) {
       commit('AddItemsForCompare', item);
     },
     REMOVE_ITEMS_FOR_COMPARE({commit}) {
       commit('removeItemsForCompare');
+    },
+    CHANGE_RESTART({commit}, boolean) {
+      commit('changeRestart', boolean);
+    },
+    CHANGE_TIMER({commit}, seconds) {
+      commit('changeTimer', seconds);
+    },
+    CHANGE_ISPLAYING({commit}, boolean) {
+      commit('changeIsPlaying', boolean);
+    },
+    CHANGE_LEVEl({commit}, level) {
+      commit('changeLevel', level);
+    },
+    CLEAN_GAME({commit}) {
+      commit('changeGameFinished', false);
+      commit('changeIsPlaying', undefined);
+      // commit('changeResult', '');
+      commit('changeTimer');
+      commit('changeShowHint', false);
+    },
+    CHANGE_SHOW_HINT({commit}, boolean) {
+      commit('changeShowHint', boolean);
     }
   } 
 }
