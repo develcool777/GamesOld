@@ -75,6 +75,9 @@ export default {
     },
     showPath() {
       this.CHANGE_SHOW_PATH(!this.getShowPath);
+    },
+    showHint() {
+      this.CHANGE_SHOW_HINT(!this.getShowHint);
     }
   }
 }

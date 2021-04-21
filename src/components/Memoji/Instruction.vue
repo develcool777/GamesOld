@@ -13,7 +13,7 @@
           >{{ getIsPlaying === undefined ? 'Stop' : !getIsPlaying ? 'Stoped' : 'Stop'}}</div>
       </div>
       <div class="instMemoji__mainBtn" @click="restartGame()">Restart</div>
-      <div class="instMemoji__mainBtn" @click="showHint()">Show hint</div>
+      <div class="instMemoji__mainBtn" @click="showHint()" :style="setFontSize()">{{hint}}</div>
     </div>
     <div class="instMemoji__levels">
       <div class="instMemoji__title">Levels</div>
@@ -25,7 +25,6 @@
     </div> 
   </section>
 </template>
-
 <script>
 import Instruction from '@/mixins/instruction'
 import { createNamespacedHelpers } from 'vuex'
@@ -33,15 +32,23 @@ const { mapActions, mapState, mapGetters } = createNamespacedHelpers('memoji')
 export default {
   name: 'Instruction',
   mixins: [Instruction],
+  data() {
+    return {
+      attempts: 3 
+    }
+  },
   computed: {
     ...mapGetters([
-      'getLevel', 'getTimer', 'getShowHint', 
+      'getLevel', 'getTimer',
       'getTimeForReset', 'getIsPlaying'
     ]),
     ...mapState([
       'gameFinished', 'level',
       'timer', 'restart'
-    ])
+    ]),
+    hint() {
+      return this.attempts > 0 ? `Show hint(${this.attempts}/3)` : 'Run out of attempts'
+    }
   },
   methods: {
     ...mapActions([
@@ -49,6 +56,16 @@ export default {
       'END_GAME', 'CHANGE_RESTART',
       'CHANGE_SHOW_HINT'
     ]),
+    showHint() {
+      if (this.attempts === 0) { return }
+      this.CHANGE_SHOW_HINT(true);
+      if (this.attempts > 0) {
+        this.attempts--;
+      }
+    },
+    setFontSize() {
+      return this.attempts === 0 ? {fontSize: '20px'} : {};
+    }
   }
 }
 </script>

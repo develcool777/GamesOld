@@ -74,8 +74,5 @@ export default {
       clearInterval(this.idInterval);
       this.$emit('restart');
     },
-    showHint() {
-      this.CHANGE_SHOW_HINT(!this.getShowHint);
-    }
   }
 }

@@ -1,13 +1,13 @@
 <template>
   <div class="memoji">
     <div class="memoji__position">
-      <div class="memoji__field">
+      <div class="memoji__field" :style="{width: setFieldWidth}">
         <div class="scene" v-for="(card, i) in fieldForDraw" :key="i">
           <div 
             class="card" 
             :class="displayIsFlipped(card)" 
             :style="{cursor: getIsPlaying ? 'pointer' : 'default'}"
-          >
+          > 
             <div 
               class="card__face card__face--front" 
               @click="clickedCard(card)"
@@ -29,6 +29,11 @@
       v-on:restart="restartGame()"
     />
   </div>
+  <ResultMemoji
+    v-on:changeLevel="changeLevel($event)"
+    v-on:restart="restartGame()"
+    v-on:close="cleanField()"
+  />
 </template>
 
 <script>
@@ -38,10 +43,12 @@ import DATA from '@/data/dataForMemoji';
 import Field from '@/model/memoji/field';
 import Game from '@/model/memoji/game';
 import Instruction from '@/components/Memoji/Instruction';
+import ResultMemoji from '@/components/Memoji/Result';
 export default {
   name: 'Memoji',
   components: {
-    Instruction
+    Instruction,
+    ResultMemoji
   },
   data() {
     return {
@@ -58,6 +65,11 @@ export default {
           this.hint(false);
         }, 1000);
       }
+    },
+    gameFinished: function(newVal) {
+      if (newVal) {
+        this.game.clean();
+      } 
     }
   },
   created() {
@@ -65,14 +77,25 @@ export default {
     this.createGame();
   },
   computed: {
-    ...mapState(['showHint']),
-    ...mapGetters(['getItemsForCompare', 'getIsPlaying'])
+    ...mapState(['showHint', 'gameFinished']),
+    ...mapGetters(['getItemsForCompare', 'getIsPlaying']),
+    setFieldWidth() {
+      const amountOfCards = this.game.cards.length;
+      const calcWidth = (koef) => 130 * koef + 25 * koef;
+      if (amountOfCards <= 4) {
+        return `${calcWidth(amountOfCards)}px`
+      }
+      if (amountOfCards <= 12) {
+        return `${calcWidth(Math.ceil(amountOfCards / 2))}px`
+      }
+      return `${calcWidth(6)}px`;
+    }
   },
   methods: {
     ...mapActions([
       'INIT_STATE', 'ADD_ITEMS_FOR_COMPARE', 
       'REMOVE_ITEMS_FOR_COMPARE', 'CLEAN_GAME',
-      'CHANGE_SHOW_HINT', 'CHANGE_RESTART'
+      'CHANGE_SHOW_HINT', 'CHANGE_RESTART', 'END_GAME'
     ]),
     createGame() {
       this.game = new Game(this.field.getCardsForGame());
@@ -95,6 +118,11 @@ export default {
       if (this.getItemsForCompare.length === 2) {
         this.check();
       }
+      if (this.game.checkWin()) {
+        setTimeout(() => {
+          this.END_GAME('Win')
+        }, 1000);
+      }
     },
     draw() {
       this.fieldForDraw = this.game.cardsForDraw();
@@ -112,6 +140,10 @@ export default {
         this.REMOVE_ITEMS_FOR_COMPARE();
         this.draw();
       }, 750);   
+    },
+    changeLevel(step) {
+      this.field.changeLevel(step);
+      this.createGame();
     },
     cleanField() {
       this.game.clean();
@@ -161,7 +193,6 @@ export default {
     border-left: 5px solid $black;
   }
   &__field {
-    width: calc(130px*4 + 25px*4);
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
@@ -169,11 +200,9 @@ export default {
   }
 }
 .card__face {
-  width: rem(130);
-  height: rem(130);
+  @include Card(130);
   border: 5px solid $white;
   border-radius: 9px;
-  // cursor: pointer;
   box-shadow: 1px 1px 5px rgba(0,0,0,0.5);
 }
 
@@ -189,12 +218,11 @@ export default {
 }
 
 .img {
-  font-size: rem(75);
+  @include SizeOfEmoji(75);
 }
 /* flip */
 .scene {
-  width: 130px;
-  height: 130px;
+  @include Card(130);
   margin-bottom: 25px;
   perspective: 600px;
 }

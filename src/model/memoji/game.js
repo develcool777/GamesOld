@@ -68,6 +68,10 @@ export default class Game {
     return false;
   }
 
+  checkWin() {
+    return this.cardsData.every(item => item.isMatch === true);
+  }
+
   clickOnCard(card) {
     this.cardsData[card.id].isFlipped = true;
   }
@@ -83,6 +87,7 @@ export default class Game {
       card.isMatch = null;
       return card;
     })
+    this.shuffleCards(this.cardsData);
   }
 
   showOrHideHint(boolean) {

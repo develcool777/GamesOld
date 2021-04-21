@@ -9,7 +9,8 @@ export default {
     amountOfLevels: null,
     timer: null,
     timeForReset: null,
-    itemsForCompare: []
+    itemsForCompare: [],
+    result: ''
   },
   getters: {
     getGameFinished: state => state.gameFinished,
@@ -19,7 +20,8 @@ export default {
     getAmountOfLevels: state => state.amountOfLevels,
     getTimer: state => state.timer,
     getTimeForReset: state => state.timeForReset,
-    getItemsForCompare: state => state.itemsForCompare
+    getItemsForCompare: state => state.itemsForCompare,
+    getResult: state => state.result
   },
   mutations: {
     changeGameFinished(state, boolean) {
@@ -55,7 +57,10 @@ export default {
     },
     removeItemsForCompare(state) {
       state.itemsForCompare.splice(0);
-    }
+    },
+    changeResult(state, result='') {
+      state.result = result;
+    },
   },
   actions: {
     INIT_STATE({commit}, payload) {
@@ -88,9 +93,14 @@ export default {
     CLEAN_GAME({commit}) {
       commit('changeGameFinished', false);
       commit('changeIsPlaying', undefined);
-      // commit('changeResult', '');
+      commit('changeResult', '');
       commit('changeTimer');
       commit('changeShowHint', false);
+    },
+    END_GAME({commit}, result) {
+      commit('changeGameFinished', true);
+      commit('changeIsPlaying', false);
+      commit('changeResult', result);
     },
     CHANGE_SHOW_HINT({commit}, boolean) {
       commit('changeShowHint', boolean);

@@ -14,7 +14,7 @@
       v-on:restart="restartGame()"
     />
   </div>
-  <Result
+  <ResultMaze
     v-on:changeLevel="changeLevel($event)"
     v-on:restart="restart()"
     v-on:close="cleanField()"
@@ -26,12 +26,12 @@ const { mapActions, mapState, mapGetters } = createNamespacedHelpers('maze');
 import DATA from '@/data/dataForMaze'
 import Field from '@/model/maze/field' 
 import Game from '@/model/maze/game'
-import Result from '@/components/Maze/Result'
+import ResultMaze from '@/components/Maze/Result'
 import Instruction from '@/components/Maze/Instruction'
 export default {
   components: {
     Instruction,
-    Result
+    ResultMaze
   },
   data() {
     return {
@@ -157,6 +157,7 @@ export default {
 <style lang="scss">
 .maze {
   display: flex;
+  flex: 1;
   &__row {
     @include Flex(center);
   }
