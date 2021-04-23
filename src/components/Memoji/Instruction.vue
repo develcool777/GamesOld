@@ -5,15 +5,22 @@
       <div class="instMemoji__mainBtns">
         <div 
           class="instMemoji__mainBtn" 
-          @click.stop=" allowClick ? startGame() : null"
-        >{{ getIsPlaying === undefined ? 'Start' : getIsPlaying ? 'Started' : 'Start'}}</div>
+          @click=" allowClick ? startGame() : null"
+        >{{ start }}</div>
         <div
           class="instMemoji__mainBtn"
-          @click.stop=" !allowClick ? stopGame() : null"
-          >{{ getIsPlaying === undefined ? 'Stop' : !getIsPlaying ? 'Stoped' : 'Stop'}}</div>
+          @click=" !allowClick ? stopGame() : null"
+          >{{ stop }}</div>
       </div>
-      <div class="instMemoji__mainBtn" @click="restartGame()">Restart</div>
-      <div class="instMemoji__mainBtn" @click="showHint()" :style="setFontSize()">{{hint}}</div>
+      <div 
+        class="instMemoji__mainBtn" 
+        @click=" getIsPlaying !== undefined ? restartGame() : null"
+      >Restart</div>
+      <div 
+        class="instMemoji__mainBtn" 
+        @click="showHint()" 
+        :style="setFontSize()"
+      >{{ hint }}</div>
     </div>
     <div class="instMemoji__levels">
       <div class="instMemoji__title">Levels</div>
@@ -31,16 +38,40 @@ import { createNamespacedHelpers } from 'vuex'
 const { mapActions, mapState, mapGetters } = createNamespacedHelpers('memoji')
 export default {
   name: 'Instruction',
+  created() {
+    this.timeForPrint(this.getTimer);
+  },
   mixins: [Instruction],
   data() {
     return {
-      attempts: 3 
+      attempts: 3
+    }
+  },
+  watch: {
+    level: function(newVal) {
+      if (newVal) {
+        this.timeForPrint(this.getTimer);
+        this.attempts = 3;
+      }
+    },
+    timer: function(newVal) {
+      if (newVal === this.getTimeForReset) {
+        this.timeForPrint(newVal);
+        this.attempts = 3;
+      }
+    },
+    restart: function(newVal) {
+      if (newVal) {
+        this.startGame();
+        this.attempts = 3;
+      }
     }
   },
   computed: {
     ...mapGetters([
       'getLevel', 'getTimer',
-      'getTimeForReset', 'getIsPlaying'
+      'getTimeForReset', 'getIsPlaying',
+      'getShowHint'
     ]),
     ...mapState([
       'gameFinished', 'level',
@@ -48,16 +79,27 @@ export default {
     ]),
     hint() {
       return this.attempts > 0 ? `Show hint(${this.attempts}/3)` : 'Run out of attempts'
+    },
+    start() {
+      return this.getIsPlaying === undefined ? 'Start' : this.getIsPlaying ? 'Started' : 'Start';
+    },
+    stop() {
+      return this.getIsPlaying === undefined ? 'Stop' : !this.getIsPlaying ? 'Stoped' : 'Stop';
     }
   },
   methods: {
     ...mapActions([
       'CHANGE_LEVEl', 'CHANGE_TIMER', 'CHANGE_ISPLAYING',
       'END_GAME', 'CHANGE_RESTART',
-      'CHANGE_SHOW_HINT'
+      'CHANGE_SHOW_HINT', 'REMOVE_ITEMS_FOR_COMPARE'
     ]),
     showHint() {
-      if (this.attempts === 0) { return }
+      if (
+        this.attempts === 0  
+        || this.getIsPlaying !== true 
+        || this.getShowHint === true
+      ) { return }
+      this.REMOVE_ITEMS_FOR_COMPARE();
       this.CHANGE_SHOW_HINT(true);
       if (this.attempts > 0) {
         this.attempts--;

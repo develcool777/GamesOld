@@ -54,17 +54,13 @@ export default {
     return {
       field: {},
       game: {},
-      fieldForDraw: []
+      fieldForDraw: [],
+      timeForShow: 1000
     }
   },
   watch: {
     showHint: function(newVal) {
-      if (newVal) {
-        this.hint(true);
-        setTimeout(() => {
-          this.hint(false);
-        }, 1000);
-      }
+      return newVal ? this.hint() : null;
     },
     gameFinished: function(newVal) {
       if (newVal) {
@@ -121,7 +117,7 @@ export default {
       if (this.game.checkWin()) {
         setTimeout(() => {
           this.END_GAME('Win')
-        }, 1000);
+        }, this.timeForShow);
       }
     },
     draw() {
@@ -139,7 +135,7 @@ export default {
         }) 
         this.REMOVE_ITEMS_FOR_COMPARE();
         this.draw();
-      }, 750);   
+      }, this.timeForShow - 250);   
     },
     changeLevel(step) {
       this.field.changeLevel(step);
@@ -154,12 +150,18 @@ export default {
       this.cleanField();
       this.CHANGE_RESTART(true);
     },
-    hint(boolean) {
-      this.game.showOrHideHint(boolean);
-      this.draw();
-      if (boolean === false) {
-        this.CHANGE_SHOW_HINT(false);
+    hint() {
+      const func = bool => {
+        this.game.showOrHideHint(bool);
+        this.draw();
       }
+      func(true);
+      setTimeout(() => {
+        func(false);
+      }, this.timeForShow);
+      setTimeout(() => {
+        this.CHANGE_SHOW_HINT(false);
+      }, this.timeForShow * 2);
     },
     displayIsMatch(card) {
       if (card.isMatch && card.isFlipped) {

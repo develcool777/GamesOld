@@ -59,6 +59,7 @@
     cursor: pointer;
     border-radius: rem(10);
     transition-duration: .2s;
+		-webkit-tap-highlight-color:  rgba(0, 0, 0, 0);
   }
   &__mainBtn:hover {
     transform: scale(0.98);

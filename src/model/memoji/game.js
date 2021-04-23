@@ -26,7 +26,7 @@ export default class Game {
 
   setCardData() {
     const arr = []
-    const doubled = this.doubleCards();
+    const doubled = this.cards.concat(this.cards);
     this.shuffleCards(doubled);
     doubled.forEach((item, i) => {
       const obj = {
@@ -39,10 +39,6 @@ export default class Game {
       arr.push(obj);
     })
     this.cardsData = arr;
-  }
-
-  doubleCards() {
-    return this.cards.concat(this.cards);
   }
 
   shuffleCards(arr) {
@@ -82,12 +78,13 @@ export default class Game {
   }
 
   clean() {
-    this.cardsData = this.cardsData.map(card => {
+    this.shuffleCards(this.cardsData);
+    this.cardsData = this.cardsData.map((card, i) => {
+      card.id = i;
       card.isFlipped = null;
       card.isMatch = null;
       return card;
     })
-    this.shuffleCards(this.cardsData);
   }
 
   showOrHideHint(boolean) {

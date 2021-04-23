@@ -10,11 +10,12 @@ export default {
     timer: null,
     timeForReset: null,
     itemsForCompare: [],
-    result: ''
+    result: '',
   },
   getters: {
     getGameFinished: state => state.gameFinished,
     getIsPlaying: state => state.isPlaying,
+    getRestart: state => state.restart,
     getShowHint: state => state.showHint,
     getLevel: state => state.level,
     getAmountOfLevels: state => state.amountOfLevels,
@@ -60,7 +61,7 @@ export default {
     },
     changeResult(state, result='') {
       state.result = result;
-    },
+    }
   },
   actions: {
     INIT_STATE({commit}, payload) {

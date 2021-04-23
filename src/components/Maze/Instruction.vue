@@ -6,15 +6,21 @@
         <div 
           class="instMaze__mainBtn" 
           @click.stop=" allowClick ? startGame() : null"
-        >{{ getIsPlaying === undefined ? 'Start' : getIsPlaying ? 'Started' : 'Start'}}</div>
+        >{{ start }}</div>
         <div
           class="instMaze__mainBtn"
           @click.stop=" !allowClick ? stopGame() : null"
-          >{{ getIsPlaying === undefined ? 'Stop' : !getIsPlaying ? 'Stoped' : 'Stop'}}</div>
+          >{{ stop }}</div>
       </div>
-      <div class="instMaze__mainBtn" @click="restartGame()">Restart</div>
+      <div 
+        class="instMaze__mainBtn" 
+        @click="getIsPlaying !== undefined ? restartGame() : null"
+      >Restart</div>
       <div class="instMaze__mainBtn" @click="showPath()">
-        Show path: <span :style="{color: getShowPath ? 'green' : 'red'}">{{getShowPath ?'ON' : 'OFF'}}</span>
+        Show path: 
+        <span 
+          :style="{color: getShowPath ? 'green' : 'red'}"
+        >{{getShowPath ?'ON' : 'OFF'}}</span>
       </div>
       <div class="instMaze__mainBtn" @click="showHint()">{{getShowHint ? 'Hide' : 'Show'}} hint</div>
     </div>
@@ -60,7 +66,13 @@ export default {
     ...mapState([
       'gameFinished', 'level',
       'timer', 'restart'
-    ])
+    ]),
+    start() {
+      return this.getIsPlaying === undefined ? 'Start' : this.getIsPlaying ? 'Started' : 'Start';
+    },
+    stop() {
+      return this.getIsPlaying === undefined ? 'Stop' : !this.getIsPlaying ? 'Stoped' : 'Stop';
+    }
   },
   methods: {
     ...mapActions([
