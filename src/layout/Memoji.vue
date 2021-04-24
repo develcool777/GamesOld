@@ -1,6 +1,6 @@
 <template>
   <div class="memoji">
-    <div class="memoji__position">
+    <div class="memoji__game">
       <div class="memoji__field" :style="{width: setFieldWidth}">
         <div class="scene" v-for="(card, i) in fieldForDraw" :key="i">
           <div 
@@ -179,21 +179,9 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .memoji {
-  display: flex;
-  flex: 1;
-  &__position {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center; 
-  }
-  &__instruction {
-    flex-basis: rem(265);
-    border-left: 5px solid $black;
-  }
+  @include BasicGrid();
   &__field {
     margin: 0 auto;
     display: flex;

@@ -1,6 +1,6 @@
 <template>
   <div class="maze">
-    <div class="maze__position">
+    <div class="maze__game">
       <div class="maze__field">
         <div class="maze__row" v-for="(row, i) in fieldForDraw" :key="i">
           <div :class="cell.class" v-for="(cell, j) in row" :key="j"></div>
@@ -154,23 +154,11 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .maze {
-  display: flex;
-  flex: 1;
+  @include BasicGrid();
   &__row {
     @include Flex(center);
-  }
-  &__instruction {
-    flex-basis: rem(265);
-    border-left: 5px solid $black;
-  }
-  &__position {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center; 
   }
 }
 .empty {

@@ -19,6 +19,12 @@ const routes = [
     name: 'Memoji',
     component: Home,
     props: {id: 1}
+  },
+  {
+    path: '/rock-paper-scissors',
+    name: 'RockPaperScissors',
+    component: Home,
+    props: {id: 2}
   }
 ]
 

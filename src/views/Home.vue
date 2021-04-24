@@ -3,6 +3,7 @@
     <Header/>
     <Maze v-if="id === 0"/>
     <Memoji v-if="id === 1"/>
+    <RockPaperScissors v-if="id === 2"/>
   </div>
 </template>
 
@@ -10,12 +11,14 @@
 import Header from '@/layout/Header.vue'
 import Maze from '@/layout/Maze.vue'
 import Memoji from '@/layout/Memoji.vue'
+import RockPaperScissors from '@/layout/RockPaperScissors.vue'
 export default {
   name: 'Home',
   components: {
     Header,
     Maze,
-    Memoji
+    Memoji,
+    RockPaperScissors
   },
   props: {
     id: Number

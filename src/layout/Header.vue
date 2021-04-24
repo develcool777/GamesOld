@@ -14,7 +14,8 @@ export default {
     return {
       menu: [
         {id: 0, name: 'Maze', to: '/maze'},
-        {id: 1, name: 'Memoji', to: '/memoji'}
+        {id: 1, name: 'Memoji', to: '/memoji'},
+        {id: 2, name: 'Rock Paper Scissors', to: '/rock-paper-scissors'}
       ]
     }
   }
@@ -34,7 +35,7 @@ export default {
     font-size: rem(30);
   }
   &__menu {
-    width: rem(200);
+    width: rem(700);
     @include Flex(space-between);
   }
   &__link {

@@ -112,8 +112,8 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .instMemoji {
-  @include Instruction();
+  @include Instruction(true, true);
 }
 </style>

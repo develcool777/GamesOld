@@ -1,4 +1,4 @@
-module.exports = class Game {
+export default class Game {
   constructor() {
     let userScore = 0;
     let computerScore = 0;
@@ -28,19 +28,28 @@ module.exports = class Game {
     })
   }
 
+  log() {
+    console.log({
+      userScore: this.userScore,
+      compScore: this.computerScore,
+      history: this.history
+    });
+  }
+
   withoutDrawMode(user='') {
     if (!['r', 'p', 's'].includes(user)) {
       throw Error(`Game.withoutDrawMode(user='') user must be 'r' or 'p' or 's'`);
     }
-    const index = ['r', 'p', 's'].indexOf(user);
-    const compMoves = ['r', 'p', 's'].splice(index,1);
+    const compMoves = ['r', 'p', 's'];
+    const index = compMoves.indexOf(user);
+    compMoves.splice(index,1);
     const comp = compMoves[Math.floor(Math.random() * compMoves.length)]
     return {user, comp};
   }
 
-  imposibleMode(user='') {
+  impossibleMode(user='') {
     if (!['r', 'p', 's'].includes(user)) {
-      throw Error(`Game.imposibleMode(user='') user must be 'r' or 'p' or 's'`);
+      throw Error(`Game.impossibleMode(user='') user must be 'r' or 'p' or 's'`);
     }
     if (user === 'r') { 
       return {user: 'r', comp: 'p'};
@@ -68,6 +77,15 @@ module.exports = class Game {
     }
   }
 
+  normalGame(user='') {
+    if (!['r', 'p', 's'].includes(user)) {
+      throw Error(`Game.normalGame(user='') user must be 'r' or 'p' or 's'`);
+    }
+    const compMoves = ['r', 'p', 's'];
+    const comp = compMoves[Math.floor(Math.random() * compMoves.length)]
+    return {user, comp};
+  }
+
   play(user='', comp='') {
     if (!['r', 'p', 's'].includes(user)) {
       throw Error(`Game.cheak(user='', comp='') user must be 'r' or 'p' or 's'`);
@@ -78,7 +96,6 @@ module.exports = class Game {
     let winner;
     if (user === comp) {
       winner = 'draw';
-      console.log('DRAW');
     } else {
       const win = this.cheak(user, comp);
       winner = win === user ? 'user' : 'comp';
@@ -122,28 +139,50 @@ module.exports = class Game {
     }
   }
 
-  getAllWinsBymove(move='', winner='') {
+  getAllWinsByMove(move='', winner='') {
     if (!['r', 'p', 's'].includes(move)) {
       throw Error(`Game.getAllWinsBymove(move='', winner='') move must be 'r' or 'p' or 's'`);
     }
     if (!['user', 'comp'].includes(winner)) {
       throw Error(`Game.getAllWinsBymove(move='', winner='') winner must be 'user' or 'comp'`);
     }
-    const filteredByMove = this.history.filter(item => item.userMove === move || item.compMove === move);
-    const filteredByWinner = filteredByMove.filter(item => item.result === winner);
-    return filteredByWinner.length;
+    const filtered = this.history.filter(item => {
+      if (item.result === winner) {
+        if (winner === 'comp' && item.compMove === move) {
+          return item;
+        }
+        if (winner === 'user' && item.userMove === move) {
+          return item;
+        }
+      }
+
+    });
+    return filtered.length;
+  }
+
+  getAllDrawsByMove(move='') {
+    if (!['r', 'p', 's'].includes(move)) {
+      throw Error(`Game.getAllDrawsByMove(move='') move must be 'r' or 'p' or 's'`);
+    }
+    const filtered = this.history.filter(item => item.result === 'draw' && item.userMove === move && item.compMove === move);
+    return filtered.length;
   }
 
   analytics() {
     const moves = ['r', 'p', 's'];
     const winners = ['user', 'comp'];
-    return winners.reduce((acc, winner) => {
+    const wins = winners.reduce((acc, winner) => {
       const res = moves.reduce((obj, move) => {
-        obj[move] = this.getAllWinsBymove(move, winner)
+        obj[move] = this.getAllWinsByMove(move, winner)
         return obj;
       }, {})
-      acc[winner] = res
+      acc[winner] = res;
+      return acc;
+    }, {});
+    const draws = moves.reduce((acc, move) => {
+      acc[move] = this.getAllDrawsByMove(move);
       return acc;
     }, {})
+    return Object.assign(wins, {draws});
   }
 }

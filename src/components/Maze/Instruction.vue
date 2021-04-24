@@ -95,9 +95,9 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .instMaze {
- @include Instruction();
+ @include Instruction(true, true);
 }
 .up, .down, .left, .right {
   position: relative;
