@@ -1,0 +1,25 @@
+{
+  "games": [
+    {
+      "id": 0,
+      "name": "Maze",
+      "img": "maze.png",
+      "text": "Aim of the game is to make way from the start point to the end point.",
+      "to": "/maze"
+    },
+    {
+      "id": 1,
+      "name": "Memoji",
+      "img": "memoji.png",
+      "text": "Aim of the game uncover all cards",
+      "to": "/memoji"
+    },
+    {
+      "id": 2,
+      "name": "Rock Paper Scissors",
+      "img": "rsp.png",
+      "text": "lorem ipsun lorem ipsun lorem ipsun lorem ipsun lorem ipsun",
+      "to": "/rock-paper-scissors"
+    }
+  ]
+}

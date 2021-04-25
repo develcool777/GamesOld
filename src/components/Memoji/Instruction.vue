@@ -116,4 +116,29 @@ export default {
 .instMemoji {
   @include Instruction(true, true);
 }
+.up, .down, .left, .right {
+  position: relative;
+}
+.up::after, .down::after, .left::after, .right::after {
+  position: absolute;
+  content: '';
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  border: solid $white;
+  border-radius: 2px;
+  border-width: 0 5px 5px 0;
+  display: inline-block;
+  padding: 5px;
+}
+.right::after {
+  transform: translate(-60%, -50%) rotate(-45deg);
+  -webkit-transform: translate(-60%, -50%) rotate(-45deg);
+}
+
+.left::after {
+  transform: translate(-40%, -50%)  rotate(135deg);
+  -webkit-transform: translate(-40%, -50%) rotate(135deg);
+}
 </style>

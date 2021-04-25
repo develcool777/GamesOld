@@ -1,6 +1,7 @@
 <template>
   <div class="home">
     <Header/>
+    <HomePage v-if="id === null"/>
     <Maze v-if="id === 0"/>
     <Memoji v-if="id === 1"/>
     <RockPaperScissors v-if="id === 2"/>
@@ -9,6 +10,7 @@
 
 <script>
 import Header from '@/layout/Header.vue'
+import HomePage from '@/layout/HomePage.vue'
 import Maze from '@/layout/Maze.vue'
 import Memoji from '@/layout/Memoji.vue'
 import RockPaperScissors from '@/layout/RockPaperScissors.vue'
@@ -16,6 +18,7 @@ export default {
   name: 'Home',
   components: {
     Header,
+    HomePage,
     Maze,
     Memoji,
     RockPaperScissors

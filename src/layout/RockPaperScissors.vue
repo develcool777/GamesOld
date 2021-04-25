@@ -238,7 +238,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scopped>
+<style lang="scss" scoped>
 .rps {
   @include BasicGrid(flex-start);
   background: #24272E;
@@ -344,7 +344,6 @@ export default {
   padding-left: rem(80);
 }
 table {
-    
     border-collapse: collapse;
     margin: 50px auto;
     color: white;
