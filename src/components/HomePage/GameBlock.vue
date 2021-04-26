@@ -4,12 +4,13 @@
       <div class="gBlock__container">
         <img 
           class="gBlock__img"
-          :src="require(`@/assets/gamesPreview/${block.img}`)" 
+          :src="require(`@/assets/gamesPreview/${block.img}`)"
           :alt="block.name"
         >
       </div>
       <div class="gBlock__title">{{ block.name }}</div>
       <div class="gBlock__text">{{ block.text }}</div>
+      <div class="gBlock__created">Added: {{ block.created }}</div>
     </div>
   </router-link>
 </template>
@@ -37,7 +38,7 @@ export default {
   }
   &__block:hover {
     background: $color-primary-1;
-    transform: scale(1.1);
+    transform: scale(1.05);
     @include boxShadow(0.7);
   }
   &__container {
@@ -49,7 +50,7 @@ export default {
   }
   &__title, &__text {
     font-size: rem(20);
-    color: black
+    color: $black
   }
   &__title {
     font-size: rem(30);
@@ -58,7 +59,12 @@ export default {
   &__text {
     height: rem(75);
     overflow: scroll;
-    color: gray;
+    color: $black;
+    opacity: 0.7;
+  }
+  &__created {
+    font-size: (20);
+    color: darkslateblue;
   }
 }
 </style>

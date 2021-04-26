@@ -18,7 +18,8 @@ export default {
       menu: [
         {id: 0, name: 'Maze', to: '/maze'},
         {id: 1, name: 'Memoji', to: '/memoji'},
-        {id: 2, name: 'Rock Paper Scissors', to: '/rock-paper-scissors'}
+        {id: 2, name: 'Rock Paper Scissors', to: '/rock-paper-scissors'},
+        {id: 3, name: 'Tic Tac Toe', to: '/tic-tac-toe'}
       ]
     }
   }

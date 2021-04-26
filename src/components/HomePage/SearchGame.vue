@@ -1,29 +1,32 @@
 <template>
   <div class="searchBar">
     <p class="searchBar__title">Search game</p>
-    <div class="searchBar__container" :style="styleInput">
-      <input 
-        class="searchBar__input" 
-        type="text" 
-        v-model="field" 
-        placeholder="Name of the game..."
-      >
-      <div class="searchBar__variants" v-if="displayVariants">
-        <div 
-          class="searchBar__variant" 
-          v-for="(variant, i) in variants" 
-          :key="i"
-          @click="findGame(variant)"
-        >{{ variant.name }}</div>
+    <div class="searchBar__merge">
+      <div class="searchBar__container" :style="styleInput">
+        <input 
+          class="searchBar__input" 
+          type="text" 
+          v-model="field" 
+          placeholder="Name of the game..."
+        >
+        <div class="searchBar__variants" v-if="displayVariants">
+          <div 
+            class="searchBar__variant" 
+            v-for="(variant, i) in variants" 
+            :key="i"
+            @click="findGame(variant)"
+          >{{ variant.name }}</div>
+        </div>
+      </div>
+      <div class="searchBar__containerImg" @click="findGame()">
+        <img 
+          class="searchBar__img" 
+          src="@/assets/searchGame/search.png" 
+          alt="search"
+        >
       </div>
     </div>
-    <div class="searchBar__containerImg" @click="findGame()">
-      <img 
-        class="searchBar__img" 
-        src="@/assets/searchGame/search.png" 
-        alt="search"
-      >
-    </div>
+    <div class="searchBar__showAll" @click="showAll()">Show All</div>
   </div>
 </template>
 
@@ -53,12 +56,16 @@ export default {
   },
   methods: {
     findGame(game) {
+      const obj = {};
       if (game !== undefined) {
-        this.$emit('searchResult', [game.id]);
+        obj.arrayOfIds =  [game.id],
+        obj.field = this.field
+        obj.founded = true
       } else {
-        const result = this.showVariants(this.field);
-        this.$emit('searchResult', result);
+        obj.arrayOfIds = this.showVariants(this.field),
+        obj.field = this.field
       }
+      this.$emit('searchResult', obj);
       this.hideVariants();
     },
     showVariants(field) {
@@ -80,6 +87,9 @@ export default {
       }
       return result.map(item => item.id);
     },
+    showAll() { 
+      this.$emit('showAll');
+    },
     hideVariants() {
       this.field = '';
       this.variants = [];
@@ -92,16 +102,17 @@ export default {
 <style lang="scss" scoped>
 .searchBar {
   @include Flex(space-around);
-  // flex: 1;
-  max-width: rem(1000);
-  width: 100%;
-  margin: 0 auto;
+  flex: 1;
   padding: rem(20) rem(30); 
   background: #24272E;
   border-radius: 0 0 rem(10) rem(10);
   &__title {
     color: $white;
     font-size: rem(30);
+  }
+  &__merge {
+    display: flex;
+    align-items: center;
   }
   &__container {
     position: relative;
@@ -133,17 +144,19 @@ export default {
     padding: rem(10) 0 rem(10) rem(20);
     border-bottom: 1px solid $black;
     cursor: pointer;
+    background: lightgray;
   }
   &__variant:first-child {
     border-top: 1px solid $black;
   }
   &__variant:hover {
-    background: lightgoldenrodyellow;
+    background: $color-primary-1;
   }
   &__containerImg {
     width: rem(30);
     height: rem(30);
     cursor: pointer;
+    margin-left: rem(30);
   }
   &__img {
     width: 100%;
@@ -152,6 +165,17 @@ export default {
   }
   &__img:hover {
     transform: rotate(360deg);
+  }
+  &__showAll {
+    padding: rem(10) rem(20);
+    border-radius: rem(10);
+    background: $white;
+    font-size: rem(16);
+    cursor: pointer;
+    transition-duration: .5s;
+  }
+  &__showAll:hover {
+    background: $color-primary-1;
   }
 }
 </style>

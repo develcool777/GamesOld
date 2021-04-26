@@ -1,6 +1,10 @@
 <template>
   <section class="homePage">
-    <SearchGame :data="parsedData" v-on:searchResult="showGames($event)"/>
+    <SearchGame 
+      :data="parsedData" 
+      v-on:searchResult="showSearchedGames($event)"
+      v-on:showAll="showAll()"
+    />
     <div class="homePage__searchResultEmpty" v-if="result">
       <p class="homePage__text">{{ message }}</p>
     </div>
@@ -46,20 +50,25 @@ export default {
         return obj;
       });
     },
-    showGames(arrOfIds) {
-      if (arrOfIds.length === 0) {
-        this.result = true;
-        this.message = 'There is no game at this name';
-        return;
+    showSearchedGames(obj) {
+      this.result = true;
+      if (obj.founded) {
+        this.result = false;
       }
-      // if (arrOfIds.length > 1) {
-      //   this.result = true;
-      //   this.message = `Found ${arrOfIds.length} games`;
-      // }  
-      this.result = false;
-      this.games = arrOfIds.map(id => {
+      const len = obj.arrayOfIds.length;
+      if (len === 0) {
+        this.message = `There is no game at '${obj.field}'`;
+      } else {
+        this.message = `Found ${len} ${len === 1 ? 'game' : 'games'} at '${obj.field}'`;
+      }
+      this.games = obj.arrayOfIds.map(id => {
         return DATA.games[id];
       })
+    },
+    showAll() {
+      this.result = false;
+      this.message = '';
+      this.games = DATA.games;
     }
   }
 }
@@ -70,9 +79,9 @@ export default {
   flex: 1;
   margin: 0 rem(20);
   &__text {
-    font-size: rem(20);
+    font-size: rem(30);
     margin: rem(20) 0;
-    text-align: center;
+    text-align: left;
   }
   &__games {
     display: flex;

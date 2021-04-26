@@ -5,21 +5,24 @@
       "name": "Maze",
       "img": "maze.png",
       "text": "Aim of the game is to make way from the start point to the end point.",
-      "to": "/maze"
+      "to": "/maze",
+      "created": "25/03/2021"
     },
     {
       "id": 1,
       "name": "Memoji",
       "img": "memoji.png",
       "text": "Aim of the game uncover all cards",
-      "to": "/memoji"
+      "to": "/memoji",
+      "created": "18/04/2021"
     },
     {
       "id": 2,
       "name": "Rock Paper Scissors",
       "img": "rsp.png",
       "text": "lorem ipsun lorem ipsun lorem ipsun lorem ipsun lorem ipsun",
-      "to": "/rock-paper-scissors"
+      "to": "/rock-paper-scissors",
+      "created": "24/04/2021"
     }
   ]
 }

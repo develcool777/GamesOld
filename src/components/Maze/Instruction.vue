@@ -18,9 +18,7 @@
       >Restart</div>
       <div class="instMaze__mainBtn" @click="showPath()">
         Show path: 
-        <span 
-          :style="{color: getShowPath ? 'green' : 'red'}"
-        >{{getShowPath ?'ON' : 'OFF'}}</span>
+        <span :style="{color: getShowPath ? 'green' : 'red'}">{{getShowPath ?'ON' : 'OFF'}}</span>
       </div>
       <div class="instMaze__mainBtn" @click="showHint()">{{getShowHint ? 'Hide' : 'Show'}} hint</div>
     </div>

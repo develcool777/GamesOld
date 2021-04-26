@@ -25,6 +25,12 @@ const routes = [
     name: 'RockPaperScissors',
     component: Home,
     props: {id: 2}
+  },
+  {
+    path: '/tic-tac-toe',
+    name: 'TicTacToe',
+    component: Home,
+    props: {id: 3}
   }
 ]
 

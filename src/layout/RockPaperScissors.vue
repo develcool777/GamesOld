@@ -2,7 +2,6 @@
   <div class="rps">
     <div class="rps__game">
       <section class="score-board">
-        <!-- {{ userScore }}:{{ compScore }} -->
         <span class="user-score">{{ userScore }}:</span>
         <span class="comp-score">{{ compScore }}</span>
       </section>
@@ -209,7 +208,7 @@ export default {
         obj.compMove = this.convertMove(item.compMove);
         obj.result = this.convertResult(item.result);
         obj.score = `${item.userScore}:${item.compScore}`
-        arr.push(obj);
+        arr.unshift(obj);
       })
       this.historyData = arr;
     },
