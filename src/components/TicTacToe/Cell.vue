@@ -30,7 +30,7 @@ export default {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: $black;
+    background: blue;
     border-radius: 50%;
   }
   &__moveO::after {
@@ -51,7 +51,7 @@ export default {
     left: 50%;
     width: rem(150);
     height: rem(10);
-    background: $black;
+    background: red;
     border-radius: rem(10);
   }
   &__moveX::after  {

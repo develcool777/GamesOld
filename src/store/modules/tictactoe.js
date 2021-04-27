@@ -1,37 +1,26 @@
 export default {
   namespaced: true,
   state: {
-    // impossible: false,
-    // easy: false,
-    // withoutDraw: false,
     clear: false,
     returnMove: false,
-    withComputer: false
-    // showHistory: false,
-    // showAnalitics: false,
-    // resultOfMove: false,
+    withComputer: false,
+    compSettings: {
+      userSide: 'x',
+      compSide: 'o',
+      difficulty: 'easy',
+      showStartButton: false,
+      isStarted: false
+    },
+    winner: ''
   },
   getters: {
-    // getImpossible: state => state.impossible,
-    // getEasy: state => state.easy,
-    // getWithoutDraw: state => state.withoutDraw,
     getClear: state => state.clear,
     getReturnMove: state => state.returnMove,
     getWithComputer: state => state.withComputer,
-    // getShowHistory: state => state.showHistory,
-    // getShowAnalitics: state => state.showAnalitics,
-    // getResultOfMove: state => state.resultOfMove
+    getCompSettings: state => state.compSettings,
+    getWinner: state => state.winner,
   },
   mutations: {
-    // changeImpossible(state, boolean) {
-    //   state.impossible = boolean;
-    // },
-    // changeEasy(state, boolean) {
-    //   state.easy = boolean;
-    // },
-    // changeWithoutDraw(state, boolean) {
-    //   state.withoutDraw = boolean;
-    // },
     changeClear(state, boolean) {
       state.clear = boolean;
     },
@@ -41,38 +30,42 @@ export default {
     changeWithComputer(state, boolean) {
       state.withComputer = boolean;
     },
-    // changeShowHistory(state, boolean) {
-    //   state.showHistory = boolean;
-    // },
-    // changeShowAnalitics(state, boolean) {
-    //   state.showAnalitics = boolean;
-    // },
-    // changeResultOfMove(state, boolean) {
-    //   state.resultOfMove = boolean;
-    // }
+    changeCompSettings(state, obj) {
+      if (obj.userSide !== undefined) {
+        state.compSettings.userSide = obj.userSide;
+      }
+      if (obj.compSide !== undefined) {
+        state.compSettings.compSide = obj.compSide;
+      }
+      if (obj.difficulty !== undefined) {
+        state.compSettings.difficulty = obj.difficulty;
+      }
+      if (obj.startButton !== undefined) {
+        state.compSettings.showStartButton = obj.startButton;
+      }
+      if (obj.isStarted !== undefined) {
+        state.compSettings.isStarted = obj.isStarted;
+      }
+    },
+    changeWinner(state, string) {
+      state.winner = string;
+    },
   },
   actions: {
-    // INIT_STATE({commit, dispatch}) {
-    //   dispatch('RESET_MODE');
-    //   commit('changeClear', false);
-    //   commit('changeShowHistory', false);
-    //   commit('changeResultOfMove', false);
-    //   commit('changeShowAnalitics', false);
-    // },
-    // RESET_MODE({commit}) {
-    //   commit('changeImpossible', false);
-    //   commit('changeEasy', false);
-    //   commit('changeWithoutDraw', false); 
-    // },
-    // CHANGE_IMPOSSIBLE({commit}, boolean) {
-    //   commit('changeImpossible', boolean);     
-    // },
-    // CHANGE_EASY({commit}, boolean) {
-    //   commit('changeEasy', boolean);     
-    // },
-    // CHANGE_WITHOUT_DRAW({commit}, boolean) {
-    //   commit('changeWithoutDraw', boolean);     
-    // },
+    INIT_STATE({commit}) {
+      commit('changeClear', false);
+      commit('changeReturnMove', false);
+      commit('changeWithComputer', false);
+      const obj = {
+        userSide: 'x',
+        compSide: 'o',
+        difficulty: 'easy',
+        startButton: false,
+        isStarted: false
+      }
+      commit('changeCompSettings', obj);
+      commit('changeWinner', '');
+    },
     CHANGE_CLEAR({commit}, boolean) {
       commit('changeClear', boolean);     
     },
@@ -81,6 +74,12 @@ export default {
     },
     CHANGE_WITH_COMPUTER({commit}, boolean) {
       commit('changeWithComputer', boolean);     
+    },
+    CHANGE_COMPUTER_SETTINGS({commit}, obj) {
+      commit('changeCompSettings', obj);     
+    },
+    CHANGE_WINNER({commit}, string) {
+      commit('changeWinner', string);     
     },
   }
 }

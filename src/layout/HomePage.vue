@@ -89,7 +89,7 @@ export default {
     margin: rem(40) 0;
   }
   &__game {
-    margin: rem(20);
+    margin: rem(15);
   }
 }
 </style>

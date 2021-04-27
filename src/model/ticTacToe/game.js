@@ -8,7 +8,8 @@ export default class Game {
     ]
     let currentPlayer = 'x';
     let numberOfMoves = 0;
-    const winner = [];
+    let winner = '';
+    const resultAfterCheakWinner = [];
     const moves = [];
     Object.defineProperties(this, {
       field: {
@@ -42,7 +43,19 @@ export default class Game {
         }
       },
       winner: {
-        get: () => winner
+        get: () => winner,
+        set: (value) => {
+          if (typeof value !== 'string') {
+            throw Error(`winner.set(value) value must be String`);
+          }
+          if (['x', 'o', ''].indexOf(value) === -1) {
+            throw Error(`winner.set(value) value must be 'x' or 'o' or ''`);
+          }
+          winner = value;
+        }
+      },
+      resultAfterCheakWinner: {
+        get: () => resultAfterCheakWinner
       },
       moves: {
         get: () => moves
@@ -53,6 +66,7 @@ export default class Game {
     console.log({
       field: this.field, 
       currentPlayer: this.currentPlayer,
+      resultAfterCheakWinner: this.resultAfterCheakWinner,
       winner: this.winner,
       moves: this.moves
     });
@@ -60,8 +74,8 @@ export default class Game {
 
   getField() {
     const match = (i, j) => {
-      if (this.winner.length === 0) { return false }
-      return this.winner.some(obj => {
+      if (this.resultAfterCheakWinner.length === 0) { return false }
+      return this.resultAfterCheakWinner.some(obj => {
         const arrayOfWinCells = Object.values(obj).pop();
         return arrayOfWinCells.some(pair => pair[0] === i && pair[1] === j)
       })
@@ -88,12 +102,13 @@ export default class Game {
     })
     this.currentPlayer = 'x';
     this.numberOfMoves = 0;
-    this.winner.splice(0);
+    this.resultAfterCheakWinner.splice(0);
     this.moves.splice(0);
+    this.winner = '';
   }
 
   play(cordX, cordY) {
-    if (this.winner.length > 0) { return }
+    if (this.resultAfterCheakWinner.length > 0) { return }
     this.makeMove(this.currentPlayer, cordX, cordY);
     this.currentPlayer = this.currentPlayer === 'x' ? 'o' : 'x';
     this.numberOfMoves++;
@@ -118,7 +133,7 @@ export default class Game {
   }
 
   returnMove() {
-    if (this.numberOfMoves === 0 || this.winner.length > 0) { return }
+    if (this.numberOfMoves === 0 || this.resultAfterCheakWinner.length > 0) { return }
     this.numberOfMoves--;
     const lastMove = this.moves.splice(this.moves.length - 1).pop();
     this.field[lastMove.x][lastMove.y] = '';
@@ -141,7 +156,7 @@ export default class Game {
         const values = coordinates.map((pair) => array[ pair[0] ][ pair[1] ]);
         const cheak = equals(...values);
         if (cheak) {
-          const move = array[0][0];
+          const move = values[0];
           const obj = {};
           obj[move] = coordinates;
           result.push(obj);
@@ -179,8 +194,9 @@ export default class Game {
     const filtered = [cheakedDiagonals, cheakedRows, cheackedColumns].filter(item => item !== false);
     if (filtered.length > 0 ) {
       filtered.forEach(arr => {
-        this.winner.push(...arr);
+        this.resultAfterCheakWinner.push(...arr);
       })
+      this.winner = Object.keys(filtered[0][0]).pop();
     }
   }
 

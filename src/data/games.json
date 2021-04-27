@@ -23,6 +23,14 @@
       "text": "lorem ipsun lorem ipsun lorem ipsun lorem ipsun lorem ipsun",
       "to": "/rock-paper-scissors",
       "created": "24/04/2021"
+    },
+    {
+      "id": 3,
+      "name": "Tic Tac Toe",
+      "img": "tictactoe.png",
+      "text": "lorem ipsun lorem ipsun lorem ipsun lorem ipsun lorem ipsun",
+      "to": "/tic-tac-toe",
+      "created": "27/04/2021"
     }
   ]
 }

@@ -1,12 +1,14 @@
 <template>
   <div class="tictactoe">
     <section class="tictactoe__game">
+      <Info/>
       <div class="tictactoe__field">
         <Cell 
           class="tictactoe__cell"
           v-for="(item, i) in fieldForDraw" 
           :key="i"
           :class="{win: item.winCell}"
+          :style="{cursor: item.cell === '' && game.winner === '' ? 'pointer' : 'default'}"
           :whatToDraw="item.cell"
           @click="clickCell(item.coordinates)"
         />
@@ -25,12 +27,14 @@ import { createNamespacedHelpers } from 'vuex'
 const { mapActions, mapState, mapGetters } = createNamespacedHelpers('tictactoe');
 import Game from '@/model/ticTacToe/game';
 import Instruction from '@/components/TicTacToe/Instruction';
-import Cell from '@/components/TicTacToe/Cell'
+import Cell from '@/components/TicTacToe/Cell';
+import Info from '@/components/TicTacToe/Info';
 export default {
   name: 'TicTacToe',
   components: {
     Instruction,
-    Cell
+    Cell,
+    Info
   },
   data() {
     return {
@@ -55,12 +59,38 @@ export default {
   },
   computed: {
     ...mapState(['clear', 'returnMove', 'withComputer']),
-    ...mapGetters(['getWithComputer'])
+    ...mapGetters(['getWithComputer', 'getCompSettings']),
+    compSide() {
+      return this.getCompSettings.compSide === 'o' ? 'O' : 'X';
+    },
+    userSide() {
+      return this.getCompSettings.userSide === 'o' ? 'O' : 'X';
+    },
+    compColor() {
+      return this.getCompSettings.compSide === 'o' ? {color: 'blue'} : {color: 'red'};
+    },
+    userColor() {
+      return this.getCompSettings.userSide === 'o' ? {color: 'blue'} : {color: 'red'};
+    },
+    resultOfBattle() {
+      const winner = this.game.winner;
+      if (winner === '') {
+        return '';
+      }
+      if (this.getWithComputer) {
+        const compSide = this.getCompSettings.compSide;
+        const userSide = this.getCompSettings.userSide;
+        return winner === compSide ? 'Comp win' : winner === userSide ? 'User win' : `It's a draw`;
+      }
+      console.log(winner);
+      return winner === 'o' ? 'User2 win' : winner === 'x' ? 'User1 win' : `It's a draw`;
+    }
   },
   methods: {
-    ...mapActions(['CHANGE_CLEAR', 'CHANGE_RETURN_MOVE']),
+    ...mapActions(['CHANGE_CLEAR', 'CHANGE_RETURN_MOVE', 'INIT_STATE', 'CHANGE_WINNER']),
     createGame() {
       this.game = new Game();
+      this.INIT_STATE();
       this.draw();
     },
     clickCell(coordinates) {
@@ -68,9 +98,13 @@ export default {
       if (this.getWithComputer) {
         this.game.playWithComputer();
       }
+      if (this.game.winner !== '') {
+        this.CHANGE_WINNER(this.game.winner);
+      }
       this.draw();
     },
     draw() {
+      this.game.log();
       this.fieldForDraw = this.game.getField();
     },
     clearField() {

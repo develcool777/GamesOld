@@ -3,24 +3,34 @@
     <div class="instTic__mainBtns">
       <div class="instTic__mainBtn" @click="clear()">Clear</div>
       <div class="instTic__mainBtn" @click="returnMove()">Return move</div>
-      <div class="instTic__mainBtn" :class="{active: !getWithComputer}" @click="changePlayer()">User VS User</div>
+      <div class="instTic__mainBtn" :class="{active: !getWithComputer}" @click="changePlayer()">User1 VS User2</div>
       <div class="instTic__mainBtn" :class="{active: getWithComputer}" @click="changePlayer()">User VS Comp</div>
-      <div class="instTic__mainBtn" @click="start()" v-if="userChoice === 'o' && getWithComputer">Start Comp</div>
+      <div class="instTic__mainBtn" @click="startComputer()" v-if="getCompSettings.showStartButton && getWithComputer">Start Comp</div>
     </div>
     <section class="" v-if="getWithComputer">
       <div class="instTic__block">
         <div class="instTic__title">Users choice</div>
       </div>
       <div class="instTic__mainBtns">
-        <div class="instTic__mainBtn" :class="{active: userChoice === 'x'}" @click="changeSide('x')">X</div>
-        <div class="instTic__mainBtn" :class="{active: userChoice === 'o'}" @click="changeSide('o')">O</div>
+        <div 
+          class="instTic__mainBtn" 
+          v-for="(side, i) in sides"
+          :key="i"
+          :class="{active: getCompSettings.compSide === side.comp}" 
+          @click="changeSide(side.comp)"
+        >{{ side.user }}</div> 
       </div>
      <div class="instTic__block">
         <div class="instTic__title">Difficulty</div>
       </div>
       <div class="instTic__mainBtns">
-        <div class="instTic__mainBtn" :class="{active: difficulty === 'easy'}" @click="changeDifficulty('easy')">Easy</div>
-        <div class="instTic__mainBtn" :class="{active: difficulty === 'hard'}" @click="changeDifficulty('hard')">Hard</div>
+        <div 
+          class="instTic__mainBtn" 
+          v-for="(diff, i) in difficulties"
+          :key="i"
+          :class="{active: getCompSettings.difficulty === diff.comp}" 
+          @click="changeDifficulty(diff.comp)"
+        >{{ diff.display }}</div>
       </div>
     </section>
   </div>
@@ -33,17 +43,28 @@ export default {
   name: 'Instruction',
   data() {
     return {
-      userChoice: 'x',
-      difficulty: 'easy'
+      sides: [
+        { comp: 'o', user: 'X' },
+        { comp: 'x', user: 'O' }
+      ],
+      difficulties: [
+        { comp: 'easy', display: 'Easy' },
+        { comp: 'hard', display: 'Hard' }
+      ]
     }
   },
   computed: {
-    ...mapGetters(['getWithComputer'])
+    ...mapGetters(['getWithComputer', 'getCompSettings'])
   },
   methods: {
-    ...mapActions(['CHANGE_CLEAR', 'CHANGE_RETURN_MOVE', 'CHANGE_WITH_COMPUTER']),
+    ...mapActions([
+      'CHANGE_CLEAR', 'CHANGE_RETURN_MOVE', 
+      'CHANGE_WITH_COMPUTER', 'CHANGE_COMPUTER_SETTINGS',
+      'CHANGE_WINNER'
+    ]),
     clear() {
       this.CHANGE_CLEAR(true);
+      this.CHANGE_WINNER('');
     },
     returnMove() {
       this.CHANGE_RETURN_MOVE(true);
@@ -53,10 +74,24 @@ export default {
       this.clear();
     },
     changeSide(move) {
-      this.userChoice = move;
+      const obj = {
+        compSide: move,
+        userSide: move === 'x' ? 'o' : 'x',
+        startButton: move === 'x' ? true : false
+      }
+      this.CHANGE_COMPUTER_SETTINGS(obj);
     },
     changeDifficulty(diff) {
-      this.difficulty = diff;
+      const obj = {
+        difficulty: diff
+      }
+      this.CHANGE_COMPUTER_SETTINGS(obj)
+    },
+    startComputer() {
+      const obj = {
+        isStarted: true
+      }
+      this.CHANGE_COMPUTER_SETTINGS(obj);
     }
   }
 }
