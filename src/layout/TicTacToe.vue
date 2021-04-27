@@ -2,14 +2,14 @@
   <div class="tictactoe">
     <section class="tictactoe__game">
       <div class="tictactoe__field">
-        <div 
+        <Cell 
           class="tictactoe__cell"
-          :class="{moveX: item.cell === 'x', moveO: item.cell === 'o'}"
           v-for="(item, i) in fieldForDraw" 
           :key="i"
+          :class="{win: item.winCell}"
+          :whatToDraw="item.cell"
           @click="clickCell(item.coordinates)"
-
-        ></div>
+        />
         <div class="tictactoe__lineVertical1"></div>
         <div class="tictactoe__lineVertical2"></div>
         <div class="tictactoe__lineHorizontal1"></div>
@@ -21,12 +21,16 @@
 </template>
 
 <script>
+import { createNamespacedHelpers } from 'vuex'
+const { mapActions, mapState, mapGetters } = createNamespacedHelpers('tictactoe');
 import Game from '@/model/ticTacToe/game';
-import Instruction from '@/components/TicTacToe/Instruction'
+import Instruction from '@/components/TicTacToe/Instruction';
+import Cell from '@/components/TicTacToe/Cell'
 export default {
   name: 'TicTacToe',
   components: {
-    Instruction
+    Instruction,
+    Cell
   },
   data() {
     return {
@@ -34,23 +38,50 @@ export default {
       fieldForDraw: []
     }
   },
+  watch: {
+    clear: function(newVal) {
+      if (newVal) {
+        this.clearField();
+      }
+    },
+    returnMove: function(newVal) {
+      if (newVal) {
+        this.return();
+      }
+    },
+  },
   created() {
     this.createGame()
   },
+  computed: {
+    ...mapState(['clear', 'returnMove', 'withComputer']),
+    ...mapGetters(['getWithComputer'])
+  },
   methods: {
+    ...mapActions(['CHANGE_CLEAR', 'CHANGE_RETURN_MOVE']),
     createGame() {
       this.game = new Game();
       this.draw();
     },
     clickCell(coordinates) {
       this.game.play(coordinates.x, coordinates.y);
-      if (this.game.numberOfMoves > 4) {
-        this.game.cheakWinner()
+      if (this.getWithComputer) {
+        this.game.playWithComputer();
       }
       this.draw();
     },
     draw() {
       this.fieldForDraw = this.game.getField();
+    },
+    clearField() {
+      this.game.clear();
+      this.draw();
+      this.CHANGE_CLEAR(false);
+    },
+    return() {
+      this.game.returnMove();
+      this.draw();
+      this.CHANGE_RETURN_MOVE(false);
     }
   }
 }
@@ -67,11 +98,6 @@ export default {
     justify-content: space-between;
     width: rem(620);
     margin: 0 auto;
-  }
-  &__cell {
-    width: rem(200);
-    height: rem(200);
-    background: $white;
   }
   &__cell:nth-child(n+4):nth-child(-n+6) {
     margin: rem(10) 0;
@@ -99,35 +125,7 @@ export default {
     left: rem(410);   
   }
 }
-.moveX {
-  position: relative;
-}
-.moveX::after, .moveX::before {
-  position: absolute;
-  content: "";
-  top: 50%;
-  left: 10%;
-  width: rem(150);
-  height: rem(10);
-  background: $black;
-  border-radius: rem(10);
-}
-.moveX::after {
-  transform: rotate(45deg);
-}
-.moveX::before {
-  transform: rotate(-45deg);
-}
-.moveO {
-  position: relative;
-}
-.moveO::after {
-  position: absolute;
-  content: "O";
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: $black;
-  font-size: rem(150);
+.win {
+  background: lightgreen;
 }
 </style>
