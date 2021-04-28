@@ -53,58 +53,59 @@ export default {
         this.return();
       }
     },
+    computerStarted: function(newVal) {
+      if (newVal) {
+        this.computerFirstMove();
+      }
+    }
   },
   created() {
     this.createGame()
   },
   computed: {
-    ...mapState(['clear', 'returnMove', 'withComputer']),
-    ...mapGetters(['getWithComputer', 'getCompSettings']),
-    compSide() {
-      return this.getCompSettings.compSide === 'o' ? 'O' : 'X';
-    },
-    userSide() {
-      return this.getCompSettings.userSide === 'o' ? 'O' : 'X';
-    },
-    compColor() {
-      return this.getCompSettings.compSide === 'o' ? {color: 'blue'} : {color: 'red'};
-    },
-    userColor() {
-      return this.getCompSettings.userSide === 'o' ? {color: 'blue'} : {color: 'red'};
-    },
-    resultOfBattle() {
-      const winner = this.game.winner;
-      if (winner === '') {
-        return '';
-      }
-      if (this.getWithComputer) {
-        const compSide = this.getCompSettings.compSide;
-        const userSide = this.getCompSettings.userSide;
-        return winner === compSide ? 'Comp win' : winner === userSide ? 'User win' : `It's a draw`;
-      }
-      console.log(winner);
-      return winner === 'o' ? 'User2 win' : winner === 'x' ? 'User1 win' : `It's a draw`;
-    }
+    ...mapState(['clear', 'returnMove', 'computerStarted']),
+    ...mapGetters(['getPlayingWithComputer', 'getCompSettings', 'getWinner'])
   },
   methods: {
-    ...mapActions(['CHANGE_CLEAR', 'CHANGE_RETURN_MOVE', 'INIT_STATE', 'CHANGE_WINNER']),
+    ...mapActions(['CHANGE_CLEAR', 'CHANGE_RETURN_MOVE', 
+      'INIT_STATE', 'CHANGE_WINNER', 'CHANGE_COMPUTER_STARTED'
+    ]),
     createGame() {
       this.game = new Game();
       this.INIT_STATE();
       this.draw();
     },
     clickCell(coordinates) {
-      this.game.play(coordinates.x, coordinates.y);
-      if (this.getWithComputer) {
-        this.game.playWithComputer();
+      const field = this.game.field;
+      const playingWithComputer = this.getPlayingWithComputer;
+      if (field[coordinates.x][coordinates.y] !== '') {
+        return;
       }
-      if (this.game.winner !== '') {
-        this.CHANGE_WINNER(this.game.winner);
+      if (this.getWinner !== '') {
+        return;
+      }
+      this.userMove(coordinates)
+      if (playingWithComputer) {
+        this.computerMove();
       }
       this.draw();
     },
+    userMove(coordinates) {
+      this.game.play(coordinates.x, coordinates.y);
+      this.cheakWinner();
+    },
+    computerMove() {
+      this.game.playWithComputer(this.getCompSettings.difficulty);
+      this.cheakWinner();
+    },
+    cheakWinner() {
+      const winner = this.game.winner
+      if (winner !== '') {
+        this.CHANGE_WINNER(winner);
+      }
+    },
     draw() {
-      this.game.log();
+      // this.game.log();
       this.fieldForDraw = this.game.getField();
     },
     clearField() {
@@ -116,6 +117,10 @@ export default {
       this.game.returnMove();
       this.draw();
       this.CHANGE_RETURN_MOVE(false);
+    },
+    computerFirstMove() {
+      this.game.playWithComputer();
+      this.draw();
     }
   }
 }

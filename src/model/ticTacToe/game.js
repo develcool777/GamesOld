@@ -200,13 +200,18 @@ export default class Game {
     }
   }
 
-  playWithComputer() {
-    const computerMove = this.computerMove();
+  playWithComputer(difficulty='easy') {
+    const computerMove = difficulty === 'hard' ? this.computerMoveClever() : this.computerMoveRandom();
     if (computerMove === undefined) { return }
     this.play(...computerMove);
   }
 
-  computerMove() {
+  computerMoveClever() {
+    return 0;
+
+  }
+
+  computerMoveRandom() {
     const availableMoves = (array) => {
       return array.map((arr, i) => {
         return arr.map((cell, j) => {

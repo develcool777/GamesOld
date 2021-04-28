@@ -3,20 +3,21 @@ export default {
   state: {
     clear: false,
     returnMove: false,
-    withComputer: false,
+    playingWithComputer: false,
+    computerStarted: false,
     compSettings: {
       userSide: 'x',
       compSide: 'o',
       difficulty: 'easy',
       showStartButton: false,
-      isStarted: false
     },
     winner: ''
   },
   getters: {
     getClear: state => state.clear,
     getReturnMove: state => state.returnMove,
-    getWithComputer: state => state.withComputer,
+    getPlayingWithComputer: state => state.playingWithComputer,
+    getComputerStarted: state => state.computerStarted,
     getCompSettings: state => state.compSettings,
     getWinner: state => state.winner,
   },
@@ -28,7 +29,10 @@ export default {
       state.returnMove = boolean;
     },
     changeWithComputer(state, boolean) {
-      state.withComputer = boolean;
+      state.playingWithComputer = boolean;
+    },
+    changeComputerStarted(state, boolean) {
+      state.computerStarted = boolean;
     },
     changeCompSettings(state, obj) {
       if (obj.userSide !== undefined) {
@@ -42,9 +46,6 @@ export default {
       }
       if (obj.startButton !== undefined) {
         state.compSettings.showStartButton = obj.startButton;
-      }
-      if (obj.isStarted !== undefined) {
-        state.compSettings.isStarted = obj.isStarted;
       }
     },
     changeWinner(state, string) {
@@ -61,7 +62,6 @@ export default {
         compSide: 'o',
         difficulty: 'easy',
         startButton: false,
-        isStarted: false
       }
       commit('changeCompSettings', obj);
       commit('changeWinner', '');
@@ -72,7 +72,7 @@ export default {
     CHANGE_RETURN_MOVE({commit}, boolean) {
       commit('changeReturnMove', boolean);     
     },
-    CHANGE_WITH_COMPUTER({commit}, boolean) {
+    CHANGE_PLAYING_WITH_COMPUTER({commit}, boolean) {
       commit('changeWithComputer', boolean);     
     },
     CHANGE_COMPUTER_SETTINGS({commit}, obj) {
@@ -80,6 +80,9 @@ export default {
     },
     CHANGE_WINNER({commit}, string) {
       commit('changeWinner', string);     
+    },
+    CHANGE_COMPUTER_STARTED({commit}, boolean) {
+      commit('changeComputerStarted', boolean);     
     },
   }
 }

@@ -1,6 +1,6 @@
 <template>
   <section class="info">
-    <div class="info__title" v-if="getWithComputer">
+    <div class="info__title" v-if="getPlayingWithComputer">
       <div>
         User:
         <span :style="userColor">{{ userSide }}</span> 
@@ -28,17 +28,30 @@
         <span :style="{color: 'blue'}">O</span> 
       </div>
     </div>
-    <div class="info__result">{{ resultOfBattle }}</div>
+    <div class="info__result">{{ result }}</div>
   </section>
 </template>
 
 <script>
 import { createNamespacedHelpers } from 'vuex'
-const { mapGetters } = createNamespacedHelpers('tictactoe');
+const { mapGetters, mapState } = createNamespacedHelpers('tictactoe');
 export default {
   name: 'Info',
+  data() {
+    return {
+      result: ''
+    }
+  },
+  watch: {
+    winner: function(newVal) {
+      if (newVal !== '') {
+        this.resultOfBattle();
+      }
+    }
+  },
   computed: {
-    ...mapGetters(['getWithComputer', 'getCompSettings', 'getWinner']),
+    ...mapState(['winner']),
+    ...mapGetters(['getPlayingWithComputer', 'getCompSettings', 'getWinner']),
     compSide() {
       return this.getCompSettings.compSide === 'o' ? 'O' : 'X';
     },
@@ -51,19 +64,18 @@ export default {
     userColor() {
       return this.getCompSettings.userSide === 'o' ? {color: 'blue'} : {color: 'red'};
     },
+
+  },
+  methods: {
     resultOfBattle() {
       const winner = this.getWinner;
-      console.log({winner});
-      if (winner === '') {
-        return '';
-      }
-      if (this.getWithComputer) {
+      if (this.getPlayingWithComputer) {
         const compSide = this.getCompSettings.compSide;
         const userSide = this.getCompSettings.userSide;
-        console.log({compSide, userSide});
-        return winner === compSide ? 'Comp win' : winner === userSide ? 'User win' : `It's a draw`;
+        this.result = winner === compSide ? 'Comp win' : winner === userSide ? 'User win' : `It's a draw`;
+        return;
       }
-      return winner === 'o' ? 'User2 win' : winner === 'x' ? 'User1 win' : `It's a draw`;
+      this.result = winner === 'o' ? 'User2 win' : winner === 'x' ? 'User1 win' : `It's a draw`;
     }
   }
 }
