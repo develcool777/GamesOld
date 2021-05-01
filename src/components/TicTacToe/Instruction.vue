@@ -1,11 +1,11 @@
 <template>
   <div class="instTic">
     <div class="instTic__mainBtns">
+      <div class="instTic__mainBtn" @click="startGame()">{{ start }}</div>
       <div class="instTic__mainBtn" @click="clear()">Clear</div>
       <div class="instTic__mainBtn" @click="returnMove()">Return move</div>
       <div class="instTic__mainBtn" :class="{active: !getPlayingWithComputer}" @click="changePlayer()">User1 VS User2</div>
       <div class="instTic__mainBtn" :class="{active: getPlayingWithComputer}" @click="changePlayer()">User VS Comp</div>
-      <div class="instTic__mainBtn" @click="startComputer()" v-if="getCompSettings.showStartButton && getPlayingWithComputer">Start Comp</div>
     </div>
     <section class="" v-if="getPlayingWithComputer">
       <div class="instTic__block">
@@ -55,19 +55,21 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getPlayingWithComputer', 'getCompSettings'])
+    ...mapGetters(['getPlayingWithComputer', 'getCompSettings', 'getIsPlaying']),
+    start() {
+      return this.getIsPlaying ? 'Started' : 'Start';
+    }
   },
   methods: {
     ...mapActions([
       'CHANGE_CLEAR', 'CHANGE_RETURN_MOVE', 
       'CHANGE_PLAYING_WITH_COMPUTER', 'CHANGE_COMPUTER_SETTINGS',
-      'CHANGE_WINNER', 'CHANGE_COMPUTER_STARTED'
+      'CHANGE_WINNER', 'CHANGE_IS_PLAYING'
     ]),
     clear() {
       this.CHANGE_CLEAR(true);
       this.CHANGE_WINNER('');
-      this.CHANGE_COMPUTER_STARTED(false);
-      this.allowClick = true;
+      this.CHANGE_IS_PLAYING(false);
     },
     returnMove() {
       this.CHANGE_RETURN_MOVE(true);
@@ -80,7 +82,6 @@ export default {
       const obj = {
         compSide: move,
         userSide: move === 'x' ? 'o' : 'x',
-        startButton: move === 'x' ? true : false
       }
       this.CHANGE_COMPUTER_SETTINGS(obj);
       this.clear();
@@ -92,12 +93,8 @@ export default {
       this.CHANGE_COMPUTER_SETTINGS(obj);
       this.clear();
     },
-    startComputer() {
-      if (this,this.allowClick) {
-        this.CHANGE_COMPUTER_STARTED(true);
-        this.allowClick = false;
-      }
-
+    startGame() {
+      this.CHANGE_IS_PLAYING(true);
     }
   }
 }

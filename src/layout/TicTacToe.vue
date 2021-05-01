@@ -8,8 +8,12 @@
           v-for="(item, i) in fieldForDraw" 
           :key="i"
           :class="{win: item.winCell}"
-          :style="{cursor: item.cell === '' && game.winner === '' ? 'pointer' : 'default'}"
+          :style="{cursor: item.cell === '' && game.winner === '' && getIsPlaying ? 'pointer' : 'default'}"
           :whatToDraw="item.cell"
+          :whatToHover="item.currentPlayer"
+          :hover="hovered === i && item.cell === '' && getIsPlaying"
+          @mouseover="hovered = i;"
+          @mouseleave="hovered = null"
           @click="clickCell(item.coordinates)"
         />
         <div class="tictactoe__lineVertical1"></div>
@@ -39,7 +43,8 @@ export default {
   data() {
     return {
       game: {},
-      fieldForDraw: []
+      fieldForDraw: [],
+      hovered: null,
     }
   },
   watch: {
@@ -53,9 +58,9 @@ export default {
         this.return();
       }
     },
-    computerStarted: function(newVal) {
-      if (newVal) {
-        this.computerFirstMove();
+    isPlaying: function (newVal) {
+      if (newVal && this.getPlayingWithComputer && this.getCompSettings.compSide === 'x') {
+        this.computerMove();
       }
     }
   },
@@ -63,12 +68,20 @@ export default {
     this.createGame()
   },
   computed: {
-    ...mapState(['clear', 'returnMove', 'computerStarted']),
-    ...mapGetters(['getPlayingWithComputer', 'getCompSettings', 'getWinner'])
+    ...mapState([
+      'clear', 'returnMove',
+      'playingWithComputer', 'isPlaying'
+    ]),
+    ...mapGetters([
+      'getPlayingWithComputer', 'getCompSettings', 
+      'getWinner', 'getIsPlaying'
+    ])
   },
   methods: {
-    ...mapActions(['CHANGE_CLEAR', 'CHANGE_RETURN_MOVE', 
-      'INIT_STATE', 'CHANGE_WINNER', 'CHANGE_COMPUTER_STARTED'
+    ...mapActions([
+      'CHANGE_CLEAR', 'CHANGE_RETURN_MOVE', 
+      'INIT_STATE', 'CHANGE_WINNER',
+      'CHANGE_IS_PLAYING'
     ]),
     createGame() {
       this.game = new Game();
@@ -76,6 +89,7 @@ export default {
       this.draw();
     },
     clickCell(coordinates) {
+      if (this.getIsPlaying !== true) { return }
       const field = this.game.field;
       const playingWithComputer = this.getPlayingWithComputer;
       if (field[coordinates.x][coordinates.y] !== '') {
@@ -86,22 +100,24 @@ export default {
       }
       this.userMove(coordinates)
       if (playingWithComputer) {
-        this.computerMove();
+        setTimeout(() => this.computerMove(), 250);
       }
-      this.draw();
     },
     userMove(coordinates) {
       this.game.play(coordinates.x, coordinates.y);
       this.cheakWinner();
+      this.draw();
     },
     computerMove() {
       this.game.playWithComputer(this.getCompSettings.difficulty);
       this.cheakWinner();
+      this.draw()
     },
     cheakWinner() {
       const winner = this.game.winner
       if (winner !== '') {
         this.CHANGE_WINNER(winner);
+        this.CHANGE_IS_PLAYING(false);
       }
     },
     draw() {
@@ -114,14 +130,10 @@ export default {
       this.CHANGE_CLEAR(false);
     },
     return() {
-      this.game.returnMove();
+      this.game.returnMove(this.getPlayingWithComputer, this.getCompSettings.compSide === 'x');
       this.draw();
       this.CHANGE_RETURN_MOVE(false);
     },
-    computerFirstMove() {
-      this.game.playWithComputer();
-      this.draw();
-    }
   }
 }
 </script>

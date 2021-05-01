@@ -1,27 +1,29 @@
 export default {
   namespaced: true,
   state: {
+    isPlaying: false,
     clear: false,
     returnMove: false,
     playingWithComputer: false,
-    computerStarted: false,
     compSettings: {
       userSide: 'x',
       compSide: 'o',
       difficulty: 'easy',
-      showStartButton: false,
     },
     winner: ''
   },
   getters: {
+    getIsPlaying: state => state.isPlaying,
     getClear: state => state.clear,
     getReturnMove: state => state.returnMove,
     getPlayingWithComputer: state => state.playingWithComputer,
-    getComputerStarted: state => state.computerStarted,
     getCompSettings: state => state.compSettings,
     getWinner: state => state.winner,
   },
   mutations: {
+    changeIsPlaying(state, boolean) {
+      state.isPlaying = boolean;
+    },
     changeClear(state, boolean) {
       state.clear = boolean;
     },
@@ -30,9 +32,6 @@ export default {
     },
     changeWithComputer(state, boolean) {
       state.playingWithComputer = boolean;
-    },
-    changeComputerStarted(state, boolean) {
-      state.computerStarted = boolean;
     },
     changeCompSettings(state, obj) {
       if (obj.userSide !== undefined) {
@@ -44,9 +43,6 @@ export default {
       if (obj.difficulty !== undefined) {
         state.compSettings.difficulty = obj.difficulty;
       }
-      if (obj.startButton !== undefined) {
-        state.compSettings.showStartButton = obj.startButton;
-      }
     },
     changeWinner(state, string) {
       state.winner = string;
@@ -54,6 +50,7 @@ export default {
   },
   actions: {
     INIT_STATE({commit}) {
+      commit('changeIsPlaying', false);
       commit('changeClear', false);
       commit('changeReturnMove', false);
       commit('changeWithComputer', false);
@@ -61,10 +58,12 @@ export default {
         userSide: 'x',
         compSide: 'o',
         difficulty: 'easy',
-        startButton: false,
       }
       commit('changeCompSettings', obj);
       commit('changeWinner', '');
+    },
+    CHANGE_IS_PLAYING({commit}, boolean) {
+      commit('changeIsPlaying', boolean);     
     },
     CHANGE_CLEAR({commit}, boolean) {
       commit('changeClear', boolean);     
@@ -80,9 +79,6 @@ export default {
     },
     CHANGE_WINNER({commit}, string) {
       commit('changeWinner', string);     
-    },
-    CHANGE_COMPUTER_STARTED({commit}, boolean) {
-      commit('changeComputerStarted', boolean);     
-    },
+    }
   }
 }

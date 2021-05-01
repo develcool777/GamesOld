@@ -1,5 +1,5 @@
+import { minMax, Board } from './minMaxAlgorithm';
 export default class Game {
-// module.exports = class Game {
   constructor() {
     let field = [
       ['', '', ''],
@@ -7,7 +7,6 @@ export default class Game {
       ['', '', '']
     ]
     let currentPlayer = 'x';
-    let numberOfMoves = 0;
     let winner = '';
     const resultAfterCheakWinner = [];
     const moves = [];
@@ -33,23 +32,11 @@ export default class Game {
           currentPlayer = value;
         }
       },
-      numberOfMoves: {
-        get: () => numberOfMoves,
-        set: (value) => {
-          if (!Number.isInteger(value)) {
-            throw Error(`numberOfMoves.set(value) value must be Integer`);
-          }
-          numberOfMoves = value;
-        }
-      },
       winner: {
         get: () => winner,
         set: (value) => {
           if (typeof value !== 'string') {
             throw Error(`winner.set(value) value must be String`);
-          }
-          if (['x', 'o', ''].indexOf(value) === -1) {
-            throw Error(`winner.set(value) value must be 'x' or 'o' or ''`);
           }
           winner = value;
         }
@@ -83,6 +70,7 @@ export default class Game {
     return this.field.map((arr, i) => {
       return arr.map((item, j) => {
         return {
+          currentPlayer: this.currentPlayer,
           cell: item,
           winCell: match(i, j),
           coordinates: {
@@ -101,7 +89,6 @@ export default class Game {
       });
     })
     this.currentPlayer = 'x';
-    this.numberOfMoves = 0;
     this.resultAfterCheakWinner.splice(0);
     this.moves.splice(0);
     this.winner = '';
@@ -111,8 +98,7 @@ export default class Game {
     if (this.resultAfterCheakWinner.length > 0) { return }
     this.makeMove(this.currentPlayer, cordX, cordY);
     this.currentPlayer = this.currentPlayer === 'x' ? 'o' : 'x';
-    this.numberOfMoves++;
-    this.cheakWinner();
+    this.cheakWinner(this.field);
   }
 
   makeMove(player, cordX, cordY) {
@@ -128,19 +114,29 @@ export default class Game {
     if (this.field[cordX][cordY] !== '') {
       return console.log('this cell is not available for move');
     }
-    this.moves.push({x: cordX, y: cordY});
+    this.moves.push({player, x: cordX, y: cordY});
     this.field[cordX][cordY] = player;
   }
 
-  returnMove() {
-    if (this.numberOfMoves === 0 || this.resultAfterCheakWinner.length > 0) { return }
-    this.numberOfMoves--;
-    const lastMove = this.moves.splice(this.moves.length - 1).pop();
-    this.field[lastMove.x][lastMove.y] = '';
+  returnMove(withComp=false, compFirstMove=false) {
+    if (this.moves.length === 0 || this.resultAfterCheakWinner.length > 0) { return }
+    let amountOfMoves = 1;
+    if (withComp) {
+      amountOfMoves = 2; 
+    } 
+    if (compFirstMove && this.moves.length <= 2) {
+      amountOfMoves = 0;    
+    }
+    const lastMoves = this.moves.splice(this.moves.length - amountOfMoves).reverse()
+    lastMoves.forEach(move => {
+      this.currentPlayer = move.player;
+      this.field[move.x][move.y] = '';
+    })
+
   }
 
-  cheakWinner() {
-    if (this.numberOfMoves < 4) { return } 
+  cheakWinner(field) {
+    if (this.moves.length < 4) { return } 
     const equals = (a,b,c) => a === b && b === c && a !== '';
 
     const cheak = (array, cheakColOrRow='') => {
@@ -154,30 +150,27 @@ export default class Game {
           coordinates = [[i, 0], [i, 1], [i, 2]];
         }
         const values = coordinates.map((pair) => array[ pair[0] ][ pair[1] ]);
-        const cheak = equals(...values);
-        if (cheak) {
+        const cheakedValue = equals(...values);
+        if (cheakedValue) {
           const move = values[0];
           const obj = {};
           obj[move] = coordinates;
           result.push(obj);
-          continue;
         }
-        result.push(false);
       }
-      const filtered = result.filter(item => item !== false);
-      return filtered.length > 0 ? filtered : false;
+      return result.length > 0 ? result : false;
     }
 
     const cheakDiagonals = array => {
       const mainCoordinates = [[0, 0], [1, 1], [2, 2]];
       const secondaryCoordinates = [[0, 2], [1, 1], [2, 0]];
-      const cheaked = [mainCoordinates, secondaryCoordinates].map(item => {
-        const value = item.map((pair) => array[ pair[0] ][ pair[1] ]);
+      const cheaked = [mainCoordinates, secondaryCoordinates].map(coord => {
+        const value = coord.map((pair) => array[ pair[0] ][ pair[1] ]);
         const cheakedValue = equals(...value);
         if (cheakedValue) {
           const move = array[1][1];
           const obj = {};
-          obj[move] = item;
+          obj[move] = coord;
           return obj;
         }
         return false;
@@ -185,18 +178,22 @@ export default class Game {
       const filtered = cheaked.filter(item => item !== false);
       return filtered.length > 0 ? filtered : false;
     }
-
-    const cheakedDiagonals = cheakDiagonals(this.field);
-    const cheakedRows = cheak(this.field, 'row');
-    const cheackedColumns = cheak(this.field, 'col');
+    // console.log(field);
+    const cheakedDiagonals = cheakDiagonals(field);
+    const cheakedRows = cheak(field, 'row');
+    const cheackedColumns = cheak(field, 'col');
     // console.log({cheakedDiagonals, cheakedRows: cheakedRows, cheackedColumns: cheackedColumns});
 
-    const filtered = [cheakedDiagonals, cheakedRows, cheackedColumns].filter(item => item !== false);
+    const filtered = [cheakedDiagonals, cheakedRows, cheackedColumns].filter(item => item !== false).flat();
+    console.log({filtered});
     if (filtered.length > 0 ) {
       filtered.forEach(arr => {
-        this.resultAfterCheakWinner.push(...arr);
+        this.resultAfterCheakWinner.push(arr);
       })
-      this.winner = Object.keys(filtered[0][0]).pop();
+      this.winner = Object.keys(filtered.pop()).pop();
+    }
+    if (this.moves.length === 9) {
+      this.winner = `It's a draw`;
     }
   }
 
@@ -207,24 +204,28 @@ export default class Game {
   }
 
   computerMoveClever() {
-    return 0;
-
+    const convertedToArray = this.field.flat();
+    const b = new Board(convertedToArray);
+    const m = new minMax();
+    const maximizing = this.currentPlayer === 'x' ? true : false;
+    const bestMove = m.getBestMove(b, maximizing);
+    return [Math.floor(bestMove / 3), bestMove % 3];
   }
 
   computerMoveRandom() {
-    const availableMoves = (array) => {
-      return array.map((arr, i) => {
-        return arr.map((cell, j) => {
-          if (cell === '') {
-            return [i, j];
-          }
-          return false;
-        })
-      }).flat().filter(pair => pair !== false);
-    }
-
-    const moves = availableMoves(this.field);
+    const moves = this.availableMoves(this.field);
     const randomMove = moves[Math.floor(Math.random() * moves.length)];
     return randomMove;
+  }
+
+  availableMoves(array) {
+    return array.map((arr, i) => {
+      return arr.map((cell, j) => {
+        if (cell === '') {
+          return [i, j];
+        }
+        return false;
+      })
+    }).flat().filter(pair => pair !== false);
   }
 }

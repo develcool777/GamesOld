@@ -47,6 +47,9 @@ export default {
       if (newVal !== '') {
         this.resultOfBattle();
       }
+      if (newVal === '') {
+        this.result = '';
+      }
     }
   },
   computed: {
