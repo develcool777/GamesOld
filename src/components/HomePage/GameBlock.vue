@@ -4,7 +4,7 @@
       <div class="gBlock__container">
         <img 
           class="gBlock__img"
-          :src="require(`@/assets/gamesPreview/${block.img}`)"
+          :src="block.imgUrl"
           :alt="block.name"
         >
       </div>
@@ -43,6 +43,8 @@ export default {
   }
   &__container {
     width: rem(280);
+    height: rem(170);
+    background: gray;
   }
   &__img {
     width: 100%;

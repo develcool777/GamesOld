@@ -20,7 +20,11 @@
 </template>
 
 <script>
-import DATA from '@/data/games.json';
+// import firebase from 'firebase/app';
+// import "firebase/firestore";
+// import "firebase/storage";
+import { createNamespacedHelpers } from 'vuex'
+const { mapGetters } = createNamespacedHelpers('games');
 import GameBlock from '@/components/HomePage/GameBlock';
 import SearchGame from '@/components/HomePage/SearchGame';
 export default {
@@ -40,15 +44,15 @@ export default {
   created() {
     this.init();
   },
+  computed: {
+    ...mapGetters(['getData', 'getParsedData']),
+  },
   methods: {
-    init() {
-      this.games = DATA.games;
-      this.parsedData = this.games.map(game => {
-        const obj = {};
-        obj.id = game.id;
-        obj.name = game.name;
-        return obj;
-      });
+    // ...mapActions(['INIT']),
+    async init() {
+      // await this.INIT();
+      this.games = this.getData;
+      this.parsedData = this.getParsedData;
     },
     showSearchedGames(obj) {
       this.result = true;
@@ -62,14 +66,14 @@ export default {
         this.message = `Found ${len} ${len === 1 ? 'game' : 'games'} at '${obj.field}'`;
       }
       this.games = obj.arrayOfIds.map(id => {
-        return DATA.games[id];
+        return this.getData[id];
       })
     },
     showAll() {
       this.result = false;
       this.message = '';
-      this.games = DATA.games;
-    }
+      this.games = this.getData;
+    },
   }
 }
 </script>

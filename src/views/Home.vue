@@ -11,6 +11,7 @@
 
 <script>
 import { mapActions } from 'vuex';
+// const { mapActions, mapGetters } = createNamespacedHelpers('games');
 import Header from '@/layout/Header.vue'
 import HomePage from '@/layout/HomePage.vue'
 import Maze from '@/layout/Maze.vue'
