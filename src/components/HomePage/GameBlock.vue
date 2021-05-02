@@ -67,4 +67,11 @@ export default {
     color: darkslateblue;
   }
 }
+@media (aspect-ratio: 16/9){
+  .gBlock {
+    &__text {
+      height: 100;
+    }
+  }
+}
 </style>

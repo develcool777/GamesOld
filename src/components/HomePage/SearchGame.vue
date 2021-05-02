@@ -41,7 +41,8 @@ export default {
       field: '',
       variants: [],
       displayVariants: false,
-      placeHolder: ''
+      placeHolder: '',
+      lockSearch: false
     } 
   },
   watch: {
@@ -56,8 +57,10 @@ export default {
   },
   methods: {
     findGame(game) {
+      if (this.lockSearch) { return }
       const obj = {};
       if (game !== undefined) {
+        this.lockSearch = true;
         obj.arrayOfIds =  [game.id],
         obj.field = this.field
         obj.founded = true
@@ -85,6 +88,7 @@ export default {
         this.variants = result;
         this.displayVariants = true;  
       }
+      this.lockSearch = false;
       return result.map(item => item.id);
     },
     showAll() { 
