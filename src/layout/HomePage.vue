@@ -14,17 +14,15 @@
         v-for="(game, i) in games" 
         :key="i"
         :block="game"
+        @click="updatePlayed(game.docID)"
       />
     </div>
   </section>
 </template>
 
 <script>
-// import firebase from 'firebase/app';
-// import "firebase/firestore";
-// import "firebase/storage";
 import { createNamespacedHelpers } from 'vuex'
-const { mapGetters } = createNamespacedHelpers('games');
+const { mapGetters, mapActions } = createNamespacedHelpers('games');
 import GameBlock from '@/components/HomePage/GameBlock';
 import SearchGame from '@/components/HomePage/SearchGame';
 export default {
@@ -45,12 +43,14 @@ export default {
     this.init();
   },
   computed: {
-    ...mapGetters(['getData', 'getParsedData']),
+    ...mapGetters(['getData', 'getParsedData', 'getIsDataLoaded']),
   },
   methods: {
-    // ...mapActions(['INIT']),
+    ...mapActions(['INIT', 'UPDATE_PLAYED']),
     async init() {
-      // await this.INIT();
+      if (this.getIsDataLoaded === false) {
+        await this.INIT();
+      }
       this.games = this.getData;
       this.parsedData = this.getParsedData;
     },
@@ -74,6 +74,9 @@ export default {
       this.message = '';
       this.games = this.getData;
     },
+    updatePlayed(docId) {
+      this.UPDATE_PLAYED(docId);
+    }
   }
 }
 </script>

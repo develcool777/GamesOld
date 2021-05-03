@@ -168,7 +168,7 @@ export default {
     transition-duration: .5s;
   }
   &__img:hover {
-    transform: rotate(360deg);
+    transform: scale(1.1);
   }
   &__showAll {
     padding: rem(10) rem(20);

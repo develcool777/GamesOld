@@ -10,7 +10,10 @@
       </div>
       <div class="gBlock__title">{{ block.name }}</div>
       <div class="gBlock__text">{{ block.text }}</div>
-      <div class="gBlock__created">Added: {{ block.created }}</div>
+      <div class="gBlock__flex">
+        <div class="gBlock__created">Added: {{ block.created }}</div>
+        <div class="gBlock__played">Played: {{ block.played }}</div>
+      </div>
     </div>
   </router-link>
 </template>
@@ -59,21 +62,19 @@ export default {
     margin: rem(20) 0;
   }
   &__text {
-    height: rem(75);
+    height: rem(100);
     overflow: scroll;
     color: $black;
     opacity: 0.7;
   }
-  &__created {
-    font-size: (20);
-    color: darkslateblue;
+  &__flex {
+    margin-top: rem(10);
+    width: 100%;
+    @include Flex(space-between);
+    color: darkmagenta;
   }
-}
-@media (aspect-ratio: 16/9){
-  .gBlock {
-    &__text {
-      height: 100;
-    }
+  &__created, &__played {
+    font-size: rem(16);
   }
 }
 </style>

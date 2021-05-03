@@ -6,11 +6,13 @@ export default {
   namespaced: true,
   state: {
     data: [],
-    parsedData: []
+    parsedData: [],
+    isDataLoaded: false,
   },
   getters: {
     getData: state => state.data,
-    getParsedData: state => state.parsedData
+    getParsedData: state => state.parsedData,
+    getIsDataLoaded: state => state.isDataLoaded,   
   },
   mutations: {
     setData(state, data) {
@@ -18,6 +20,9 @@ export default {
     },
     setParsedData(state, data) {
       state.parsedData = data;
+    },
+    changeIsDataLoaded(state, boolean) {
+      state.isDataLoaded = boolean;
     },
   },
   actions: {
@@ -27,7 +32,9 @@ export default {
         const db = firebase.firestore();
         const collection = await db.collection('Games').get();
         collection.docs.forEach(doc => {
-          DATA.push(doc.data())
+          const data = doc.data();
+          data.docID = doc.id;
+          DATA.push(data)
         })
       }
 
@@ -67,6 +74,7 @@ export default {
       
       commit('setData', DATA);
       dispatch('PARSE_DATA');
+      commit('changeIsDataLoaded', true);
     },
     PARSE_DATA({commit, state}) {
       const DATA = state.data;
@@ -78,6 +86,18 @@ export default {
       })
 
       commit('setParsedData', parsedData)
+    },
+    UPDATE_PLAYED({ commit }, docId) {
+      const update = async () => {
+        const db = firebase.firestore();
+        const doc = await db.collection('Games').doc(docId);
+        const docData = await doc.get();
+        await doc.update({
+          played: docData.data().played + 1
+        })
+      }
+      update();
+      commit('changeIsDataLoaded', false);
     }
   }
 }

@@ -10,8 +10,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
-// const { mapActions, mapGetters } = createNamespacedHelpers('games');
+
 import Header from '@/layout/Header.vue'
 import HomePage from '@/layout/HomePage.vue'
 import Maze from '@/layout/Maze.vue'
@@ -33,10 +32,8 @@ export default {
   },
   created() {
     this.dontAllowToScroll();
-    this.INIT_ASPECT_RATIO();
   },
   methods: {
-    ...mapActions(['INIT_ASPECT_RATIO']),
     dontAllowToScroll() {
       window.addEventListener('keydown', function(e) {
         if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.key) > -1) {
