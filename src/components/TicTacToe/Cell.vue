@@ -38,8 +38,8 @@ export default {
 
 <style lang="scss" scoped>
 .cell {
-  width: rem(200);
-  height: rem(200);
+  width: rem(150);
+  height: rem(150);
   background: $white;
   &__moveO, &__moveX {
     position: relative;

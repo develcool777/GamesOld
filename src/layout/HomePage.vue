@@ -14,7 +14,10 @@
         v-for="(game, i) in games" 
         :key="i"
         :block="game"
+        :hovered="hoveredBlock === i"
         @click="updatePlayed(game.docID)"
+        @mouseover="hoveredBlock = i"
+        @mouseleave="hoveredBlock = null"
       />
     </div>
   </section>
@@ -36,7 +39,8 @@ export default {
       games: [],
       parsedData: [],
       result: false,
-      message: ''
+      message: '',
+      hoveredBlock: null
     }
   },
   created() {

@@ -2,11 +2,14 @@
   <router-link class="gBlock" tag="div" :to="block.to">
     <div class="gBlock__block">
       <div class="gBlock__container">
-        <img 
-          class="gBlock__img"
-          :src="block.imgUrl"
-          :alt="block.name"
-        >
+        <video 
+          class="gBlock__video"
+          ref="video" 
+          :src="block.videoUrl" 
+          :poster="block.imgUrl"
+          preload="none"
+          loop
+        ></video>
       </div>
       <div class="gBlock__title">{{ block.name }}</div>
       <div class="gBlock__text">{{ block.text }}</div>
@@ -22,7 +25,19 @@
 export default {
   name: 'GameBlock',
   props: {
-    block: Object
+    block: Object,
+    hovered: Boolean
+  },
+  watch: {
+    hovered: function(newVal) {
+      if (newVal) {
+        this.$refs.video.play()
+      } else {
+        this.$refs.video.pause();
+        this.$refs.video.currentTime = 0;
+        this.$refs.video.load()
+      }
+    }
   }
 }
 </script>
@@ -46,10 +61,10 @@ export default {
   }
   &__container {
     width: rem(280);
-    height: rem(170);
+    height: rem(135);
     background: gray;
   }
-  &__img {
+  &__video {
     width: 100%;
     height: 100%;
   }

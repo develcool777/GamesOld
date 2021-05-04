@@ -119,7 +119,7 @@ export default class Game {
   }
 
   returnMove(withComp=false, compFirstMove=false) {
-    if (this.moves.length === 0 || this.resultAfterCheakWinner.length > 0) { return }
+    if (this.moves.length === 0 || this.resultAfterCheakWinner.length > 0 || this.moves.length === 9) { return }
     let amountOfMoves = 1;
     if (withComp) {
       amountOfMoves = 2; 
@@ -192,7 +192,7 @@ export default class Game {
       })
       this.winner = Object.keys(filtered.pop()).pop();
     }
-    if (this.moves.length === 9) {
+    if (this.moves.length === 9 && this.winner === '') {
       this.winner = `It's a draw`;
     }
   }

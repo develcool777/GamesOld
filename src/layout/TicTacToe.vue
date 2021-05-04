@@ -147,7 +147,7 @@ export default {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    width: rem(620);
+    width: rem(470);
     margin: 0 auto;
   }
   &__cell:nth-child(n+4):nth-child(-n+6) {
@@ -162,18 +162,18 @@ export default {
   &__lineVertical1, &__lineVertical2 {
     width: 100%;
     height: rem(10);
-    top: rem(200);
+    top: rem(150);
   }
   &__lineVertical2 {
-    top: rem(410);
+    top: rem(310);
   }
   &__lineHorizontal1, &__lineHorizontal2 {
     width: rem(10);
     height: 100%;
-    left: rem(200);
+    left: rem(150);
   }
   &__lineHorizontal2 {
-    left: rem(410);   
+    left: rem(310);   
   }
 }
 .win {
