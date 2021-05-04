@@ -78,7 +78,6 @@ export default {
   }
   &__text {
     height: rem(100);
-    overflow: scroll;
     color: $black;
     opacity: 0.7;
   }
