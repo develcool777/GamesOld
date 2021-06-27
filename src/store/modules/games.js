@@ -126,7 +126,7 @@ export default {
         })
       }
       update();
-      commit('changeIsDataLoaded', false);
+      commit('changeIsDataLoaded', true);
     }
   }
 }

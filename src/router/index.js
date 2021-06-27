@@ -31,6 +31,12 @@ const routes = [
     name: 'TicTacToe',
     component: Home,
     props: {id: 3}
+  },
+  {
+    path: '/chess',
+    name: 'Chess',
+    component: Home,
+    props: {id: 4}
   }
 ]
 

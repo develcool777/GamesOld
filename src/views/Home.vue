@@ -6,6 +6,7 @@
     <Memoji v-if="id === 1"/>
     <RockPaperScissors v-if="id === 2"/>
     <TicTacToe v-if="id === 3"/>
+    <Chess v-if="id === 4"/>
   </div>
 </template>
 
@@ -17,6 +18,7 @@ import Maze from '@/layout/Maze.vue'
 import Memoji from '@/layout/Memoji.vue'
 import RockPaperScissors from '@/layout/RockPaperScissors.vue'
 import TicTacToe from '@/layout/TicTacToe.vue'
+import Chess from '@/layout/Chess.vue'
 export default {
   name: 'Home',
   components: {
@@ -25,7 +27,8 @@ export default {
     Maze,
     Memoji,
     RockPaperScissors,
-    TicTacToe
+    TicTacToe,
+    Chess
   },
   props: {
     id: Number

@@ -78,8 +78,9 @@ export default {
       this.message = '';
       this.games = this.getData;
     },
-    updatePlayed(docId) {
+    async updatePlayed(docId) {
       this.UPDATE_PLAYED(docId);
+      await this.INIT();
     }
   }
 }
