@@ -20,20 +20,72 @@ export default class Knight {
     })
   }
 
-  // available(field) {
-  //   const availableMoves = [];
-  //   const availableKills = [];
+  available(field) {
+    const availableMoves = [];
+    const availableKills = [];
 
-    // if (this.position.x - 2 >= 0 && this.position.y + 1 < 8) {
-      
-    // }
-    // if (convertedCell[0] - 2 >= 0 && convertedCell[1] - 1 >= 0) {
-    //   moves++;
-    // }
-    
+    const check = (x, y) => {
+      if (field[x][y].figure !== null) {
+        if (field[x][y].figure.color !== this.color) { availableKills.push({x, y}) }
+        return;
+      }
+      availableMoves.push({x, y});
+    }
 
-  //   return [availableMoves, availableKills] 
-  // }
+    //  ##
+    //  #
+    //  #
+    if (this.position.x - 2 >= 0 && this.position.y + 1 < field.length) {
+      check(this.position.x - 2, this.position.y + 1);
+    }
+
+    // ##
+    //  #
+    //  #
+    if (this.position.x - 2 >= 0 && this.position.y - 1 >= 0) {
+      check(this.position.x - 2, this.position.y - 1);
+    }
+
+    //  #
+    //  #
+    // ##
+    if (this.position.x + 2 < field.length && this.position.y - 1 >= 0) {
+      check(this.position.x + 2, this.position.y - 1);
+    }
+
+    //  #
+    //  #
+    //  ##
+    if (this.position.x + 2 < field.length && this.position.y + 1 < field.length) {
+      check(this.position.x + 2, this.position.y + 1);
+    }
+
+    //    #
+    //    ###
+    if (this.position.x + 1 < field.length && this.position.y + 2 < field.length) {
+      check(this.position.x + 1, this.position.y + 2);
+    }
+
+    //    #
+    //  ###
+    if (this.position.x + 1 < field.length && this.position.y - 2 >= 0) {
+      check(this.position.x + 1, this.position.y - 2);
+    }
+
+    //    ###
+    //    #
+    if (this.position.x - 1 >= 0 && this.position.y + 2 < field.length) {
+      check(this.position.x - 1, this.position.y + 2);
+    }
+
+    //  ###
+    //    #
+    if (this.position.x - 1 >=0 && this.position.y - 2 >= 0) {
+      check(this.position.x - 1, this.position.y - 2);
+    }
+
+    return [availableMoves, availableKills] 
+  }
 
   move(cordinates, field) {
     const moves = this.available(field).flat();
@@ -47,7 +99,7 @@ export default class Knight {
       field[ this.position.x ][ this.position.y ].figure = old;
     }
     else {
-      console.log('wrong move Rook');
+      console.log('wrong move Knight');
     }
   }
 }

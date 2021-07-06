@@ -206,9 +206,9 @@
 	}
 }
 
-@mixin Size() {
-  width: 20px;
-  height: 20px;
+@mixin Size($width: 20, $height: 20) {
+  width: #{$width}px;
+  height: #{$height}px;
 }
 
 @mixin Card($size) {

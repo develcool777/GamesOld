@@ -20,7 +20,7 @@ export default {
         {id: 1, name: 'Memoji', to: '/memoji'},
         {id: 2, name: 'Rock Paper Scissors', to: '/rock-paper-scissors'},
         {id: 3, name: 'Tic Tac Toe', to: '/tic-tac-toe'},
-        {id: 3, name: 'Chess', to: '/chess'}
+        {id: 4, name: 'Chess', to: '/chess'}
       ]
     }
   }

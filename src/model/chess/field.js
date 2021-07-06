@@ -1,8 +1,6 @@
 /* eslint-disable no-empty */
 import Cell from './cell'
 export default class Field {
-// const Cell = require("./cell");
-// module.exports = class Field {
   constructor() {
     const field = [];
     Object.defineProperties(this, {

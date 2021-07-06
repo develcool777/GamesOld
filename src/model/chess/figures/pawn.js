@@ -45,7 +45,7 @@ export default class Pawn {
       if (i === 0 && condition(item) === null) {
         addMove(item);
       }
-      if (i === 1 && this.firstMove && acc.length > 0) {
+      if (i === 1 && this.firstMove && acc.length > 0 && condition(item) === null) {
         addMove(item);
       }
       return acc;

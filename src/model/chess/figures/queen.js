@@ -24,104 +24,78 @@ export default class Queen {
     const availableMoves = [];
     const availableKills = [];
 
+    const check = (x=0, y=0, position) => {
+      position.x = x;
+      position.y = y;
+      if (field[x][y].figure !== null) {
+        if (field[x][y].figure.color !== this.color) { availableKills.push({...position}) }
+        return true;
+      }
+      availableMoves.push({...position})
+    }
+
     // up 
     const currentPositionUp = Object.assign({}, this.position);
     for (let i = currentPositionUp.x; i > 0; i--) {
-      const condition = field[currentPositionUp.x - 1][currentPositionUp.y].figure;
-      currentPositionUp.x -= 1;
-      if (condition !== null) { 
-        if (condition.color !== this.color) { availableKills.push({...currentPositionUp}) }
+      if (check(currentPositionUp.x - 1, currentPositionUp.y, currentPositionUp)) {
         break;
-      } 
-      availableMoves.push({...currentPositionUp});
+      }
     }
 
     // down
     const currentPositionDown = Object.assign({}, this.position);
     for (let i = currentPositionDown.x; i < field.length - 1; i++) {
-      const condition = field[currentPositionDown.x + 1][currentPositionDown.y].figure;
-      currentPositionDown.x += 1;
-      if (condition !== null) { 
-        if (condition.color !== this.color) { availableKills.push({...currentPositionDown}) }
+      if (check(currentPositionDown.x + 1, currentPositionDown.y, currentPositionDown)) {
         break;
-      } 
-      availableMoves.push({...currentPositionDown});
+      }
     }
 
     // left
     const currentPositionLeft = Object.assign({}, this.position);
     for (let i = currentPositionLeft.y; i > 0; i--) {
-      const condition = field[currentPositionLeft.x][currentPositionLeft.y - 1].figure;
-      currentPositionLeft.y -= 1;
-      if (condition !== null) { 
-        if (condition.color !== this.color) { availableKills.push({...currentPositionLeft}) }
+      if (check(currentPositionLeft.x, currentPositionLeft.y - 1, currentPositionLeft)) {
         break;
-      } 
-      availableMoves.push({...currentPositionLeft});
+      }
     }
 
     // right
     const currentPositionRight = Object.assign({}, this.position);
     for (let i = currentPositionRight.y; i < field.length - 1; i++) {
-      const condition = field[currentPositionRight.x][currentPositionRight.y + 1].figure;
-      currentPositionRight.y += 1;
-      if (condition !== null) { 
-        if (condition.color !== this.color) { availableKills.push({...currentPositionRight}) }
+      if (check(currentPositionRight.x, currentPositionRight.y + 1, currentPositionRight)) {
         break;
-      } 
-      availableMoves.push({...currentPositionRight});
+      }
     }
 
     // upLeft 
     const currentPositionUpLeft = Object.assign({}, this.position);
     for (let i = this.position.x; i > 0 && currentPositionUpLeft.y > 0; i--) {
-      const condition = field[currentPositionUpLeft.x - 1][currentPositionUpLeft.y - 1].figure;
-      currentPositionUpLeft.x -= 1;
-      currentPositionUpLeft.y -= 1;
-      if (condition !== null) { 
-        if (condition.color !== this.color) { availableKills.push({...currentPositionUpLeft}) }
-        break;
-      } 
-      availableMoves.push({...currentPositionUpLeft});
+      if (check(currentPositionUpLeft.x - 1, currentPositionUpLeft.y - 1, currentPositionUpLeft)) {
+        break
+      }
     }
 
     // downLeft
     const currentPositionDownLeft = Object.assign({}, this.position);
     for (let i = currentPositionDownLeft.x; i < field.length - 1 && currentPositionDownLeft.y > 0; i++) {
-      const condition = field[currentPositionDownLeft.x + 1][currentPositionDownLeft.y - 1].figure;
-      currentPositionDownLeft.x += 1;
-      currentPositionDownLeft.y -= 1;
-      if (condition !== null) { 
-        if (condition.color !== this.color) { availableKills.push({...currentPositionDownLeft}) }
+      if (check(currentPositionDownLeft.x + 1, currentPositionDownLeft.y - 1, currentPositionDownLeft)) {
         break;
-      } 
-      availableMoves.push({...currentPositionDownLeft});
+      }
     }
 
     // upRight
     const currentPositionUpRight = Object.assign({}, this.position);
     for (let i = currentPositionUpRight.x; i > 0 && currentPositionUpRight.y < field.length - 1; i--) {
-      const condition = field[currentPositionUpRight.x - 1][currentPositionUpRight.y + 1].figure;
-      currentPositionUpRight.x -= 1;
-      currentPositionUpRight.y += 1;
-      if (condition !== null) { 
-        if (condition.color !== this.color) { availableKills.push({...currentPositionUpRight}) }
+      if (check(currentPositionUpRight.x - 1, currentPositionUpRight.y + 1, currentPositionUpRight)) {
         break;
-      } 
-      availableMoves.push({...currentPositionUpRight});
+      }
     }
 
     // downRight
     const currentPositionDownRight = Object.assign({}, this.position);
     for (let i = currentPositionDownRight.x; i < field.length - 1 && currentPositionDownRight.y < field.length - 1; i++) {
-      const condition = field[currentPositionDownRight.x + 1][currentPositionDownRight.y + 1].figure;
-      currentPositionDownRight.x += 1;
-      currentPositionDownRight.y += 1;
-      if (condition !== null) { 
-        if (condition.color !== this.color) { availableKills.push({...currentPositionDownRight}) }
+      if (check(currentPositionDownRight.x + 1, currentPositionDownRight.y + 1, currentPositionDownRight)) {
         break;
-      } 
-      availableMoves.push({...currentPositionDownRight});
+      }
     }
     
     return [availableMoves, availableKills] 
