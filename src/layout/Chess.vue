@@ -2,23 +2,24 @@
   <div class="chess">
     <div class="chess__game">
       <div class="chess__field">
-        <div class="chess__row" v-for="(row, i) in fieldForDraw" :key="i">
+        <div class="chess__row" v-for="(row, i) in board" :key="i">
           <div 
-            :class="[cell.color, 'chess__cell']"  
+            :class="[chooseCellColor(cell, i, j), 'chess__cell']"  
             v-for="(cell, j) in row" 
             :key="j"
-            @click="clickOnCell(cell, i, j)"
+            @click="clickOnCellForMove(cell, i, j)"
           >
             <div v-if="cell.isAvailableFor === 'move'" class="chess__move"></div>
-            <div v-if="cell.isAvailableFor === 'kill'" class="chess__kill"></div>
-            <Figure 
-              @click="clickOnFigure(cell.figure)" 
-              :figureName="createFigureName(cell)"
-            />
-
+            <div v-if="cell.isAvailableFor === 'kill'" class="chess__upRight"></div>
+            <div v-if="cell.isAvailableFor === 'kill'" class="chess__upLeft"></div>
+            <div v-if="cell.isAvailableFor === 'kill'" class="chess__downRight"></div>
+            <div v-if="cell.isAvailableFor === 'kill'" class="chess__downLeft"></div>
+              
+            <Figure :figureName="createFigureName(cell)"/>
           </div>
         </div>
       </div>
+    </div>
   </div>
   <!-- <Instruction 
     class="maze__instruction" 
@@ -26,7 +27,7 @@
     v-on:clicked="actOfUser($event)"
     v-on:restart="restartGame()"
   /> -->
-  </div>
+
 </template>
 
 <script>
@@ -47,8 +48,10 @@ export default {
   data() {
     return {
       field: {},
-      fieldForDraw: [],
-      selectedFigure: null
+      board: [],
+      selectedCell: null,
+      oldPosition: null,
+      newPosition: null,
     }
   },
   created() {
@@ -59,71 +62,20 @@ export default {
       this.field = new Field();
       this.field.createField();
       const f = new Figures();
-      f.addFiguresToField(this.field.field);
-      this.fieldForDraw = this.field.field;
-
-      // Pawn
-      // const p = new Pawn('black', {x: 6, y: 0});
-      // const p2 = new Pawn('black', {x: 5, y: 1});
-      // this.field.field[p.position.x][p.position.y].figure = p;
-      // this.field.field[p2.position.x][p2.position.y].figure = p2;
-      // this.fieldForDraw = this.field.field;
-      // const p2 = new Pawn('black', {x: 5, y: 1});
-      // console.log(p.available(this.fieldForDraw));
-      // p.move([5,1], this.fieldForDraw);
-      // console.log(p.available(this.fieldForDraw));
-      // console.log(p2.available(this.fieldForDraw));
-
-      // Rook
-      // const r = new Rook('white', {x: 7, y: 0});
-      // this.field.field[r.position.x][r.position.y].figure = r;
-      // this.fieldForDraw = this.field.field;
-     
-      // console.log(this.fieldForDraw)
-      // console.log(r.available(this.fieldForDraw));
-      // r.move([7,5], this.fieldForDraw);
-     
-
-      // Bishop
-      // const b = new Bishop('white', {x: 4, y: 5});
-      // this.field.field[b.position.x][b.position.y].figure = b;
-      // this.fieldForDraw = this.field.field;
-      // console.log(b.available(this.fieldForDraw))
-      // b.move([7,0], this.fieldForDraw);
-      // console.log(this.fieldForDraw);
-
-      // Queen
-      // const q = new Queen('white', {x: 2, y: 3});
-      // this.field.field[q.position.x][q.position.y].figure = q;
-      // this.fieldForDraw = this.field.field;
-      // console.log(q.available(this.fieldForDraw));
-      // console.log(this.fieldForDraw);
-
-      // knight
-      // const k = new Knight('white', {x: 3, y: 5});
-      // this.field.field[k.position.x][k.position.y].figure = k;
-      // this.fieldForDraw = this.field.field;
-      // console.log(k.available(this.fieldForDraw));
-      // console.log(this.fieldForDraw);
-
-      // king
-      // const K = new King('black', {x: 5, y: 5});
-      // this.field.field[K.position.x][K.position.y].figure = K;
-      // this.fieldForDraw = this.field.field;
-      // console.log(K.available(this.fieldForDraw));
-      // console.log(this.fieldForDraw);
+      f.addFiguresToField(this.field.board);
+      this.board = this.field.board;
+      console.log(this.board);
     },
 
     createFigureName(cell) {
       // console.log(cell);
       if (cell.figure === null) { return '' }
       const name = cell.figure.color + cell.figure.name + '.png';
-      // console.log(name);
       return name;
     },
 
     clearAvailableMove() {
-      this.fieldForDraw = this.fieldForDraw.map((row, ) => {
+      this.board = this.board.map((row, ) => {
         return row.map((cell, ) => {
           cell.isAvailableFor = '';
           return cell;
@@ -131,24 +83,50 @@ export default {
       })
     },
 
-    clickOnFigure(figure) {
+    clickOnFigure(cell) {
       this.clearAvailableMove();
-      this.selectedFigure = figure;
-      const availableMoves = figure.available(this.fieldForDraw);
+      const availableMoves = cell.figure.available(this.board);
       availableMoves.forEach((moves, i) => {
         moves.forEach(move => {
-          this.fieldForDraw[move.x][move.y].isAvailableFor = i === 0 ? 'move' : 'kill'
+          this.board[move.x][move.y].isAvailableFor = i === 0 ? 'move' : 'kill';
         })
       })
-      console.log(this.fieldForDraw);
+      this.selectedCell = cell;
     },
 
-    clickOnCell(cell, x, y) {
-      if (cell.isAvailableFor === '') { return }
-      this.selectedFigure.move([x,y], this.fieldForDraw);
-      this.selectedFigure = null;
+    clickOnCellForMove(cell, x, y) {
+      if (cell.figure !== null && cell.isAvailableFor !== 'kill') {
+        this.clickOnFigure(cell);
+        return;
+      }
+      if (cell.isAvailableFor === '') { 
+        this.selectedCell = null;
+        this.clearAvailableMove();
+        return  
+      }
+      const figure = this.selectedCell.figure
+      this.oldPosition = Object.assign({}, figure.position);
+      figure.move([x,y], this.board);
+      this.newPosition = Object.assign({}, figure.position);
+      this.selectedCell = null;
       this.clearAvailableMove();
-      // console.log(cell);
+    },
+
+    chooseCellColor(cell, x, y) {
+      if (cell.isAvailableFor !== '') {
+        return cell.color;
+      }
+      if (this.oldPosition !== null && this.oldPosition.x === x && this.oldPosition.y === y) {
+        return 'lastMoveOldPosition';
+      }
+      if (this.newPosition !== null && this.newPosition.x === x && this.newPosition.y === y) {
+        return 'lastMoveNewPosition';
+      }
+      if (this.selectedCell !== null && this.selectedCell.position.x === x && this.selectedCell.position.y === y) {
+        return 'selected';
+      }
+
+      return cell.color;
     }
   }
 }
@@ -160,23 +138,14 @@ export default {
   &__row {
     @include Flex(center);
   }
-  &__cell {
-    @include Size(78, 78);
-  }
-  &__move {
+  &__cell, &__move {
     @include Size(78, 78);
     position: relative;
   }
-  &__kill {
-    // @include Size(78, 78);
-    position: relative;
-  }
-  &__move::after, &__kill::after {
+  &__move::after {
     position: absolute;
     content: "";
     z-index: 1;
-  }
-  &__move::after {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -184,20 +153,52 @@ export default {
     height: 20px;
     border-radius: 50%;
     background: darkgreen;
-
+    transition-duration: .5s;
   }
-  &__kill::after {
+  &__move:hover::after {
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+  &__upRight, &__upLeft, &__downLeft, &__downRight {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 15px 15px 0;
+    border-color: transparent firebrick transparent transparent;
+    transition-duration: .5s;
+  }
+  &__upRight {
+    right: 0;
+  }
+  &__upLeft {
     top: 0;
-    // left: 50%;
-    // transform: translate(-50%, -50%);
-    width: 72px;
-    height: 72px;
-    border: 3px solid darkred;
-    background: transparent;
+    transform: rotate(-90deg);   
+  }
+  &__downRight {
+    bottom: 0;
+    right: 0;
+    transform: rotate(90deg);
+  }
+  &__downLeft {
+    bottom: 0;
+    transform: rotate(-180deg);
+  }
+  &__cell:hover &__upRight, &__cell:hover &__upLeft, &__cell:hover &__downRight, &__cell:hover  &__downLeft {
+    border-width: 0 20px 20px 0;
   }
 }
-.available {
-  background: lightblue;
+
+.lastMoveOldPosition {
+  background: olivedrab;
+}
+.lastMoveNewPosition {
+  background: rgb(55, 78, 10);
+}
+.selected {
+  background: lightgreen;
 }
 .white {
   background: #EDDAB9;
@@ -205,4 +206,5 @@ export default {
 .black {
   background: #AE8868;
 }
+
 </style>
