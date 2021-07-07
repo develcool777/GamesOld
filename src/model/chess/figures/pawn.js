@@ -108,6 +108,8 @@ export default class Pawn {
     if (this.firstMove) {
       this.firstMove = false;
     }
+
+    this.checkPromotion(this);
   }
 
   moveFigure(field, figure, x, y) {

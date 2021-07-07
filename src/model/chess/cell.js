@@ -30,8 +30,8 @@ export default class Cell {
           if (typeof value !== 'string') {
             throw Error(`Cell.isAvailableFor.set(value) value must be String`);
           }
-          if (!['', 'move', 'kill', 'castle'].includes(value)) {
-            throw Error(`Cell.isAvailableFor.set(value) value must be '' or 'move' or 'kill' or 'castle'`);
+          if (!['', 'move', 'kill', 'castle', 'promotion'].includes(value)) {
+            throw Error(`Cell.isAvailableFor.set(value) value must be '' or 'move' or 'kill' or 'castle' or 'promotion'`);
           }
           isAvailableFor = value;
         }

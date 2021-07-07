@@ -16,8 +16,14 @@
             <div v-if="cell.isAvailableFor === 'kill'" class="chess__downLeft"></div>
             <div v-if="cell.isAvailableFor === 'castle'" class="chess__castle"></div>  
             <Figure :figureName="createFigureName(cell)"/>
+            <Promotion 
+              v-if="showPromotion(cell)" 
+              v-on:promotion="pawnPromotion($event, i, j)"
+              :index="cell.figure.color === 'white' ? 0 : 1"
+            />
           </div>
         </div>
+        <div v-if="isPromotion" class="chess__mask"></div>
       </div>
     </div>
   </div>
@@ -40,18 +46,23 @@ import Field from '@/model/chess/field';
 // import King from '@/model/chess/figures/king'
 import Figures from '@/model/chess/figures'
 import Figure from '@/components/Chess/Figure'
+import Promotion from '@/components/Chess/Promotion'
 export default {
   name: 'Chess',
   components: {
-    Figure
+    Figure,
+    Promotion
   },
   data() {
     return {
       field: {},
+      figures: {},
       board: [],
       selectedCell: null,
       oldPosition: null,
       newPosition: null,
+      isPromotion: false,
+      dontClick: false,
     }
   },
   created() {
@@ -61,9 +72,11 @@ export default {
     init() {
       this.field = new Field();
       this.field.createField();
-      const f = new Figures();
-      f.addFiguresToField(this.field.board);
+      this.figures = new Figures();
+      this.figures.addFiguresToField(this.field.board);
+      // this.field.board[0][0].isAvailableFor = 'promotion'
       this.board = this.field.board;
+
       console.log(this.board);
     },
 
@@ -85,8 +98,6 @@ export default {
 
     clickOnFigure(cell) {
       this.clearAvailableMove();
-      // console.log(cell);
-      console.log(cell, 'why why');
       const availableMoves = cell.figure.available(this.board);
       availableMoves.forEach((moves, i) => {
         moves.forEach(move => {
@@ -98,26 +109,50 @@ export default {
     },
 
     clickOnCellForMove(cell, x, y) {
+      // dont click after pawn promotion
+      if (this.dontClick) {
+        this.dontClick = false;
+        return;
+      }
+      // call clickOnFigure if figure was clicked
       if (cell.figure !== null && cell.isAvailableFor !== 'kill') {
         this.clickOnFigure(cell);
         return;
       }
+      // if figure was clicked but new click was not on available moves
       if (cell.isAvailableFor === '') { 
         this.selectedCell = null;
         this.clearAvailableMove();
         return  
       }
+
       const figure = this.selectedCell.figure
       this.oldPosition = Object.assign({}, figure.position);
+
       if (cell.isAvailableFor === 'castle') {
-        console.log('here!!!!1');
         figure.makeCastle([x,y], this.board)
       } else {
         figure.makeMove([x,y], this.board);
       }
+
       this.newPosition = Object.assign({}, figure.position);
       this.selectedCell = null;
       this.clearAvailableMove();
+
+      // check that figure was pawn
+      if (figure.name !== 'Pawn') {
+        return;
+      }
+      // check pawn promotion
+      if (figure.promotion) {
+        this.board[x][y].isAvailableFor = 'promotion';
+      }
+    },
+
+    pawnPromotion(figureName, x, y) {
+      this.figures.pawnPromotion(this.board,figureName, {x, y});
+      this.isPromotion = false;
+      this.dontClick = true
     },
 
     chooseCellColor(cell, x, y) {
@@ -133,8 +168,15 @@ export default {
       if (this.selectedCell !== null && this.selectedCell.position.x === x && this.selectedCell.position.y === y) {
         return 'selected';
       }
-
       return cell.color;
+    },
+
+    showPromotion(cell) {
+      if (cell.isAvailableFor === 'promotion') {
+        this.isPromotion = true;
+        return true;
+      }
+      return false;
     }
   }
 }
@@ -149,6 +191,18 @@ export default {
   &__cell, &__move, &__castle {
     @include Size(78, 78);
     position: relative;
+  }
+  &__field {
+    position: relative;
+  }
+  &__mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    background-color: rgba(0, 0, 0, 0.6);
   }
   &__move::after, &__castle::after {
     position: absolute;

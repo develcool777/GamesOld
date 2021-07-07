@@ -7,14 +7,6 @@ import King from '@/model/chess/figures/king'
 
 export default class Figures {
   constructor() {
-    // if (typeof side !== 'string') {
-    //   throw Error(`Figures.constructor side must be String`);
-    // }
-    // Object.defineProperties(this, {
-    //   side: {
-    //     get: () => side
-    //   }
-    // })
     this.whiteRook1 = new Rook('white', {x: 7, y: 0});
     this.whiteKnight1 = new Knight('white', {x: 7, y: 1});
     this.whiteBishop1 = new Bishop('white', {x: 7, y: 2});
@@ -91,5 +83,24 @@ export default class Figures {
     field[this.blackPawn7.position.x][this.blackPawn7.position.y].figure = this.blackPawn7;
     field[this.blackPawn8.position.x][this.blackPawn8.position.y].figure = this.blackPawn8;
   }
-  
+
+  pawnPromotion(field, figureName, position) {
+    const color = figureName.substring(0, 5);
+    const name = figureName.substring(5);
+    let fig;
+    if (name === 'Queen') {
+      fig = new Queen(color, position)
+    }
+    if (name === 'Rook') {
+      fig = new Rook(color, position)
+    }
+    if (name === 'Bishop') {
+      fig = new Bishop(color, position)
+    }
+    if (name === 'Knight') {
+      fig = new Knight(color, position)
+    }
+    field[position.x][position.y].figure = fig;
+    field[position.x][position.y].isAvailableFor = '';
+  }
 }
