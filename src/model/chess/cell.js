@@ -8,9 +8,6 @@ export default class Cell {
     }
     let figure = null;
     let isAvailableFor = '';
-    // let selectedCell = false;
-    // let lastMoveOldPosition = false;
-    // let lastMoveNewPosition = false;
     Object.defineProperties(this, {
       color: {
         get: () => color 
@@ -33,46 +30,12 @@ export default class Cell {
           if (typeof value !== 'string') {
             throw Error(`Cell.isAvailableFor.set(value) value must be String`);
           }
-          if (!['', 'move', 'kill'].includes(value)) {
-            throw Error(`Cell.isAvailableFor.set(value) value must be '' or 'move' or 'kill'`);
+          if (!['', 'move', 'kill', 'castle'].includes(value)) {
+            throw Error(`Cell.isAvailableFor.set(value) value must be '' or 'move' or 'kill' or 'castle'`);
           }
           isAvailableFor = value;
         }
-      },
-
-      // selectedCell: {
-      //   get: () => selectedCell,
-      //   set: (value) => {
-      //     if (figure === null) {
-      //       throw Error(`Cell.selectedCell.set(value) there is no figure on this cell`);
-      //     }
-      //     if (typeof value !== 'boolean') {
-      //       throw Error(`Cell.selectedCell.set(value) value must be Boolean`);
-      //     }
-      //     selectedCell = value;
-      //   } 
-      // },
-
-      // lastMoveOldPosition: {
-      //   get: () => lastMoveOldPosition,
-      //   set: (value) => {
-      //     if (typeof value !== 'boolean') {
-      //       throw Error(`Cell.lastMoveOldPosition.set(value) value must be Boolean`);
-      //     }
-      //     lastMoveOldPosition = value;
-      //   } 
-      // },
-
-      // lastMoveNewPosition: {
-      //   get: () => lastMoveNewPosition,
-      //   set: (value) => {
-      //     if (typeof value !== 'boolean') {
-      //       throw Error(`Cell.lastMoveNewPosition.set(value) value must be Boolean`);
-      //     }
-      //     lastMoveNewPosition = value;
-      //   } 
-      // },
-
+      }
     })
   }
 }

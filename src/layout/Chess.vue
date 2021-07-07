@@ -14,7 +14,7 @@
             <div v-if="cell.isAvailableFor === 'kill'" class="chess__upLeft"></div>
             <div v-if="cell.isAvailableFor === 'kill'" class="chess__downRight"></div>
             <div v-if="cell.isAvailableFor === 'kill'" class="chess__downLeft"></div>
-              
+            <div v-if="cell.isAvailableFor === 'castle'" class="chess__castle"></div>  
             <Figure :figureName="createFigureName(cell)"/>
           </div>
         </div>
@@ -85,10 +85,13 @@ export default {
 
     clickOnFigure(cell) {
       this.clearAvailableMove();
+      // console.log(cell);
+      console.log(cell, 'why why');
       const availableMoves = cell.figure.available(this.board);
       availableMoves.forEach((moves, i) => {
         moves.forEach(move => {
-          this.board[move.x][move.y].isAvailableFor = i === 0 ? 'move' : 'kill';
+          const availableFor = i === 0 ? 'move' : i === 1 ? 'kill' : 'castle'
+          this.board[move.x][move.y].isAvailableFor = availableFor;
         })
       })
       this.selectedCell = cell;
@@ -106,7 +109,12 @@ export default {
       }
       const figure = this.selectedCell.figure
       this.oldPosition = Object.assign({}, figure.position);
-      figure.move([x,y], this.board);
+      if (cell.isAvailableFor === 'castle') {
+        console.log('here!!!!1');
+        figure.makeCastle([x,y], this.board)
+      } else {
+        figure.makeMove([x,y], this.board);
+      }
       this.newPosition = Object.assign({}, figure.position);
       this.selectedCell = null;
       this.clearAvailableMove();
@@ -138,11 +146,11 @@ export default {
   &__row {
     @include Flex(center);
   }
-  &__cell, &__move {
+  &__cell, &__move, &__castle {
     @include Size(78, 78);
     position: relative;
   }
-  &__move::after {
+  &__move::after, &__castle::after {
     position: absolute;
     content: "";
     z-index: 1;
@@ -155,7 +163,7 @@ export default {
     background: darkgreen;
     transition-duration: .5s;
   }
-  &__move:hover::after {
+  &__move:hover::after, &__castle:hover::after {
     cursor: pointer;
     width: 100%;
     height: 100%;
@@ -188,6 +196,11 @@ export default {
   }
   &__cell:hover &__upRight, &__cell:hover &__upLeft, &__cell:hover &__downRight, &__cell:hover  &__downLeft {
     border-width: 0 20px 20px 0;
+  }
+  &__castle::after {
+    width: 30px;
+    height: 30px;
+    background: darkslateblue;
   }
 }
 

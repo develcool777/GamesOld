@@ -101,19 +101,26 @@ export default class Queen {
     return [availableMoves, availableKills] 
   }
 
-  move(cordinates, field) {
+  makeMove(cordinates, field) {
     const moves = this.available(field).flat();
     const isMoveAvailable = moves.some((obj) => obj.x === cordinates[0] && obj.y === cordinates[1]);
 
-    if (isMoveAvailable) {
-      const old = field[ this.position.x ][ this.position.y ].figure;
-      field[ this.position.x ][ this.position.y ].figure = null;
-      this.position.x = cordinates[0];
-      this.position.y = cordinates[1];
-      field[ this.position.x ][ this.position.y ].figure = old;
+    if (!isMoveAvailable) {
+      return console.log('wrong move Queen');
     }
-    else {
-      console.log('wrong move Queen');
+
+    this.moveFigure(field, this, ...cordinates);
+
+    if (this.firstMove) {
+      this.firstMove = false;
     }
   }
+
+  moveFigure(field, figure, x, y) {
+    const old = field[ figure.position.x ][ figure.position.y ].figure;
+    field[ figure.position.x ][ figure.position.y ].figure = null;
+    figure.position.x = x;
+    figure.position.y = y;
+    field[ figure.position.x ][ figure.position.y ].figure = old;
+  } 
 }

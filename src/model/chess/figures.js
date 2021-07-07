@@ -90,5 +90,6 @@ export default class Figures {
     field[this.blackPawn6.position.x][this.blackPawn6.position.y].figure = this.blackPawn6;
     field[this.blackPawn7.position.x][this.blackPawn7.position.y].figure = this.blackPawn7;
     field[this.blackPawn8.position.x][this.blackPawn8.position.y].figure = this.blackPawn8;
-  } 
+  }
+  
 }

@@ -8,6 +8,7 @@ export default class Pawn {
     }
     const name = 'Pawn';
     let firstMove = true;
+    let promotion = false;
     Object.defineProperties(this, {
       color: {
         get: () => color
@@ -25,6 +26,15 @@ export default class Pawn {
             throw Error(`Pawn.firstMove.set() value must be Boolean`);
           }
           firstMove = value;
+        }
+      },
+      promotion: {
+        get: () => promotion,
+        set: (value) => {
+          if (typeof value !== 'boolean') {
+            throw Error(`Pawn.promotion.set() value must be Boolean`);
+          }
+          promotion = value;
         }
       }
     })
@@ -78,22 +88,33 @@ export default class Pawn {
     return [availableMoves, availableKills];
   }
 
-  move(cordinates, field) {
+  checkPromotion(figure) {
+    if (figure.position.x === 0 || figure.position.x === 7) {
+      this.promotion = true;
+    }
+  }
+
+
+  makeMove(cordinates, field) {
     const moves = this.available(field).flat();
     const isMoveAvailable = moves.some((obj) => obj.x === cordinates[0] && obj.y === cordinates[1]);
 
-    if (isMoveAvailable) {
-      const old = field[ this.position.x ][ this.position.y ].figure;
-      field[ this.position.x ][ this.position.y ].figure = null;
-      this.position.x = cordinates[0];
-      this.position.y = cordinates[1];
-      field[ this.position.x ][ this.position.y ].figure = old;
-      if (this.firstMove) {
-        this.firstMove = false;
-      }
+    if (!isMoveAvailable) {
+      return console.log('wrong move Pawn');
     }
-    else {
-      console.log('wrong move Pawn');
+
+    this.moveFigure(field, this, ...cordinates);
+
+    if (this.firstMove) {
+      this.firstMove = false;
     }
   }
+
+  moveFigure(field, figure, x, y) {
+    const old = field[ figure.position.x ][ figure.position.y ].figure;
+    field[ figure.position.x ][ figure.position.y ].figure = null;
+    figure.position.x = x;
+    figure.position.y = y;
+    field[ figure.position.x ][ figure.position.y ].figure = old;
+  } 
 }
