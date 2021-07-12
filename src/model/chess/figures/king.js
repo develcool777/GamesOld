@@ -1,5 +1,9 @@
-export default class King {
+import Figures from "../figures";
+
+export default class King extends Figures {
   constructor(color, position) {
+    super();
+    
     if (typeof color !== 'string') {
       throw Error(`King.constructor color must be String`);
     }

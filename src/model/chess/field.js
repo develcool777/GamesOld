@@ -11,7 +11,6 @@ export default class Field {
   }
 
   createField() {
-    // console.log(this.field)
     for (let i=0; i<8; i++) {
       const row = [];
       for (let j=0; j<8; j++) {
@@ -23,7 +22,5 @@ export default class Field {
       }
       this.board.push(row);
     }
-    // console.log(this.field[1][0].color, this.field[1][1].color, this.field[1][2].color)
-    // console.log(JSON.stringify(this.field, null, 2))
   }
 }

@@ -1,5 +1,8 @@
-export default class Pawn {
+import Figures from "../figures";
+export default class Pawn extends Figures  {
   constructor(color, position) {
+    super();
+
     if (typeof color !== 'string') {
       throw Error(`Pawn.constructor color must be String`);
     }
@@ -94,9 +97,8 @@ export default class Pawn {
       }
       return acc;
     }, []);
-    // console.log({available}, field);
+
     this.kills = available.kill
-    // console.log(this.kills);
     return available;
   }
 
@@ -113,14 +115,7 @@ export default class Pawn {
   }
 
   makeMove(cordinates, field) {
-    const moves = Object.values(this.available(field)).flat();
-    const isMoveAvailable = moves.some((obj) => obj.x === cordinates[0] && obj.y === cordinates[1]);
-
-    if (!isMoveAvailable) {
-      return console.log('wrong move Pawn');
-    }
-
-    this.moveFigure(field, this, ...cordinates);
+    super.makeMove(cordinates, field, this);
 
     if (this.firstMove) {
       this.firstMove = false;
@@ -128,12 +123,4 @@ export default class Pawn {
 
     this.checkPromotion(this);
   }
-
-  moveFigure(field, figure, x, y) {
-    const old = field[ figure.position.x ][ figure.position.y ].figure;
-    field[ figure.position.x ][ figure.position.y ].figure = null;
-    figure.position.x = x;
-    figure.position.y = y;
-    field[ figure.position.x ][ figure.position.y ].figure = old;
-  } 
 }

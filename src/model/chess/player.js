@@ -49,7 +49,7 @@ export default class Player {
   }
 
   createFigures(field) {
-    console.log(this.positions);
+    // console.log(this.positions);
     field[this.positions[0].x][this.positions[0].y].figure = new Rook(this.side, this.positions[0]);
     field[this.positions[1].x][this.positions[1].y].figure = new Knight(this.side, this.positions[1]);
     field[this.positions[2].x][this.positions[2].y].figure = new Bishop(this.side, this.positions[2]);

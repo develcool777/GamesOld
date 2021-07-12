@@ -1,5 +1,9 @@
-export default class Bishop {
+import Figures from "../figures";
+
+export default class Bishop extends Figures {
   constructor(color, position) {
+    super();
+
     if (typeof color !== 'string') {
       throw Error(`Bishop.constructor color must be String`);
     }
@@ -27,26 +31,10 @@ export default class Bishop {
       check: []
     };
 
-    const check = (x=0, y=0, position) => {
-      position.x = x;
-      position.y = y;
-      if (field[x][y].figure !== null) {
-        if (field[x][y].figure.color !== this.color) { 
-          // if (field[x][y].figure.name === 'King') {
-          //   available.check.push({...position})
-          //   return;
-          // }
-          available.kill.push({...position})
-        }
-        return true;
-      }
-      available.move.push({...position});
-    }
-
     // upLeft 
     const currentPositionUpLeft = Object.assign({}, this.position);
     for (let i = this.position.x; i > 0 && currentPositionUpLeft.y > 0; i--) {
-      if (check(currentPositionUpLeft.x - 1, currentPositionUpLeft.y - 1, currentPositionUpLeft)) {
+      if (super.check(field, currentPositionUpLeft.x - 1, currentPositionUpLeft.y - 1, currentPositionUpLeft, available)) {
         break
       }
     }
@@ -54,7 +42,7 @@ export default class Bishop {
     // downLeft
     const currentPositionDownLeft = Object.assign({}, this.position);
     for (let i = currentPositionDownLeft.x; i < field.length - 1 && currentPositionDownLeft.y > 0; i++) {
-      if (check(currentPositionDownLeft.x + 1, currentPositionDownLeft.y - 1, currentPositionDownLeft)) {
+      if (super.check(field, currentPositionDownLeft.x + 1, currentPositionDownLeft.y - 1, currentPositionDownLeft, available)) {
         break;
       }
     }
@@ -62,7 +50,7 @@ export default class Bishop {
     // upRight
     const currentPositionUpRight = Object.assign({}, this.position);
     for (let i = currentPositionUpRight.x; i > 0 && currentPositionUpRight.y < field.length - 1; i--) {
-      if (check(currentPositionUpRight.x - 1, currentPositionUpRight.y + 1, currentPositionUpRight)) {
+      if (super.check(field, currentPositionUpRight.x - 1, currentPositionUpRight.y + 1, currentPositionUpRight, available)) {
         break;
       }
     }
@@ -70,32 +58,17 @@ export default class Bishop {
     // downRight
     const currentPositionDownRight = Object.assign({}, this.position);
     for (let i = currentPositionDownRight.x; i < field.length - 1 && currentPositionDownRight.y < field.length - 1; i++) {
-      if (check(currentPositionDownRight.x + 1, currentPositionDownRight.y + 1, currentPositionDownRight)) {
+      if (super.check(field, currentPositionDownRight.x + 1, currentPositionDownRight.y + 1, currentPositionDownRight, available)) {
         break;
       }
     }
 
-    return available
+    return available;
   }
 
   makeMove(cordinates, field) {
-    const moves = Object.values(this.available(field)).flat();
-    const isMoveAvailable = moves.some((obj) => obj.x === cordinates[0] && obj.y === cordinates[1]);
-
-    if (!isMoveAvailable) {
-      return console.log('wrong move Bishop');
-    }
-
-    this.moveFigure(field, this, ...cordinates);
+    super.makeMove(cordinates, field, this);
   }
-
-  moveFigure(field, figure, x, y) {
-    const old = field[ figure.position.x ][ figure.position.y ].figure;
-    field[ figure.position.x ][ figure.position.y ].figure = null;
-    figure.position.x = x;
-    figure.position.y = y;
-    field[ figure.position.x ][ figure.position.y ].figure = old;
-  } 
 
   checkForCheck(figure, field) {
     const moves = figure.available(field);

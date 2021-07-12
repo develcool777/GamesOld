@@ -1,5 +1,9 @@
-export default class Rook {
+import Figures from "../figures";
+
+export default class Rook extends Figures {
   constructor(color, position) {
+    super();
+
     if (typeof color !== 'string') {
       throw Error(`Rook.constructor color must be String`);
     }
@@ -37,26 +41,10 @@ export default class Rook {
       check: []
     };
 
-    const check = (x=0, y=0, position) => {
-      position.x = x;
-      position.y = y;
-      if (field[x][y].figure !== null) {
-        if (field[x][y].figure.color !== this.color) { 
-          // if (field[x][y].figure.name === 'King') {
-          //   available.check.push({...position})
-          //   return;
-          // }
-          available.kill.push({...position})
-        }
-        return true;
-      }
-      available.move.push({...position});
-    }
-
     // up 
     const currentPositionUp = Object.assign({}, this.position);
     for (let i = currentPositionUp.x; i > 0; i--) {
-      if (check(currentPositionUp.x - 1, currentPositionUp.y, currentPositionUp)) {
+      if (super.check(field, currentPositionUp.x - 1, currentPositionUp.y, currentPositionUp, available)) {
         break;
       }
     }
@@ -64,7 +52,7 @@ export default class Rook {
     // down
     const currentPositionDown = Object.assign({}, this.position);
     for (let i = currentPositionDown.x; i < field.length - 1; i++) {
-      if (check(currentPositionDown.x + 1, currentPositionDown.y, currentPositionDown)) {
+      if (super.check(field, currentPositionDown.x + 1, currentPositionDown.y, currentPositionDown, available)) {
         break;
       }
     }
@@ -72,7 +60,7 @@ export default class Rook {
     // left
     const currentPositionLeft = Object.assign({}, this.position);
     for (let i = currentPositionLeft.y; i > 0; i--) {
-      if (check(currentPositionLeft.x, currentPositionLeft.y - 1, currentPositionLeft)) {
+      if (super.check(field, currentPositionLeft.x, currentPositionLeft.y - 1, currentPositionLeft, available)) {
         break;
       }
     }
@@ -80,7 +68,7 @@ export default class Rook {
     // right
     const currentPositionRight = Object.assign({}, this.position);
     for (let i = currentPositionRight.y; i < field.length - 1; i++) {
-      if (check(currentPositionRight.x, currentPositionRight.y + 1, currentPositionRight)) {
+      if (super.check(field, currentPositionRight.x, currentPositionRight.y + 1, currentPositionRight, available)) {
         break;
       }
     }
@@ -89,27 +77,12 @@ export default class Rook {
   }
 
   makeMove(cordinates, field) {
-    const moves = Object.values(this.available(field)).flat();
-    const isMoveAvailable = moves.some((obj) => obj.x === cordinates[0] && obj.y === cordinates[1]);
-
-    if (!isMoveAvailable) {
-      return console.log('wrong move Rook');
-    }
-
-    this.moveFigure(field, this, ...cordinates);
+    super.makeMove(cordinates, field, this);
 
     if (this.firstMove) {
       this.firstMove = false;
     }
   }
-
-  moveFigure(field, figure, x, y) {
-    const old = field[ figure.position.x ][ figure.position.y ].figure;
-    field[ figure.position.x ][ figure.position.y ].figure = null;
-    figure.position.x = x;
-    figure.position.y = y;
-    field[ figure.position.x ][ figure.position.y ].figure = old;
-  } 
 
   checkForCheck(figure, field) {
     const moves = figure.available(field);
