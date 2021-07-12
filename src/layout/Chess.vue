@@ -37,16 +37,9 @@
 </template>
 
 <script>
-import Field from '@/model/chess/field';
-// import Pawn from '@/model/chess/figures/pawn'
-// import Rook from '@/model/chess/figures/rook'
-// import Bishop from '@/model/chess/figures/bishop'
-// import Queen from '@/model/chess/figures/queen'
-// import Knight from '@/model/chess/figures/knight'
-// import King from '@/model/chess/figures/king'
-import Figures from '@/model/chess/figures'
 import Figure from '@/components/Chess/Figure'
 import Promotion from '@/components/Chess/Promotion'
+import Game from '@/model/chess/game';
 export default {
   name: 'Chess',
   components: {
@@ -55,6 +48,7 @@ export default {
   },
   data() {
     return {
+      GAME: {},
       field: {},
       figures: {},
       board: [],
@@ -70,18 +64,13 @@ export default {
   },
   methods: {
     init() {
-      this.field = new Field();
-      this.field.createField();
-      this.figures = new Figures();
-      this.figures.addFiguresToField(this.field.board);
-      // this.field.board[0][0].isAvailableFor = 'promotion'
-      this.board = this.field.board;
-
-      console.log(this.board);
+      this.GAME = new Game();
+      this.GAME.createField();
+      this.GAME.createFigures();
+      this.board = this.GAME.field.board;
     },
 
     createFigureName(cell) {
-      // console.log(cell);
       if (cell.figure === null) { return '' }
       const name = cell.figure.color + cell.figure.name + '.png';
       return name;
@@ -90,6 +79,9 @@ export default {
     clearAvailableMove() {
       this.board = this.board.map((row, ) => {
         return row.map((cell, ) => {
+          if (cell.isAvailableFor === 'check') {
+            return cell;
+          }
           cell.isAvailableFor = '';
           return cell;
         })
@@ -98,12 +90,13 @@ export default {
 
     clickOnFigure(cell) {
       this.clearAvailableMove();
-      const availableMoves = cell.figure.available(this.board);
-      availableMoves.forEach((moves, i) => {
-        moves.forEach(move => {
-          const availableFor = i === 0 ? 'move' : i === 1 ? 'kill' : 'castle'
-          this.board[move.x][move.y].isAvailableFor = availableFor;
-        })
+      const availableMoves = Object.entries(cell.figure.available(this.board));
+      availableMoves.forEach((moves) => {
+        if (moves[1].length > 0) {
+          moves[1].forEach(move => {
+            this.board[move.x][move.y].isAvailableFor = moves[0] 
+          })
+        }
       })
       this.selectedCell = cell;
     },
@@ -138,6 +131,7 @@ export default {
       this.newPosition = Object.assign({}, figure.position);
       this.selectedCell = null;
       this.clearAvailableMove();
+      this.isCheck(figure, this.board);
 
       // check that figure was pawn
       if (figure.name !== 'Pawn') {
@@ -149,15 +143,26 @@ export default {
       }
     },
 
+    isCheck(figure, field) {
+      if (Boolean(figure.checkForCheck) === false) {
+        return;
+      }
+      const coordinates = figure.checkForCheck(figure, field);
+      if (coordinates !== false) {
+        field[coordinates.x][coordinates.y].isAvailableFor = 'check';
+      }
+    },  
+
     pawnPromotion(figureName, x, y) {
-      this.figures.pawnPromotion(this.board,figureName, {x, y});
+      this.GAME.pawnPromotion(this.board, figureName, {x, y});
       this.isPromotion = false;
       this.dontClick = true
     },
 
     chooseCellColor(cell, x, y) {
-      if (cell.isAvailableFor !== '') {
-        return cell.color;
+      if (cell.isAvailableFor === 'check') {
+        console.log('here');
+        return 'check';
       }
       if (this.oldPosition !== null && this.oldPosition.x === x && this.oldPosition.y === y) {
         return 'lastMoveOldPosition';
@@ -257,7 +262,9 @@ export default {
     background: darkslateblue;
   }
 }
-
+.check {
+  background: darkred;
+}
 .lastMoveOldPosition {
   background: olivedrab;
 }

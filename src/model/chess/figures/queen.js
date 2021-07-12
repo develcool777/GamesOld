@@ -21,17 +21,26 @@ export default class Queen {
   }
 
   available(field) {
-    const availableMoves = [];
-    const availableKills = [];
+    const available = {
+      move: [],
+      kill: [],
+      check: []
+    };
 
     const check = (x=0, y=0, position) => {
       position.x = x;
       position.y = y;
       if (field[x][y].figure !== null) {
-        if (field[x][y].figure.color !== this.color) { availableKills.push({...position}) }
+        if (field[x][y].figure.color !== this.color) { 
+          // if (field[x][y].figure.name === 'King') {
+          //   available.check.push({...position})
+          //   return;
+          // }
+          available.kill.push({...position})
+        }
         return true;
       }
-      availableMoves.push({...position})
+      available.move.push({...position});
     }
 
     // up 
@@ -98,11 +107,11 @@ export default class Queen {
       }
     }
     
-    return [availableMoves, availableKills] 
+    return available;
   }
 
   makeMove(cordinates, field) {
-    const moves = this.available(field).flat();
+    const moves = Object.values(this.available(field)).flat();
     const isMoveAvailable = moves.some((obj) => obj.x === cordinates[0] && obj.y === cordinates[1]);
 
     if (!isMoveAvailable) {
@@ -123,4 +132,9 @@ export default class Queen {
     figure.position.y = y;
     field[ figure.position.x ][ figure.position.y ].figure = old;
   } 
+
+  checkForCheck(figure, field) {
+    const moves = figure.available(field);
+    return moves.check.length === 0 ? false : moves.check[0];
+  }
 }

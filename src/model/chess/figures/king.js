@@ -31,16 +31,19 @@ export default class King {
   }
 
   available(field) {
-    const availableMoves = [];
-    const availableKills = [];
+    const available = {
+      move: [],
+      kill: [],
+      castle: []
+    };
     
     const check = (x=0, y=0) => {
       if (field[x] === undefined || field[x][y] === undefined) { return }
       if (field[x][y].figure !== null) {
-        if (field[x][y].figure.color !== this.color) { availableKills.push({x, y}) }
+        if (field[x][y].figure.color !== this.color) { available.kill.push({x, y}) }
         return;
       }
-      availableMoves.push({x, y})
+      available.move.push({x, y})
     }
 
     const moves = [
@@ -56,12 +59,12 @@ export default class King {
 
     // if this is not King first move 
     if (!this.firstMove) {
-      return [availableMoves, availableKills];
+      return available;
     }
 
     // castle 
-    const availableCastles = this.availableCastle(field);
-    return [availableMoves, availableKills, availableCastles]; 
+    available.castle = this.availableCastle(field);
+    return available; 
   }
 
   availableCastle(field) {
@@ -118,14 +121,17 @@ export default class King {
   }
 
   makeMove(cordinates, field) {
-    const moves = this.available(field).flat();
+    const moves = Object.values(this.available(field)).flat();
     const isMoveAvailable = moves.some((obj) => obj.x === cordinates[0] && obj.y === cordinates[1]);
 
     if (!isMoveAvailable) {
       return console.log('wrong move King');
     }
-
+    // if (field[this.position.x][this.position.y].isAvailableFor === 'check') {
+    //   field[this.position.x][this.position.y].isAvailableFor === '';
+    // }
     this.moveFigure(field, this, ...cordinates);
+
 
     if (this.firstMove) {
       this.firstMove = false;

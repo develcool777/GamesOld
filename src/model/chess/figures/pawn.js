@@ -41,7 +41,13 @@ export default class Pawn {
   }
 
   available(field) {
+    const available = {
+      move: [],
+      kill: [],
+      check: [],
+    }
     let move = this.color === 'white' ? -1 : 1;
+
     const condition = x => {
       if (this.position.x + x === field.length || this.position.x + x < 0) {
         return undefined;
@@ -50,7 +56,7 @@ export default class Pawn {
     }
 
     // moves
-    const availableMoves = [move, move + move].reduce((acc, item, i) => {
+    available.move = [move, move + move].reduce((acc, item, i) => {
       const addMove = i => acc.push({ x: this.position.x + i, y: this.position.y });
       if (i === 0 && condition(item) === null) {
         addMove(item);
@@ -72,20 +78,26 @@ export default class Pawn {
       return field[this.position.x + x][this.position.y + y].figure;
     }
 
-    const availableKills = [1, -1].reduce((acc, item) => {
+    available.kill = [1, -1].reduce((acc, item) => {
       if (condition2(move, item) !== null) {
         if (condition2(move, item).color !== this.color) {
           const obj = {
             x: this.position.x + move,
             y: this.position.y + item
           }
+          // if (condition2(move, item).name === 'King') {
+          //   available.check.push(obj);
+          //   return acc;
+          // }
           acc.push(obj)
         }
       }
       return acc;
     }, []);
-
-    return [availableMoves, availableKills];
+    // console.log({available}, field);
+    this.kills = available.kill
+    // console.log(this.kills);
+    return available;
   }
 
   checkPromotion(figure) {
@@ -94,9 +106,14 @@ export default class Pawn {
     }
   }
 
+  checkForCheck(figure, field) {
+    const moves = figure.available(field);
+    // console.log(moves.check);
+    return moves.check.length === 0 ? false : moves.check[0];
+  }
 
   makeMove(cordinates, field) {
-    const moves = this.available(field).flat();
+    const moves = Object.values(this.available(field)).flat();
     const isMoveAvailable = moves.some((obj) => obj.x === cordinates[0] && obj.y === cordinates[1]);
 
     if (!isMoveAvailable) {

@@ -21,15 +21,24 @@ export default class Knight {
   }
 
   available(field) {
-    const availableMoves = [];
-    const availableKills = [];
+    const available = {
+      move: [],
+      kill: [],
+      check: []
+    };
 
     const check = (x, y) => {
       if (field[x][y].figure !== null) {
-        if (field[x][y].figure.color !== this.color) { availableKills.push({x, y}) }
+        if (field[x][y].figure.color !== this.color) { 
+          // if (field[x][y].figure.name === 'King') {
+          //   available.check.push({x, y})
+          //   return;
+          // }
+          available.kill.push({x, y}) 
+        }
         return;
       }
-      availableMoves.push({x, y});
+      available.move.push({x, y});
     }
 
     //  ##
@@ -84,11 +93,11 @@ export default class Knight {
       check(this.position.x - 1, this.position.y - 2);
     }
 
-    return [availableMoves, availableKills] 
+    return available
   }
 
   makeMove(cordinates, field) {
-    const moves = this.available(field).flat();
+    const moves = Object.values(this.available(field)).flat();
     const isMoveAvailable = moves.some((obj) => obj.x === cordinates[0] && obj.y === cordinates[1]);
 
     if (!isMoveAvailable) {
@@ -96,10 +105,6 @@ export default class Knight {
     }
 
     this.moveFigure(field, this, ...cordinates);
-
-    if (this.firstMove) {
-      this.firstMove = false;
-    }
   }
 
   moveFigure(field, figure, x, y) {
@@ -109,4 +114,9 @@ export default class Knight {
     figure.position.y = y;
     field[ figure.position.x ][ figure.position.y ].figure = old;
   } 
+
+  checkForCheck(figure, field) {
+    const moves = figure.available(field);
+    return moves.check.length === 0 ? false : moves.check[0];
+  }
 }
