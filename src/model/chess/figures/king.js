@@ -3,7 +3,7 @@ import Figures from "../figures";
 export default class King extends Figures {
   constructor(color, position) {
     super();
-    
+
     if (typeof color !== 'string') {
       throw Error(`King.constructor color must be String`);
     }
@@ -118,35 +118,17 @@ export default class King extends Figures {
     const rook = field[cordinates[0]][cordinates[1] + sign].figure;
     const newRookPosition = sign < 0 ? [cordinates[0], 3] : [cordinates[0], 5];
 
-    this.moveFigure(field, rook, ...newRookPosition);
-    this.moveFigure(field, this, ...cordinates);
+    super.moveFigure(field, rook, ...newRookPosition);
+    super.moveFigure(field, this, ...cordinates);
     this.firstMove = false;
     rook.firstMove = false;
   }
 
   makeMove(cordinates, field) {
-    const moves = Object.values(this.available(field)).flat();
-    const isMoveAvailable = moves.some((obj) => obj.x === cordinates[0] && obj.y === cordinates[1]);
-
-    if (!isMoveAvailable) {
-      return console.log('wrong move King');
-    }
-    // if (field[this.position.x][this.position.y].isAvailableFor === 'check') {
-    //   field[this.position.x][this.position.y].isAvailableFor === '';
-    // }
-    this.moveFigure(field, this, ...cordinates);
-
+    super.makeMove(cordinates, field, this);
 
     if (this.firstMove) {
       this.firstMove = false;
     }
-  }
-
-  moveFigure(field, figure, x, y) {
-    const old = field[ figure.position.x ][ figure.position.y ].figure;
-    field[ figure.position.x ][ figure.position.y ].figure = null;
-    figure.position.x = x;
-    figure.position.y = y;
-    field[ figure.position.x ][ figure.position.y ].figure = old;
-  }  
+  } 
 }
