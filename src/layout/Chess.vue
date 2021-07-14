@@ -7,7 +7,7 @@
             :class="[chooseCellColor(cell, i, j), 'chess__cell']"  
             v-for="(cell, j) in row" 
             :key="j"
-            @click="clickOnCellForMove(cell, i, j)"
+            @click="clickOnCell(cell, i, j)"
           >
             <div v-if="cell.isAvailableFor === 'move'" class="chess__move"></div>
             <div v-if="cell.isAvailableFor === 'kill'" class="chess__upRight"></div>
@@ -15,15 +15,18 @@
             <div v-if="cell.isAvailableFor === 'kill'" class="chess__downRight"></div>
             <div v-if="cell.isAvailableFor === 'kill'" class="chess__downLeft"></div>
             <div v-if="cell.isAvailableFor === 'castle'" class="chess__castle"></div>  
-            <Figure :figureName="createFigureName(cell)"/>
+            <Figure 
+              :figureName="createFigureName(cell)"
+              :cursorStyle="showCursorPointer(cell)"
+            />
             <Promotion 
-              v-if="showPromotion(cell)" 
+              v-if="cell.isAvailableFor === 'promotion'" 
               v-on:promotion="pawnPromotion($event, i, j)"
               :index="cell.figure.color === 'white' ? 0 : 1"
             />
           </div>
         </div>
-        <div v-if="isPromotion" class="chess__mask"></div>
+        <div v-if="GAME.isPawnPromotion" class="chess__mask"></div>
       </div>
     </div>
   </div>
@@ -49,13 +52,7 @@ export default {
   data() {
     return {
       GAME: {},
-      field: {},
-      figures: {},
       board: [],
-      selectedCell: null,
-      oldPosition: null,
-      newPosition: null,
-      isPromotion: false,
       dontClick: false,
     }
   },
@@ -67,6 +64,10 @@ export default {
       this.GAME = new Game();
       this.GAME.createField();
       this.GAME.createFigures();
+      this.draw();
+    },
+
+    draw() {
       this.board = this.GAME.field.board;
     },
 
@@ -77,85 +78,23 @@ export default {
     },
 
     clearAvailableMove() {
-      this.board = this.board.map((row, ) => {
-        return row.map((cell, ) => {
-          if (cell.isAvailableFor === 'check') {
-            return cell;
-          }
-          cell.isAvailableFor = '';
-          return cell;
-        })
-      })
+      this.GAME.clearAvailableMove();
+      this.draw();
     },
 
-    clickOnFigure(cell) {
-      this.clearAvailableMove();
-      const availableMoves = Object.entries(cell.figure.available(this.board));
-      availableMoves.forEach((moves) => {
-        if (moves[1].length > 0) {
-          moves[1].forEach(move => {
-            this.board[move.x][move.y].isAvailableFor = moves[0] 
-          })
-        }
-      })
-      this.selectedCell = cell;
-    },
-
-    clickOnCellForMove(cell, x, y) {
+    clickOnCell(cell, x, y) {
       // dont click after pawn promotion
       if (this.dontClick) {
         this.dontClick = false;
         return;
       }
-      // call clickOnFigure if figure was clicked
-      if (cell.figure !== null && cell.isAvailableFor !== 'kill') {
-        this.clickOnFigure(cell);
-        return;
-      }
-      // if figure was clicked but new click was not on available moves
-      if (cell.isAvailableFor === '') { 
-        this.selectedCell = null;
-        this.clearAvailableMove();
-        return  
-      }
 
-      const figure = this.selectedCell.figure
-      this.oldPosition = Object.assign({}, figure.position);
-
-      if (cell.isAvailableFor === 'castle') {
-        figure.makeCastle([x,y], this.board)
-      } else {
-        figure.makeMove([x,y], this.board);
-      }
-
-      this.newPosition = Object.assign({}, figure.position);
-      this.selectedCell = null;
-      this.clearAvailableMove();
-      this.isCheck(figure, this.board);
-
-      // check that figure was pawn
-      if (figure.name !== 'Pawn') {
-        return;
-      }
-      // check pawn promotion
-      if (figure.promotion) {
-        this.board[x][y].isAvailableFor = 'promotion';
-      }
-    },
-
-    isCheck(figure, field) {
-      if (Boolean(figure.checkForCheck) === false) {
-        return;
-      }
-      const coordinates = figure.checkForCheck(figure, field);
-      if (coordinates !== false) {
-        field[coordinates.x][coordinates.y].isAvailableFor = 'check';
-      }
-    },  
+      this.GAME.clickOnCellForMove(cell, x, y);
+      this.draw();
+    }, 
 
     pawnPromotion(figureName, x, y) {
       this.GAME.pawnPromotion(this.board, figureName, {x, y});
-      this.isPromotion = false;
       this.dontClick = true
     },
 
@@ -164,24 +103,21 @@ export default {
         console.log('here');
         return 'check';
       }
-      if (this.oldPosition !== null && this.oldPosition.x === x && this.oldPosition.y === y) {
+      if (this.GAME.oldPosition !== null && this.GAME.oldPosition.x === x && this.GAME.oldPosition.y === y) {
         return 'lastMoveOldPosition';
       }
-      if (this.newPosition !== null && this.newPosition.x === x && this.newPosition.y === y) {
+      if (this.GAME.newPosition !== null && this.GAME.newPosition.x === x && this.GAME.newPosition.y === y) {
         return 'lastMoveNewPosition';
       }
-      if (this.selectedCell !== null && this.selectedCell.position.x === x && this.selectedCell.position.y === y) {
+      if (this.GAME.selectedCell !== null && this.GAME.selectedCell.position.x === x && this.GAME.selectedCell.position.y === y) {
         return 'selected';
       }
       return cell.color;
     },
 
-    showPromotion(cell) {
-      if (cell.isAvailableFor === 'promotion') {
-        this.isPromotion = true;
-        return true;
-      }
-      return false;
+    showCursorPointer(cell) {
+      if (cell.figure === null) { return 'default' }
+      return cell.figure.color === this.GAME.whoMoves ? 'pointer' : 'default';
     }
   }
 }
@@ -253,7 +189,10 @@ export default {
     bottom: 0;
     transform: rotate(-180deg);
   }
-  &__cell:hover &__upRight, &__cell:hover &__upLeft, &__cell:hover &__downRight, &__cell:hover  &__downLeft {
+  &__cell:hover &__upRight, 
+  &__cell:hover &__upLeft, 
+  &__cell:hover &__downRight, 
+  &__cell:hover  &__downLeft {
     border-width: 0 20px 20px 0;
   }
   &__castle::after {

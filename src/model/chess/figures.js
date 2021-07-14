@@ -6,11 +6,11 @@ export default class Figures {
     position.y = y;
     if (field[x][y].figure !== null) {
       if (field[x][y].figure.color !== this.color) { 
-        // if (field[x][y].figure.name === 'King') {
-        //   available.check.push({...position})
-        //   return;
-        // }
-        available.kill.push({...position})
+        if (field[x][y].figure.name === 'King') {
+          available.check.push({...position})
+        } else {
+          available.kill.push({...position})
+        }
       }
       return true;
     }

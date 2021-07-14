@@ -1,5 +1,5 @@
 <template>
-  <div class="figure">
+  <div class="figure" :style="{cursor: cursorStyle}">
     <img v-if="figureName !== ''" :src="require(`@/assets/chess/${figureName}`)" alt="">
   </div>
 </template>
@@ -8,13 +8,11 @@
 export default {
   name: 'Figure',
   props: {
-    figureName: String
-  },
+    figureName: String,
+    cursorStyle: String,
+  }
 }
 </script>
 
 <style lang="scss" scopped>
-.figure {
-  cursor: pointer;
-}
 </style>

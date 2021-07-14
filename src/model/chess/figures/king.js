@@ -38,7 +38,8 @@ export default class King extends Figures {
     const available = {
       move: [],
       kill: [],
-      castle: []
+      castle: [],
+      kingPosition: this.position
     };
     
     const check = (x=0, y=0) => {

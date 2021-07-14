@@ -84,8 +84,8 @@ export default class Rook extends Figures {
     }
   }
 
-  checkForCheck(figure, field) {
-    const moves = figure.available(field);
-    return moves.check.length === 0 ? false : moves.check[0];
-  }
+  // checkForCheck(figure, field) {
+  //   const moves = figure.available(field);
+  //   return moves.check.length === 0 ? false : moves.check[0];
+  // }
 }

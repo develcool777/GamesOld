@@ -88,10 +88,10 @@ export default class Pawn extends Figures  {
             x: this.position.x + move,
             y: this.position.y + item
           }
-          // if (condition2(move, item).name === 'King') {
-          //   available.check.push(obj);
-          //   return acc;
-          // }
+          if (condition2(move, item).name === 'King') {
+            available.check.push(obj);
+            return acc;
+          }
           acc.push(obj)
         }
       }
@@ -102,18 +102,6 @@ export default class Pawn extends Figures  {
     return available;
   }
 
-  checkPromotion(figure) {
-    if (figure.position.x === 0 || figure.position.x === 7) {
-      this.promotion = true;
-    }
-  }
-
-  checkForCheck(figure, field) {
-    const moves = figure.available(field);
-    // console.log(moves.check);
-    return moves.check.length === 0 ? false : moves.check[0];
-  }
-
   makeMove(cordinates, field) {
     super.makeMove(cordinates, field, this);
 
@@ -122,5 +110,11 @@ export default class Pawn extends Figures  {
     }
 
     this.checkPromotion(this);
+  }
+
+  checkPromotion(figure) {
+    if (figure.position.x === 0 || figure.position.x === 7) {
+      this.promotion = true;
+    }
   }
 }
