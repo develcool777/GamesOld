@@ -28,18 +28,22 @@ export default class Knight extends Figures {
     const available = {
       move: [],
       kill: [],
-      check: []
+      check: [],
+      wayToKing: [],
+      cover: [],
     };
 
     const check = (x, y) => {
       if (field[x][y].figure !== null) {
         if (field[x][y].figure.color !== this.color) { 
-          // if (field[x][y].figure.name === 'King') {
-          //   available.check.push({x, y})
-          //   return;
-          // }
-          available.kill.push({x, y}) 
-        }
+          if (field[x][y].figure.name === 'King') {
+            available.check.push({x, y});
+            return;
+          }
+          available.kill.push({x, y});
+          return;
+        } 
+        available.cover.push({x, y});
         return;
       }
       available.move.push({x, y});
@@ -97,15 +101,12 @@ export default class Knight extends Figures {
       check(this.position.x - 1, this.position.y - 2);
     }
 
+    available.wayToKing.push({...this.position});
+
     return available
   }
 
   makeMove(cordinates, field) {
     super.makeMove(cordinates, field, this);
   }
-
-  // checkForCheck(figure, field) {
-  //   const moves = figure.available(field);
-  //   return moves.check.length === 0 ? false : moves.check[0];
-  // }
 }

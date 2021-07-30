@@ -48,6 +48,8 @@ export default class Pawn extends Figures  {
       move: [],
       kill: [],
       check: [],
+      wayToKing: [],
+      cover: [],
     }
     let move = this.color === 'white' ? -1 : 1;
 
@@ -83,22 +85,26 @@ export default class Pawn extends Figures  {
 
     available.kill = [1, -1].reduce((acc, item) => {
       if (condition2(move, item) !== null) {
+        const obj = {
+          x: this.position.x + move,
+          y: this.position.y + item
+        }
         if (condition2(move, item).color !== this.color) {
-          const obj = {
-            x: this.position.x + move,
-            y: this.position.y + item
-          }
           if (condition2(move, item).name === 'King') {
             available.check.push(obj);
             return acc;
           }
           acc.push(obj)
+        } 
+        else {
+          available.cover.push(obj);
         }
       }
       return acc;
     }, []);
 
-    this.kills = available.kill
+    available.wayToKing.push({...this.position});
+
     return available;
   }
 
@@ -117,4 +123,5 @@ export default class Pawn extends Figures  {
       this.promotion = true;
     }
   }
+
 }

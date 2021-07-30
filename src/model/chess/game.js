@@ -1,14 +1,12 @@
 import Player from "./player";
 import Field from "./field";
-import Rook from '@/model/chess/figures/rook'
-import Bishop from '@/model/chess/figures/bishop'
-import Queen from '@/model/chess/figures/queen'
-import Knight from '@/model/chess/figures/knight'
+
 export default class Game {
   constructor() {
     const field = new Field();
     const playerWhite = new Player('white');
     const playerBlack = new Player('black');
+    let defendMoves = [];
     let whoMoves = 'white';
     let selectedCell = null;
     let oldPosition = null;
@@ -40,7 +38,6 @@ export default class Game {
       selectedCell: {
         get: () => selectedCell,
         set: (value) => {
-          // here must awsome check for value 
           selectedCell = value;
         }
       },
@@ -48,28 +45,46 @@ export default class Game {
         get: () => oldPosition,
         set: (value) => {
           // here must awsome check for value 
+          if (value !== null && Object.keys(value).join('') !== 'xy') {
+            throw Error(`Game.oldPosition.set(value) value must be null or Object with keys 'x' and 'y'`);
+          }
           oldPosition = value;
         }
       },
       newPosition: {
         get: () => newPosition,
         set: (value) => {
-          // here must awsome check for value 
+          if (value !== null && Object.keys(value).join('') !== 'xy') {
+            throw Error(`Game.newPosition.set(value) value must be null or Object with keys 'x' and 'y'`);
+          }
           newPosition = value;
         }
       },
       isCheck: {
         get: () => isCheck,
         set: (value) => {
-          // here must awsome check for value 
+          if (typeof value !== 'boolean') {
+            throw Error(`Game.isCheck.set(value) value must be Boolean`);
+          }
           isCheck = value;
         }
       },
       isPawnPromotion: {
         get: () => isPawnPromotion,
         set: (value) => {
-          // here must awsome check for value 
+          if (typeof value !== 'boolean') {
+            throw Error(`Game.isCheck.set(value) value must be Boolean`);
+          }
           isPawnPromotion = value;
+        }
+      },
+      defendMoves: {
+        get: () => defendMoves,
+        set: (value) => {
+          if (!Array.isArray(value)) {
+            throw Error(`Game.defendMoves.set(value) value must be Array`);
+          }
+          defendMoves = value;
         }
       }
     })
@@ -89,11 +104,19 @@ export default class Game {
 
   clickOnFigure(cell) {
     this.clearAvailableMove();
-    const availableMoves = Object.entries(cell.figure.available(this.field.board));
+    const availableMoves = cell.figure.name === 'King' 
+      ? Object.entries(this.kingMoves(cell.figure))
+      : Object.entries(cell.figure.available(this.field.board)).slice(0, 3);
+    const condition = (moves, move) => moves.some(dmove => dmove.x === move.x && dmove.y === move.y);
+
     availableMoves.forEach((moves) => {
       if (moves[1].length > 0) {
         moves[1].forEach(move => {
-          this.field.board[move.x][move.y].isAvailableFor = moves[0] 
+          if (this.isCheck && cell.figure.name !== 'King') {
+            this.field.board[move.x][move.y].isAvailableFor = condition(this.defendMoves, move) ? moves[0] : "";
+            return;
+          }
+          this.field.board[move.x][move.y].isAvailableFor = moves[0];   
         })
       }
     })
@@ -121,9 +144,12 @@ export default class Game {
       figure.makeCastle([x,y], this.field.board)
     } else {
       figure.makeMove([x,y], this.field.board);
-      this.whoMoves = this.whoMoves === 'white' ? 'black' : 'white';
+      if (this.isCheck) {
+        this.isCheck = false;
+      }
+      // this.whoMoves = this.whoMoves === 'white' ? 'black' : 'white';
     }
-
+    this.whoMoves = this.whoMoves === 'white' ? 'black' : 'white';
     this.newPosition = Object.assign({}, figure.position);
     this.selectedCell = null;
 
@@ -153,25 +179,15 @@ export default class Game {
     }
   }
 
-  pawnPromotion(field, figureName, position) {
+  async pawnPromotion(field, figureName, position) {
     const color = figureName.substring(0, 5);
-    const name = figureName.substring(5);
-    let fig;
-    if (name === 'Queen') {
-      fig = new Queen(color, position)
-    }
-    if (name === 'Rook') {
-      fig = new Rook(color, position)
-    }
-    if (name === 'Bishop') {
-      fig = new Bishop(color, position)
-    }
-    if (name === 'Knight') {
-      fig = new Knight(color, position)
-    }
+    const name = figureName.substring(5).toLowerCase();
+    let {default: figure} = await import(`@/model/chess/figures/${name}`)
+    const fig = new figure(color, position);
     this.isPawnPromotion = false;
     field[position.x][position.y].figure = fig;
     field[position.x][position.y].isAvailableFor = '';
+    this.checkForCheck(fig);
   }
 
   checkForCheck(figure) {
@@ -179,20 +195,104 @@ export default class Game {
     const playerAttack = figure.color === this.playerWhite.side ? this.playerWhite : this.playerBlack;
     const playerDefend = playerAttack.side === 'white' ? this.playerBlack : this.playerWhite;
 
-    const allAvailableMoves = playerAttack.allAvailableMoves(this.field.board);
-    const allKingMoves = playerDefend.kingMoves(this.field.board);
-    // console.log(allAvailableMoves, allKingMoves);
-    
+    const allAvailableChecks = playerAttack.allAvailableMoves(this.field.board, 'check');
+    const KingPosition = playerDefend.getKing(this.field.board).position;
+
     // is it check?
-    const kingPosition = allKingMoves.kingPosition;
-    this.isCheck = allAvailableMoves.some(move => move.x === kingPosition.x && move.y === kingPosition.y);
+    this.isCheck = allAvailableChecks.length > 0;
     if (!this.isCheck) { return }
 
-    this.field.board[kingPosition.x][kingPosition.y].isAvailableFor = 'check';
+    this.field.board[KingPosition.x][KingPosition.y].isAvailableFor = 'check';
 
+    // console.log(this.whoMoves, '!!!')
+    this.checkDefense();
   }
 
-  // checkDefendNoves(attackFigure, sideDefend='') {
+  checkDefense() {
+    // console.log('checkDefense');
+    const playerDefend = this.whoMoves === 'white' ? this.playerWhite : this.playerBlack;
+    const playerAttack = playerDefend.side === 'white' ? this.playerBlack : this.playerWhite;
+
+    const attackFigures = playerAttack.getAttackFigures(this.field.board);
+
+    // const KingPosition = playerDefend.getKing(this.field.board).position;
+    const checkMoves = attackFigures[0].available(this.field.board).wayToKing //   ????? double ckeck also needed
+    // console.log(checkMoves, KingPosition);
+
+    const allMoves = playerDefend.allAvailableMoves(this.field.board, 'moveAndKill');
+    // defendMoves from figure that made check
+    const defendMoves = allMoves.filter(move => checkMoves.some(amove => amove.x === move.x && amove.y === move.y))
+    // console.log({defendMoves});
+
+
+    this.defendMoves = defendMoves;
+  }
+
+  kingMoves(king) {
+    if (king.name !== "King") { return }
+
+    const playerDefend = king.color === this.playerWhite.side ? this.playerWhite : this.playerBlack;
+    const playerAttack = playerDefend.side === 'white' ? this.playerBlack : this.playerWhite;  
+    const attackMoves = playerAttack.allAvailableMoves(this.field.board, 'move');
+    const attackCovers = playerAttack.allAvailableMoves(this.field.board, 'cover');
+    const AllKingMoves = playerDefend.kingMoves(this.field.board);
+
+    AllKingMoves.move = AllKingMoves.move.filter(move => !attackMoves.some(amove => amove.x === move.x && amove.y === move.y));
+    AllKingMoves.kill = AllKingMoves.kill.filter(move => !attackCovers.some(amove => amove.x === move.x && amove.y === move.y));
+
+    if (this.isCheck) {
+      AllKingMoves.castle = [];
+      return AllKingMoves;
+    }
+
+    const kingMovesWhenCastling = [];
+    if (AllKingMoves.castle.length > 0) {
+      const pos = king.position;
+      AllKingMoves.castle.forEach(obj => {
+        if (obj.y > pos.y) {
+          for (let i = pos.y + 1; i <= obj.y; i++) {
+            kingMovesWhenCastling.push({x: obj.x, y: i});
+          }
+        } else {
+          for (let i = pos.y - 1; i >= obj.y; i--) {
+            kingMovesWhenCastling.push({x: obj.x, y: i});
+          }
+        }
+      })
+    }
+
+    if (kingMovesWhenCastling.length === 0) {
+      return AllKingMoves;
+    }
+
+    if (kingMovesWhenCastling.length === 2) {
+      const dontAllowCastle = kingMovesWhenCastling.some(move => attackMoves.some(amove => amove.x === move.x && amove.y === move.y));
+      if (dontAllowCastle) {
+        AllKingMoves.castle = [];
+      }
+    }
+
+    if (kingMovesWhenCastling.length === 4) {
+      const splitInParts = [kingMovesWhenCastling.slice(0, 2), kingMovesWhenCastling.slice(2)];
+      const dontAllowCastle = splitInParts.map(part => {
+        return part.some(move => attackMoves.some(amove => amove.x === move.x && amove.y === move.y));
+      })
+      AllKingMoves.castle = dontAllowCastle.reduce((acc, bool, i) => {
+        if (bool === false) {
+          acc.push(AllKingMoves.castle[i]);
+        }
+        return acc
+      }, []);
+    }
+
+    return AllKingMoves;
+  }
+
+  // figureMove(figure) {
+  //   if (figure.name === "King") { return }
+
+  //   const playerDefend = figure.color === this.playerWhite.side ? this.playerWhite : this.playerBlack;
+  //   const playerAttack = playerDefend.side === 'white' ? this.playerBlack : this.playerWhite;  
 
   // }
 

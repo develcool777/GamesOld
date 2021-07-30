@@ -28,82 +28,104 @@ export default class Queen extends Figures {
     const available = {
       move: [],
       kill: [],
-      check: []
+      check: [],
+      wayToKing: [],
+      cover: [],
     };
 
     // up 
-    const currentPositionUp = Object.assign({}, this.position);
-    for (let i = currentPositionUp.x; i > 0; i--) {
-      if (super.check(field, currentPositionUp.x - 1, currentPositionUp.y, currentPositionUp, available)) {
+    let currentPosition = Object.assign({}, this.position);
+    for (let i = currentPosition.x; i > 0; i--) {
+      super.fillWayToKing(available, currentPosition);
+      if (super.check(field, currentPosition.x - 1, currentPosition.y, currentPosition, available)) {
+        super.clearWayToKing(available);
         break;
       }
     }
+    super.clearWayToKing(available);
 
     // down
-    const currentPositionDown = Object.assign({}, this.position);
-    for (let i = currentPositionDown.x; i < field.length - 1; i++) {
-      if (super.check(field, currentPositionDown.x + 1, currentPositionDown.y, currentPositionDown, available)) {
+    currentPosition = Object.assign({}, this.position);
+    for (let i = currentPosition.x; i < field.length - 1; i++) {
+      super.fillWayToKing(available, currentPosition);
+      if (super.check(field, currentPosition.x + 1, currentPosition.y, currentPosition, available)) {
+        super.clearWayToKing(available);
         break;
       }
     }
+    super.clearWayToKing(available);
 
     // left
-    const currentPositionLeft = Object.assign({}, this.position);
-    for (let i = currentPositionLeft.y; i > 0; i--) {
-      if (super.check(field, currentPositionLeft.x, currentPositionLeft.y - 1, currentPositionLeft, available)) {
+    currentPosition = Object.assign({}, this.position);
+    for (let i = currentPosition.y; i > 0; i--) {
+      super.fillWayToKing(available, currentPosition);
+      if (super.check(field, currentPosition.x, currentPosition.y - 1, currentPosition, available)) {
+        super.clearWayToKing(available);
         break;
       }
     }
+    super.clearWayToKing(available);
 
     // right
-    const currentPositionRight = Object.assign({}, this.position);
-    for (let i = currentPositionRight.y; i < field.length - 1; i++) {
-      if (super.check(field, currentPositionRight.x, currentPositionRight.y + 1, currentPositionRight, available)) {
+    currentPosition = Object.assign({}, this.position);
+    for (let i = currentPosition.y; i < field.length - 1; i++) {
+      super.fillWayToKing(available, currentPosition);
+      if (super.check(field, currentPosition.x, currentPosition.y + 1, currentPosition, available)) {
+        super.clearWayToKing(available);
         break;
       }
     }
+    super.clearWayToKing(available);
 
     // upLeft 
-    const currentPositionUpLeft = Object.assign({}, this.position);
-    for (let i = this.position.x; i > 0 && currentPositionUpLeft.y > 0; i--) {
-      if (super.check(field, currentPositionUpLeft.x - 1, currentPositionUpLeft.y - 1, currentPositionUpLeft, available)) {
+    currentPosition= Object.assign({}, this.position);
+    for (let i = this.position.x; i > 0 && currentPosition.y > 0; i--) {
+      super.fillWayToKing(available, currentPosition);
+      if (super.check(field, currentPosition.x - 1, currentPosition.y - 1, currentPosition, available)) {
+        super.clearWayToKing(available);
         break
       }
     }
+    super.clearWayToKing(available);
 
     // downLeft
-    const currentPositionDownLeft = Object.assign({}, this.position);
-    for (let i = currentPositionDownLeft.x; i < field.length - 1 && currentPositionDownLeft.y > 0; i++) {
-      if (super.check(field, currentPositionDownLeft.x + 1, currentPositionDownLeft.y - 1, currentPositionDownLeft, available)) {
+    currentPosition = Object.assign({}, this.position);
+    for (let i = currentPosition.x; i < field.length - 1 && currentPosition.y > 0; i++) {
+      super.fillWayToKing(available, currentPosition);
+      if (super.check(field, currentPosition.x + 1, currentPosition.y - 1, currentPosition, available)) {
+        super.clearWayToKing(available);
         break;
       }
     }
+    super.clearWayToKing(available);
 
     // upRight
-    const currentPositionUpRight = Object.assign({}, this.position);
-    for (let i = currentPositionUpRight.x; i > 0 && currentPositionUpRight.y < field.length - 1; i--) {
-      if (super.check(field, currentPositionUpRight.x - 1, currentPositionUpRight.y + 1, currentPositionUpRight, available)) {
+    currentPosition = Object.assign({}, this.position);
+    for (let i = currentPosition.x; i > 0 && currentPosition.y < field.length - 1; i--) {
+      super.fillWayToKing(available, currentPosition);
+      if (super.check(field, currentPosition.x - 1, currentPosition.y + 1, currentPosition, available)) {
+        super.clearWayToKing(available);
         break;
       }
     }
+    super.clearWayToKing(available);
 
     // downRight
-    const currentPositionDownRight = Object.assign({}, this.position);
-    for (let i = currentPositionDownRight.x; i < field.length - 1 && currentPositionDownRight.y < field.length - 1; i++) {
-      if (super.check(field, currentPositionDownRight.x + 1, currentPositionDownRight.y + 1, currentPositionDownRight, available)) {
+    currentPosition = Object.assign({}, this.position);
+    for (let i = currentPosition.x; i < field.length - 1 && currentPosition.y < field.length - 1; i++) {
+      super.fillWayToKing(available, currentPosition);
+      if (super.check(field, currentPosition.x + 1, currentPosition.y + 1, currentPosition, available)) {
+        super.clearWayToKing(available);
         break;
       }
     }
-    
+    super.clearWayToKing(available);
+
+    // console.log({available}, "Queen");
     return available;
   }
 
   makeMove(cordinates, field) {
     super.makeMove(cordinates, field, this);
   }
-
-  // checkForCheck(figure, field) {
-  //   const moves = figure.available(field);
-  //   return moves.check.length === 0 ? false : moves.check[0];
-  // }
 }

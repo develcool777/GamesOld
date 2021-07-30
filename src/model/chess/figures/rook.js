@@ -38,40 +38,54 @@ export default class Rook extends Figures {
     const available = {
       move: [],
       kill: [],
-      check: []
+      check: [],
+      wayToKing: [],
+      cover: [],
     };
 
     // up 
-    const currentPositionUp = Object.assign({}, this.position);
-    for (let i = currentPositionUp.x; i > 0; i--) {
-      if (super.check(field, currentPositionUp.x - 1, currentPositionUp.y, currentPositionUp, available)) {
+    let currentPosition = Object.assign({}, this.position);
+    for (let i = currentPosition.x; i > 0; i--) {
+      super.fillWayToKing(available, currentPosition);
+      if (super.check(field, currentPosition.x - 1, currentPosition.y, currentPosition, available)) {
+        super.clearWayToKing(available);
         break;
       }
     }
+    super.clearWayToKing(available);
 
     // down
-    const currentPositionDown = Object.assign({}, this.position);
-    for (let i = currentPositionDown.x; i < field.length - 1; i++) {
-      if (super.check(field, currentPositionDown.x + 1, currentPositionDown.y, currentPositionDown, available)) {
+    currentPosition = Object.assign({}, this.position);
+    for (let i = currentPosition.x; i < field.length - 1; i++) {
+      super.fillWayToKing(available, currentPosition);
+      if (super.check(field, currentPosition.x + 1, currentPosition.y, currentPosition, available)) {
+        super.clearWayToKing(available);
         break;
       }
     }
+    super.clearWayToKing(available);
 
     // left
-    const currentPositionLeft = Object.assign({}, this.position);
-    for (let i = currentPositionLeft.y; i > 0; i--) {
-      if (super.check(field, currentPositionLeft.x, currentPositionLeft.y - 1, currentPositionLeft, available)) {
+    currentPosition = Object.assign({}, this.position);
+    for (let i = currentPosition.y; i > 0; i--) {
+      super.fillWayToKing(available, currentPosition);
+      if (super.check(field, currentPosition.x, currentPosition.y - 1, currentPosition, available)) {
+        super.clearWayToKing(available);
         break;
       }
     }
+    super.clearWayToKing(available);
 
     // right
-    const currentPositionRight = Object.assign({}, this.position);
-    for (let i = currentPositionRight.y; i < field.length - 1; i++) {
-      if (super.check(field, currentPositionRight.x, currentPositionRight.y + 1, currentPositionRight, available)) {
+    currentPosition = Object.assign({}, this.position);
+    for (let i = currentPosition.y; i < field.length - 1; i++) {
+      super.fillWayToKing(available, currentPosition);
+      if (super.check(field, currentPosition.x, currentPosition.y + 1, currentPosition, available)) {
+        super.clearWayToKing(available);
         break;
       }
     }
+    super.clearWayToKing(available);
     
     return available;
   }
@@ -83,9 +97,4 @@ export default class Rook extends Figures {
       this.firstMove = false;
     }
   }
-
-  // checkForCheck(figure, field) {
-  //   const moves = figure.available(field);
-  //   return moves.check.length === 0 ? false : moves.check[0];
-  // }
 }

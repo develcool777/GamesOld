@@ -4,6 +4,7 @@ import Bishop from '@/model/chess/figures/bishop'
 import Queen from '@/model/chess/figures/queen'
 import Knight from '@/model/chess/figures/knight'
 import King from '@/model/chess/figures/king'
+
 export default class Player {
   constructor(side) {
     if (typeof side !== 'string') {
@@ -14,6 +15,7 @@ export default class Player {
     }
 
     let positions = [];
+    let isCheck = false;
     Object.defineProperties(this, {
       side: {
         get: () => side 
@@ -25,6 +27,14 @@ export default class Player {
             throw Error(`Player.positions.set(value) value must be Array`);
           }
           positions = value;
+        }
+      },
+      isCheck: {
+        get: () => isCheck,
+        set: (value) => {
+          if (typeof value !== 'boolean') {
+            throw Error(`Player.isCheck.set(value) value must be Array`);
+          }
         }
       }
     })
@@ -127,22 +137,44 @@ export default class Player {
     return obj;
   }
 
-  allAvailableMoves(field) {
+  allAvailableMoves(field, whatType='') {
+    if (typeof whatType !== 'string') {
+      throw Error(`Player.allAvailableMoves(field, whatType) whatType must be String`)
+    }
+    if (!['all', 'check', 'kill', 'move', 'moveAndKill', 'cover'].includes(whatType)) {
+      throw Error(`Player.allAvailableMoves(field, whatType) whatType must be 'all' or 'check' or 'kill' or 'move' or 'moveAndKill' or 'cover'`)
+    }
     const allFigures = this.countFigures(field);
     const figures = allFigures.all.figures
     const availableMoves = figures.reduce((acc, figure) => {
       const moves = figure.available(field);
-      if (moves.move.length > 0) {
+      if (moves.move.length > 0 && ['all', 'move', 'moveAndKill'].includes(whatType)) {
         acc.push(...moves.move);
       } 
-      if (moves.kill.length > 0) {
+      if (moves.kill.length > 0 && ['all', 'kill', 'moveAndKill'].includes(whatType)) {
         acc.push(...moves.kill);
       } 
-      if (moves.check.length > 0) {
+      if (moves.check.length > 0 && ['all', 'check'].includes(whatType)) {
         acc.push(...moves.check);
+      }
+      if (moves.cover.length > 0 && ['all', 'cover'].includes(whatType)) {
+        acc.push(...moves.cover);
       }
       return acc;
     }, []);
     return availableMoves;
+  }
+
+  getAttackFigures(field) {
+    const allFigures = this.countFigures(field);
+    const figures = allFigures.all.figures
+    const attackFigures = figures.reduce((acc, figure) => {
+      const moves = figure.available(field);
+      if (moves.check.length > 0) {
+        acc.push(figure);
+      }
+      return acc;
+    }, []);
+    return attackFigures;
   }
 }

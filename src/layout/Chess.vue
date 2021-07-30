@@ -99,8 +99,10 @@ export default {
     },
 
     chooseCellColor(cell, x, y) {
+      if (this.GAME.selectedCell !== null && this.GAME.selectedCell.position.x === x && this.GAME.selectedCell.position.y === y) {
+        return 'selected';
+      }
       if (cell.isAvailableFor === 'check') {
-        console.log('here');
         return 'check';
       }
       if (this.GAME.oldPosition !== null && this.GAME.oldPosition.x === x && this.GAME.oldPosition.y === y) {
@@ -109,9 +111,7 @@ export default {
       if (this.GAME.newPosition !== null && this.GAME.newPosition.x === x && this.GAME.newPosition.y === y) {
         return 'lastMoveNewPosition';
       }
-      if (this.GAME.selectedCell !== null && this.GAME.selectedCell.position.x === x && this.GAME.selectedCell.position.y === y) {
-        return 'selected';
-      }
+
       return cell.color;
     },
 

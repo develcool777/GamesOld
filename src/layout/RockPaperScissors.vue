@@ -107,9 +107,9 @@ export default {
           { name: 'Move' },
           { name: 'Amount of wins' },
           { name: 'Move' },
-          { name: 'Amount of draws' },
-          { name: 'Move' },
           { name: 'Amount of wins' },
+          { name: 'Move' },
+          { name: 'Amount of draws' },
         ]
       },
       historyData: [],

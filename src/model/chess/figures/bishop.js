@@ -11,6 +11,7 @@ export default class Bishop extends Figures {
       throw Error(`Bishop.constructor position must be Object with keys x and y`);
     }
     const name = 'Bishop';
+    // let isDefendingKing = false;
     Object.defineProperties(this, {
       color: {
         get: () => color
@@ -28,40 +29,54 @@ export default class Bishop extends Figures {
     const available = {
       move: [],
       kill: [],
-      check: []
+      check: [],
+      wayToKing: [],
+      cover: [],
     };
 
     // upLeft 
-    const currentPositionUpLeft = Object.assign({}, this.position);
-    for (let i = this.position.x; i > 0 && currentPositionUpLeft.y > 0; i--) {
-      if (super.check(field, currentPositionUpLeft.x - 1, currentPositionUpLeft.y - 1, currentPositionUpLeft, available)) {
+    let currentPosition= Object.assign({}, this.position);
+    for (let i = this.position.x; i > 0 && currentPosition.y > 0; i--) {
+      super.fillWayToKing(available, currentPosition);
+      if (super.check(field, currentPosition.x - 1, currentPosition.y - 1, currentPosition, available)) {
+        super.clearWayToKing(available);
         break
       }
     }
+    super.clearWayToKing(available);
 
     // downLeft
-    const currentPositionDownLeft = Object.assign({}, this.position);
-    for (let i = currentPositionDownLeft.x; i < field.length - 1 && currentPositionDownLeft.y > 0; i++) {
-      if (super.check(field, currentPositionDownLeft.x + 1, currentPositionDownLeft.y - 1, currentPositionDownLeft, available)) {
+    currentPosition = Object.assign({}, this.position);
+    for (let i = currentPosition.x; i < field.length - 1 && currentPosition.y > 0; i++) {
+      super.fillWayToKing(available, currentPosition);
+      if (super.check(field, currentPosition.x + 1, currentPosition.y - 1, currentPosition, available)) {
+        super.clearWayToKing(available);
         break;
       }
     }
+    super.clearWayToKing(available);
 
     // upRight
-    const currentPositionUpRight = Object.assign({}, this.position);
-    for (let i = currentPositionUpRight.x; i > 0 && currentPositionUpRight.y < field.length - 1; i--) {
-      if (super.check(field, currentPositionUpRight.x - 1, currentPositionUpRight.y + 1, currentPositionUpRight, available)) {
+    currentPosition = Object.assign({}, this.position);
+    for (let i = currentPosition.x; i > 0 && currentPosition.y < field.length - 1; i--) {
+      super.fillWayToKing(available, currentPosition);
+      if (super.check(field, currentPosition.x - 1, currentPosition.y + 1, currentPosition, available)) {
+        super.clearWayToKing(available);
         break;
       }
     }
+    super.clearWayToKing(available);
 
     // downRight
-    const currentPositionDownRight = Object.assign({}, this.position);
-    for (let i = currentPositionDownRight.x; i < field.length - 1 && currentPositionDownRight.y < field.length - 1; i++) {
-      if (super.check(field, currentPositionDownRight.x + 1, currentPositionDownRight.y + 1, currentPositionDownRight, available)) {
+    currentPosition = Object.assign({}, this.position);
+    for (let i = currentPosition.x; i < field.length - 1 && currentPosition.y < field.length - 1; i++) {
+      super.fillWayToKing(available, currentPosition);
+      if (super.check(field, currentPosition.x + 1, currentPosition.y + 1, currentPosition, available)) {
+        super.clearWayToKing(available);
         break;
       }
     }
+    super.clearWayToKing(available);
 
     return available;
   }
@@ -69,9 +84,4 @@ export default class Bishop extends Figures {
   makeMove(cordinates, field) {
     super.makeMove(cordinates, field, this);
   }
-
-  // checkForCheck(figure, field) {
-  //   const moves = figure.available(field);
-  //   return moves.check.length === 0 ? false : moves.check[0];
-  // }
 }
