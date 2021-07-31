@@ -1,6 +1,5 @@
-// const Player = require("./player");
-// module.exports = class Game {
 import Player from './player'
+
 export default class Game {
   constructor(field, startPosition, winPosition) {
     if (!Array.isArray(field)) {

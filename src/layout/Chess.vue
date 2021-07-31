@@ -29,25 +29,25 @@
         <div v-if="GAME.isPawnPromotion" class="chess__mask"></div>
       </div>
     </div>
+    <Instruction 
+      class="chess__instruction" 
+    />
   </div>
-  <!-- <Instruction 
-    class="maze__instruction" 
-    v-on:changeLevel="changeLevel($event)"
-    v-on:clicked="actOfUser($event)"
-    v-on:restart="restartGame()"
-  /> -->
+
 
 </template>
 
 <script>
 import Figure from '@/components/Chess/Figure'
 import Promotion from '@/components/Chess/Promotion'
-import Game from '@/model/chess/game';
+import Game from '@/model/chess/game'
+import Instruction from '@/components/Chess/Instruction'
 export default {
   name: 'Chess',
   components: {
     Figure,
-    Promotion
+    Promotion,
+    Instruction
   },
   data() {
     return {

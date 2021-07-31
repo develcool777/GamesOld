@@ -27,6 +27,7 @@ export default class Cell {
       isAvailableFor: {
         get: () => isAvailableFor,
         set: (value) => {
+          // console.log({value});
           if (typeof value !== 'string') {
             throw Error(`Cell.isAvailableFor.set(value) value must be String`);
           }

@@ -25,7 +25,7 @@ export default class Bishop extends Figures {
     })
   }
 
-  available(field) {
+  available(field, xray=false) {
     const available = {
       move: [],
       kill: [],
@@ -38,7 +38,7 @@ export default class Bishop extends Figures {
     let currentPosition= Object.assign({}, this.position);
     for (let i = this.position.x; i > 0 && currentPosition.y > 0; i--) {
       super.fillWayToKing(available, currentPosition);
-      if (super.check(field, currentPosition.x - 1, currentPosition.y - 1, currentPosition, available)) {
+      if (super.check(field, currentPosition.x - 1, currentPosition.y - 1, currentPosition, available, xray)) {
         super.clearWayToKing(available);
         break
       }
@@ -49,7 +49,7 @@ export default class Bishop extends Figures {
     currentPosition = Object.assign({}, this.position);
     for (let i = currentPosition.x; i < field.length - 1 && currentPosition.y > 0; i++) {
       super.fillWayToKing(available, currentPosition);
-      if (super.check(field, currentPosition.x + 1, currentPosition.y - 1, currentPosition, available)) {
+      if (super.check(field, currentPosition.x + 1, currentPosition.y - 1, currentPosition, available, xray)) {
         super.clearWayToKing(available);
         break;
       }
@@ -60,7 +60,7 @@ export default class Bishop extends Figures {
     currentPosition = Object.assign({}, this.position);
     for (let i = currentPosition.x; i > 0 && currentPosition.y < field.length - 1; i--) {
       super.fillWayToKing(available, currentPosition);
-      if (super.check(field, currentPosition.x - 1, currentPosition.y + 1, currentPosition, available)) {
+      if (super.check(field, currentPosition.x - 1, currentPosition.y + 1, currentPosition, available, xray)) {
         super.clearWayToKing(available);
         break;
       }
@@ -71,7 +71,7 @@ export default class Bishop extends Figures {
     currentPosition = Object.assign({}, this.position);
     for (let i = currentPosition.x; i < field.length - 1 && currentPosition.y < field.length - 1; i++) {
       super.fillWayToKing(available, currentPosition);
-      if (super.check(field, currentPosition.x + 1, currentPosition.y + 1, currentPosition, available)) {
+      if (super.check(field, currentPosition.x + 1, currentPosition.y + 1, currentPosition, available, xray)) {
         super.clearWayToKing(available);
         break;
       }

@@ -39,13 +39,15 @@ export default class King extends Figures {
       move: [],
       kill: [],
       castle: [],
-      kingPosition: this.position
+      kingPosition: this.position,
+      cover: []
     };
     
     const check = (x=0, y=0) => {
       if (field[x] === undefined || field[x][y] === undefined) { return }
       if (field[x][y].figure !== null) {
         if (field[x][y].figure.color !== this.color) { available.kill.push({x, y}) }
+        available.cover.push({x, y});
         return;
       }
       available.move.push({x, y})

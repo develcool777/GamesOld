@@ -50,6 +50,7 @@ export default class Pawn extends Figures  {
       check: [],
       wayToKing: [],
       cover: [],
+      dontAllowKingToMove: []
     }
     let move = this.color === 'white' ? -1 : 1;
 
@@ -73,6 +74,8 @@ export default class Pawn extends Figures  {
     }, [])
 
     // kills
+
+
     const condition2 = (x, y) => {
       if (this.position.x + x === field.length || this.position.x + x < 0) {
         return null;
@@ -84,11 +87,12 @@ export default class Pawn extends Figures  {
     }
 
     available.kill = [1, -1].reduce((acc, item) => {
+      const obj = {
+        x: this.position.x + move,
+        y: this.position.y + item
+      }
+
       if (condition2(move, item) !== null) {
-        const obj = {
-          x: this.position.x + move,
-          y: this.position.y + item
-        }
         if (condition2(move, item).color !== this.color) {
           if (condition2(move, item).name === 'King') {
             available.check.push(obj);
@@ -100,6 +104,11 @@ export default class Pawn extends Figures  {
           available.cover.push(obj);
         }
       }
+
+      if (obj.y !== -1 && obj.y !== 8) {
+        available.dontAllowKingToMove.push(obj);
+      }
+      
       return acc;
     }, []);
 

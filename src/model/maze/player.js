@@ -1,5 +1,4 @@
 export default class Player {
-// module.exports = class Player {
   constructor(x, y) {
     if (typeof x !== 'number' || !Number.isInteger(x)) {
       throw Error(`Player.constructor x must be Integer`);

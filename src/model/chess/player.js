@@ -59,7 +59,6 @@ export default class Player {
   }
 
   createFigures(field) {
-    // console.log(this.positions);
     field[this.positions[0].x][this.positions[0].y].figure = new Rook(this.side, this.positions[0]);
     field[this.positions[1].x][this.positions[1].y].figure = new Knight(this.side, this.positions[1]);
     field[this.positions[2].x][this.positions[2].y].figure = new Bishop(this.side, this.positions[2]);
@@ -137,17 +136,18 @@ export default class Player {
     return obj;
   }
 
-  allAvailableMoves(field, whatType='') {
+  allAvailableMoves(field, whatType='', xray=false) {
     if (typeof whatType !== 'string') {
       throw Error(`Player.allAvailableMoves(field, whatType) whatType must be String`)
     }
-    if (!['all', 'check', 'kill', 'move', 'moveAndKill', 'cover'].includes(whatType)) {
-      throw Error(`Player.allAvailableMoves(field, whatType) whatType must be 'all' or 'check' or 'kill' or 'move' or 'moveAndKill' or 'cover'`)
+    if (!['all', 'check', 'kill', 'move', 'moveAndKill', 'cover', 'pawn'].includes(whatType)) {
+      throw Error(`Player.allAvailableMoves(field, whatType) whatType must be 'all' or 'check' or 'kill' or 'move' or 'moveAndKill' or 'cover' or 'pawn'`)
     }
     const allFigures = this.countFigures(field);
-    const figures = allFigures.all.figures
+    const figures = allFigures.all.figures;
     const availableMoves = figures.reduce((acc, figure) => {
-      const moves = figure.available(field);
+      if (!['pawn', 'check', 'moveAndKill'].includes(whatType) && figure.name === 'Pawn') { return acc }
+      const moves = ['Pawn', 'Knight'].includes(figure.name) ? figure.available(field) : figure.available(field, xray);
       if (moves.move.length > 0 && ['all', 'move', 'moveAndKill'].includes(whatType)) {
         acc.push(...moves.move);
       } 
@@ -160,21 +160,23 @@ export default class Player {
       if (moves.cover.length > 0 && ['all', 'cover'].includes(whatType)) {
         acc.push(...moves.cover);
       }
+      if (moves.dontAllowKingToMove !== undefined && 'pawn' === whatType) {
+        acc.push(...moves.dontAllowKingToMove);
+      }
       return acc;
     }, []);
     return availableMoves;
   }
 
-  getAttackFigures(field) {
+  getAttackFigures(field, xray=false) {
     const allFigures = this.countFigures(field);
     const figures = allFigures.all.figures
-    const attackFigures = figures.reduce((acc, figure) => {
-      const moves = figure.available(field);
+    return figures.reduce((acc, figure) => {
+      const moves = figure.available(field, xray);
       if (moves.check.length > 0) {
         acc.push(figure);
       }
       return acc;
     }, []);
-    return attackFigures;
   }
 }

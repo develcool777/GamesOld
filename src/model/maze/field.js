@@ -1,4 +1,3 @@
-// module.exports = class Field {
 export default class Field {
   constructor(data) {
     if (typeof data !== 'object') {

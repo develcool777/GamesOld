@@ -12,6 +12,7 @@ export default class Game {
     let oldPosition = null;
     let newPosition = null;
     let isCheck = false;
+    let isCheckmate = false;
     let isPawnPromotion = false;
     Object.defineProperties(this, {
       field: {
@@ -44,7 +45,6 @@ export default class Game {
       oldPosition: {
         get: () => oldPosition,
         set: (value) => {
-          // here must awsome check for value 
           if (value !== null && Object.keys(value).join('') !== 'xy') {
             throw Error(`Game.oldPosition.set(value) value must be null or Object with keys 'x' and 'y'`);
           }
@@ -67,6 +67,15 @@ export default class Game {
             throw Error(`Game.isCheck.set(value) value must be Boolean`);
           }
           isCheck = value;
+        }
+      },
+      isCheckmate: {
+        get: () => isCheckmate,
+        set: (value) => {
+          if (typeof value !== 'boolean') {
+            throw Error(`Game.isCheckmate.set(value) value must be Boolean`);
+          }
+          isCheckmate = value;
         }
       },
       isPawnPromotion: {
@@ -104,9 +113,10 @@ export default class Game {
 
   clickOnFigure(cell) {
     this.clearAvailableMove();
+
     const availableMoves = cell.figure.name === 'King' 
-      ? Object.entries(this.kingMoves(cell.figure))
-      : Object.entries(cell.figure.available(this.field.board)).slice(0, 3);
+      ? Object.entries(this.kingMoves(cell.figure)).slice(0, 3)
+      : Object.entries(this.figureMoves(cell.figure)).slice(0, 3)
     const condition = (moves, move) => moves.some(dmove => dmove.x === move.x && dmove.y === move.y);
 
     availableMoves.forEach((moves) => {
@@ -124,6 +134,7 @@ export default class Game {
   }
 
   clickOnCellForMove(cell, x, y) {
+    if (this.isCheckmate) { return }
     // call clickOnFigure if figure was clicked
     if (cell.figure !== null && cell.isAvailableFor !== 'kill') {
       if (cell.figure.color !== this.whoMoves) { return }
@@ -147,7 +158,6 @@ export default class Game {
       if (this.isCheck) {
         this.isCheck = false;
       }
-      // this.whoMoves = this.whoMoves === 'white' ? 'black' : 'white';
     }
     this.whoMoves = this.whoMoves === 'white' ? 'black' : 'white';
     this.newPosition = Object.assign({}, figure.position);
@@ -203,29 +213,35 @@ export default class Game {
     if (!this.isCheck) { return }
 
     this.field.board[KingPosition.x][KingPosition.y].isAvailableFor = 'check';
-
-    // console.log(this.whoMoves, '!!!')
     this.checkDefense();
+    this.checkForCheckmate();
   }
 
   checkDefense() {
-    // console.log('checkDefense');
     const playerDefend = this.whoMoves === 'white' ? this.playerWhite : this.playerBlack;
     const playerAttack = playerDefend.side === 'white' ? this.playerBlack : this.playerWhite;
-
     const attackFigures = playerAttack.getAttackFigures(this.field.board);
 
-    // const KingPosition = playerDefend.getKing(this.field.board).position;
-    const checkMoves = attackFigures[0].available(this.field.board).wayToKing //   ????? double ckeck also needed
-    // console.log(checkMoves, KingPosition);
+    if (attackFigures.length > 1) {
+      this.defendMoves = [];
+      return;
+    }
 
+    const checkMoves = attackFigures[0].available(this.field.board).wayToKing;
     const allMoves = playerDefend.allAvailableMoves(this.field.board, 'moveAndKill');
     // defendMoves from figure that made check
-    const defendMoves = allMoves.filter(move => checkMoves.some(amove => amove.x === move.x && amove.y === move.y))
-    // console.log({defendMoves});
+    this.defendMoves = allMoves.filter(move => checkMoves.some(amove => amove.x === move.x && amove.y === move.y));
+  }
 
-
-    this.defendMoves = defendMoves;
+  checkForCheckmate() {
+    const playerDefend = this.whoMoves === 'white' ? this.playerWhite : this.playerBlack;
+    // const playerAttack = playerDefend.side === 'white' ? this.playerBlack : this.playerWhite;
+    const king = playerDefend.getKing(this.field.board);
+    const kingMoves = this.kingMoves(king);
+    const condition = this.defendMoves.length === 0 && kingMoves.move.length === 0 && kingMoves.kill.length === 0;
+    if (condition) {
+      this.isCheckmate = true;
+    }
   }
 
   kingMoves(king) {
@@ -240,6 +256,16 @@ export default class Game {
     AllKingMoves.move = AllKingMoves.move.filter(move => !attackMoves.some(amove => amove.x === move.x && amove.y === move.y));
     AllKingMoves.kill = AllKingMoves.kill.filter(move => !attackCovers.some(amove => amove.x === move.x && amove.y === move.y));
 
+    // case when other king is near
+    const AllOtherKingMoves = playerAttack.kingMoves(this.field.board);
+    AllKingMoves.move = AllKingMoves.move.filter(move => !AllOtherKingMoves.move.some(amove => amove.x === move.x && amove.y === move.y));
+    AllKingMoves.kill = AllKingMoves.kill.filter(move => !AllOtherKingMoves.cover.some(amove => amove.x === move.x && amove.y === move.y));
+
+    // case with pawns
+    const AllPawnsKills = playerAttack.allAvailableMoves(this.field.board, 'pawn');
+    AllKingMoves.move = AllKingMoves.move.filter(move => !AllPawnsKills.some(amove => amove.x === move.x && amove.y === move.y));
+
+    // case with castling 
     if (this.isCheck) {
       AllKingMoves.castle = [];
       return AllKingMoves;
@@ -288,12 +314,42 @@ export default class Game {
     return AllKingMoves;
   }
 
-  // figureMove(figure) {
-  //   if (figure.name === "King") { return }
+  figureMoves(figure) {
+    if (figure.name === "King") { return }
+    let figureMove = figure.available(this.field.board);
+    if (this.isCheck) { return figureMove }
 
-  //   const playerDefend = figure.color === this.playerWhite.side ? this.playerWhite : this.playerBlack;
-  //   const playerAttack = playerDefend.side === 'white' ? this.playerBlack : this.playerWhite;  
+    const playerDefend = figure.color === this.playerWhite.side ? this.playerWhite : this.playerBlack;
+    const playerAttack = playerDefend.side === 'white' ? this.playerBlack : this.playerWhite;
 
-  // }
+    // if figure defend king: no move or kill the attack figure
+    const attackFigures = playerAttack.getAttackFigures(this.field.board, true);
+    if (attackFigures.length === 0) { return figureMove }
+
+    attackFigures.forEach(attackFigure => {
+      const wayToKing = attackFigure.available(this.field.board, true).wayToKing;
+
+      const defenders = wayToKing.slice(1).reduce((acc, obj) => {
+        const defendFigure = this.field.board[obj.x][obj.y].figure; 
+        if (defendFigure === null) { return acc }
+        if (attackFigure.color !== defendFigure.color) {
+          acc.push(defendFigure);
+        }
+        return acc;
+      }, [])
+
+      // there are 2 or more defenders
+      if (defenders.length > 1) { return }
+
+      if (figure.position.x !== defenders[0].position.x || figure.position.y !== defenders[0].position.y ) {
+        return;
+      }
+
+      figureMove.move = figureMove.move.filter(move => wayToKing.some(amove => amove.x === move.x && amove.y === move.y));
+      figureMove.kill = figureMove.kill.filter(move => wayToKing.some(amove => amove.x === move.x && amove.y === move.y));
+    })
+
+    return figureMove;
+  }
 
 }

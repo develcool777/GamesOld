@@ -1,4 +1,5 @@
 import { minMax, Board } from './minMaxAlgorithm';
+
 export default class Game {
   constructor() {
     let field = [

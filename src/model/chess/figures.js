@@ -1,7 +1,7 @@
 export default class Figures {
   constructor() {}
 
-  check(field, x=0, y=0, position={}, available={}) {
+  check(field, x=0, y=0, position={}, available={}, xray=false) {
     position.x = x;
     position.y = y;
     if (field[x][y].figure !== null) {
@@ -11,10 +11,10 @@ export default class Figures {
       }
       if (field[x][y].figure.name === 'King') {
         available.check.push({...position})
-      } else {
-        available.kill.push({...position})
-      }
-      return true /// stop WH
+        return false; // xray for king to see what it does delete this line and make some check and available king moves 
+      } 
+      available.kill.push({...position});
+      return xray ? false : true; /// enable WH(xray) change to false 
     }
     available.move.push({...position});
     return false;
