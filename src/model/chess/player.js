@@ -146,7 +146,7 @@ export default class Player {
     const allFigures = this.countFigures(field);
     const figures = allFigures.all.figures;
     const availableMoves = figures.reduce((acc, figure) => {
-      if (!['pawn', 'check', 'moveAndKill'].includes(whatType) && figure.name === 'Pawn') { return acc }
+      if (!['pawn', 'check', 'moveAndKill', 'cover'].includes(whatType) && figure.name === 'Pawn') { return acc }
       const moves = ['Pawn', 'Knight'].includes(figure.name) ? figure.available(field) : figure.available(field, xray);
       if (moves.move.length > 0 && ['all', 'move', 'moveAndKill'].includes(whatType)) {
         acc.push(...moves.move);

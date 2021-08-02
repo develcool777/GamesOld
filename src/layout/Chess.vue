@@ -29,25 +29,34 @@
         <div v-if="GAME.isPawnPromotion" class="chess__mask"></div>
       </div>
     </div>
-    <Instruction 
-      class="chess__instruction" 
-    />
+    <Instruction class="chess__instruction"/>
   </div>
-
-
+  <ResultChess/>
 </template>
 
 <script>
+import { createNamespacedHelpers } from 'vuex'
+const { mapGetters, mapActions, mapState } = createNamespacedHelpers('chess');
 import Figure from '@/components/Chess/Figure'
 import Promotion from '@/components/Chess/Promotion'
 import Game from '@/model/chess/game'
 import Instruction from '@/components/Chess/Instruction'
+import ResultChess from '@/components/Chess/Result'
 export default {
   name: 'Chess',
   components: {
     Figure,
     Promotion,
-    Instruction
+    Instruction,
+    ResultChess
+  },
+  watch: {
+    clearBoard: function(newVal) {
+      if (newVal) {
+        this.GAME.clearField();
+        this.CHANGE_CLEAR_BOARD(false);
+      }
+    }
   },
   data() {
     return {
@@ -59,7 +68,13 @@ export default {
   created() {
     this.init();
   },
+  computed: {
+    ...mapState(['clearBoard']),
+    ...mapGetters(['getGameStatus']),
+  },
   methods: {
+    ...mapActions(['CHANGE_GAME_RESULT', 'CHANGE_GAME_STATUS', 'CHANGE_CLEAR_BOARD']),
+
     init() {
       this.GAME = new Game();
       this.GAME.createField();
@@ -88,10 +103,33 @@ export default {
         this.dontClick = false;
         return;
       }
-
-      this.GAME.clickOnCellForMove(cell, x, y);
-      this.draw();
-    }, 
+      if (this.getGameStatus === 'start') {
+        this.GAME.clickOnCellForMove(cell, x, y);
+        this.gameResult();
+        this.draw();
+      }
+    },
+    
+    gameResult() {
+      if (this.GAME.isCheckmate || this.GAME.isStalemate) {
+        this.CHANGE_GAME_STATUS('finish');
+      }
+      if (this.GAME.isCheckmate) {
+        const winnerColor = this.GAME.whoMoves === 'white' ? 'black' : 'white';
+        const obj = {
+          title: `It's a checkmate`,
+          description: `Player with ${winnerColor} figures win`
+        }
+        this.CHANGE_GAME_RESULT(obj);
+      }
+      if (this.GAME.isStalemate) {
+        const obj = {
+          title: `It's a stalemate`,
+          description: `No one won, it's a draw`
+        }
+        this.CHANGE_GAME_RESULT(obj);
+      }
+    },
 
     pawnPromotion(figureName, x, y) {
       this.GAME.pawnPromotion(this.board, figureName, {x, y});
@@ -116,7 +154,7 @@ export default {
     },
 
     showCursorPointer(cell) {
-      if (cell.figure === null) { return 'default' }
+      if (cell.figure === null || this.getGameStatus !== 'start') { return 'default' }
       return cell.figure.color === this.GAME.whoMoves ? 'pointer' : 'default';
     }
   }

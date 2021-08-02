@@ -7,12 +7,14 @@ export default class Game {
     const playerWhite = new Player('white');
     const playerBlack = new Player('black');
     let defendMoves = [];
+    let historyOfMoves = [];
     let whoMoves = 'white';
     let selectedCell = null;
     let oldPosition = null;
     let newPosition = null;
     let isCheck = false;
     let isCheckmate = false;
+    let isStalemate = false;
     let isPawnPromotion = false;
     Object.defineProperties(this, {
       field: {
@@ -78,6 +80,15 @@ export default class Game {
           isCheckmate = value;
         }
       },
+      isStalemate: {
+        get: () => isStalemate,
+        set: (value) => {
+          if (typeof value !== 'boolean') {
+            throw Error(`Game.isStalemate.set(value) value must be Boolean`);
+          }
+          isStalemate = value;
+        }
+      },
       isPawnPromotion: {
         get: () => isPawnPromotion,
         set: (value) => {
@@ -95,12 +106,31 @@ export default class Game {
           }
           defendMoves = value;
         }
+      },
+      historyOfMoves: {
+        get: () => historyOfMoves,
+        set: (value) => {
+          if (!Array.isArray(value)) {
+            throw Error(`Game.historyOfMoves.set(value) value must be Array`);
+          }
+          historyOfMoves = value;
+        }
       }
     })
   }
 
   createField() {
     this.field.createField();
+  }
+
+  clearField() {
+    this.field.clearField();
+    this.selectedCell = null;
+    this.oldPosition = null;
+    this.newPosition = null;
+    this.whoMoves = 'white';
+    this.historyOfMoves = [];
+    this.createFigures();
   }
 
   createFigures() {
@@ -110,6 +140,20 @@ export default class Game {
     this.playerBlack.createPositions();
     this.playerBlack.createFigures(this.field.board);
   }
+
+  makeHistory(typeOfMove="", figure, whoMoved) {
+    // const copy = JSON.parse(JSON.stringify(figure));
+    const obj = {
+      figure: figure,
+      oldPosition: this.oldPosition,
+      newPosition: this.newPosition,
+      typeOfMove: typeOfMove,
+      whoMoved: whoMoved
+    }
+    this.historyOfMoves.push(obj);
+  }
+
+  
 
   clickOnFigure(cell) {
     this.clearAvailableMove();
@@ -134,13 +178,15 @@ export default class Game {
   }
 
   clickOnCellForMove(cell, x, y) {
-    if (this.isCheckmate) { return }
+    if (this.isCheckmate || this.isStalemate) { return }
+
     // call clickOnFigure if figure was clicked
     if (cell.figure !== null && cell.isAvailableFor !== 'kill') {
       if (cell.figure.color !== this.whoMoves) { return }
       this.clickOnFigure(cell);
       return;
     }
+    
     // if figure was clicked but new click was not on available moves
     if (cell.isAvailableFor === '') { 
       this.clearAvailableMove();
@@ -152,19 +198,24 @@ export default class Game {
     this.oldPosition = Object.assign({}, figure.position);
 
     if (cell.isAvailableFor === 'castle') {
-      figure.makeCastle([x,y], this.field.board)
+      figure.makeCastle([x,y], this.field.board);
     } else {
       figure.makeMove([x,y], this.field.board);
       if (this.isCheck) {
         this.isCheck = false;
       }
     }
-    this.whoMoves = this.whoMoves === 'white' ? 'black' : 'white';
+
+
     this.newPosition = Object.assign({}, figure.position);
+    this.makeHistory(cell.isAvailableFor, figure, this.whoMoves);
+    console.log(this.historyOfMoves);
     this.selectedCell = null;
+    this.whoMoves = this.whoMoves === 'white' ? 'black' : 'white';
 
     this.checkPawnPromotion(figure, x, y);
     this.checkForCheck(figure);
+    this.checkForStalemate();
     this.clearAvailableMove();
   }
 
@@ -198,6 +249,7 @@ export default class Game {
     field[position.x][position.y].figure = fig;
     field[position.x][position.y].isAvailableFor = '';
     this.checkForCheck(fig);
+
   }
 
   checkForCheck(figure) {
@@ -235,13 +287,22 @@ export default class Game {
 
   checkForCheckmate() {
     const playerDefend = this.whoMoves === 'white' ? this.playerWhite : this.playerBlack;
-    // const playerAttack = playerDefend.side === 'white' ? this.playerBlack : this.playerWhite;
     const king = playerDefend.getKing(this.field.board);
     const kingMoves = this.kingMoves(king);
     const condition = this.defendMoves.length === 0 && kingMoves.move.length === 0 && kingMoves.kill.length === 0;
-    if (condition) {
-      this.isCheckmate = true;
-    }
+
+    this.isCheckmate = condition;
+  }
+
+  checkForStalemate() {
+    if (this.isCheckmate || this.isCheck) { return }
+    const playerDefend = this.whoMoves === 'white' ? this.playerWhite : this.playerBlack;
+    const king = playerDefend.getKing(this.field.board);
+    const kingMoves = this.kingMoves(king);
+    const moves = playerDefend.allAvailableMoves(this.field.board, 'moveAndKill');
+    const condition = moves.length === 0 && kingMoves.move.length === 0 && kingMoves.kill.length === 0;
+
+    this.isStalemate = condition;
   }
 
   kingMoves(king) {
@@ -263,7 +324,9 @@ export default class Game {
 
     // case with pawns
     const AllPawnsKills = playerAttack.allAvailableMoves(this.field.board, 'pawn');
+    // const AllPawnsCovers = playerAttack.allAvailableMoves(this.field.board, 'cover');
     AllKingMoves.move = AllKingMoves.move.filter(move => !AllPawnsKills.some(amove => amove.x === move.x && amove.y === move.y));
+
 
     // case with castling 
     if (this.isCheck) {
@@ -310,7 +373,7 @@ export default class Game {
         return acc
       }, []);
     }
-
+  
     return AllKingMoves;
   }
 

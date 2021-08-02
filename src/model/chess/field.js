@@ -23,4 +23,16 @@ export default class Field {
       this.board.push(row);
     }
   }
+
+  clearField() {
+    if (this.board.length === 0) {
+      throw Error(`Field.clearField() board is empty`);
+    }
+    this.board.forEach((row, x) => {
+      row.forEach((_, y) => {
+        this.board[x][y].isAvailableFor = '';
+        this.board[x][y].figure = null;
+      })
+    });
+  }
 }

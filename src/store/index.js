@@ -3,7 +3,9 @@ import maze from '@/store/modules/maze';
 import memoji from '@/store/modules/memoji';
 import rockPaperScissors from '@/store/modules/rockPaperScissors';
 import tictactoe from '@/store/modules/tictactoe';
+import chess from '@/store/modules/chess';
 import games from '@/store/modules/games';
+
 export default createStore({
   // state: {
   //   aspectRatio: '',
@@ -53,6 +55,7 @@ export default createStore({
     memoji,
     rockPaperScissors,
     tictactoe,
+    chess,
     games
   }
 })
