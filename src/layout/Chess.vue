@@ -26,7 +26,22 @@
             />
           </div>
         </div>
+
         <div v-if="GAME.isPawnPromotion" class="chess__mask"></div>
+
+        <div class="chess__borderLeft">
+          <div class="chess__letter" v-for="(num, i) in 8" :key="i">{{ 9 - num  }}</div>
+        </div>
+        <div class="chess__borderDown">
+          <div class="chess__number" v-for="(num, i) in 8" :key="i">{{ String.fromCharCode(64 + num) }}</div>
+        </div>
+        <div class="chess__borderRight">
+          <div class="chess__letter" v-for="(num, i) in 8" :key="i">{{ 9 - num }}</div>
+        </div>
+        <div class="chess__borderUp">
+          <div class="chess__number" v-for="(num, i) in 8" :key="i">{{ String.fromCharCode(64 + num) }}</div>
+        </div>
+ 
       </div>
     </div>
     <Instruction class="chess__instruction"/>
@@ -164,6 +179,7 @@ export default {
 <style lang="scss" scopped>
 .chess {
   @include BasicGrid();
+  background: #24272E;
   &__row {
     @include Flex(center);
   }
@@ -173,6 +189,53 @@ export default {
   }
   &__field {
     position: relative;
+  }
+  &__borderLeft, &__borderRight {
+    position: absolute;
+    top: -30px;
+    padding-top: 30px;
+    height: calc(78px * 8 + 60px);
+    width: 30px;
+    background: darkred;
+  }
+  &__borderLeft {
+    left: -30px;
+  }
+  &__borderRight {
+    right: -30px;
+  }
+  &__borderUp, &__borderDown {
+    position: absolute;
+    left: -30px;
+    display: flex;
+    padding-left: 30px;
+    height: 30px;
+    width: calc(78px * 8 + 60px);
+    background: darkred;
+  }
+  &__borderUp {
+    top: -30px;
+  }
+  &__borderDown {
+    bottom: -30px;
+  }
+  &__letter {
+    height: rem(78);
+    width: 100%;
+    vertical-align: middle;
+    line-height: rem(78);
+    text-align: center;
+    color: white;
+    font-size: rem(20);
+  }
+  &__number {
+    height: 100%;
+    width: rem(78);
+    vertical-align: middle;
+    line-height: 30px;
+    text-align: center;
+    color: white;
+    font-size: rem(20);
   }
   &__mask {
     position: absolute;

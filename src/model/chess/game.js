@@ -142,7 +142,6 @@ export default class Game {
   }
 
   makeHistory(typeOfMove="", figure, whoMoved) {
-    // const copy = JSON.parse(JSON.stringify(figure));
     const obj = {
       figure: figure,
       oldPosition: this.oldPosition,
@@ -152,8 +151,6 @@ export default class Game {
     }
     this.historyOfMoves.push(obj);
   }
-
-  
 
   clickOnFigure(cell) {
     this.clearAvailableMove();
@@ -209,7 +206,6 @@ export default class Game {
 
     this.newPosition = Object.assign({}, figure.position);
     this.makeHistory(cell.isAvailableFor, figure, this.whoMoves);
-    console.log(this.historyOfMoves);
     this.selectedCell = null;
     this.whoMoves = this.whoMoves === 'white' ? 'black' : 'white';
 
