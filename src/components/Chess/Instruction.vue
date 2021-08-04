@@ -2,9 +2,9 @@
   <section class="instChess">
     <div class="instChess__mainBtns">
       <div class="instChess__mainBtn" @click="changeBtnName('start')">{{ showBtnName() }}</div>
-      <div class="instChess__mainBtn" @click="clear()">Clear</div>
-      <div class="instChess__mainBtn" @click="returnMove()">Return move</div>
-      <div class="instChess__mainBtn">Analyze game</div>
+      <div class="instChess__mainBtn" @click="clear()">Clear Board</div>
+      <!-- <div class="instChess__mainBtn" @click="returnMove()">Return move</div>
+      <div class="instChess__mainBtn">Analyze game</div> -->
     </div>
   </section>
 </template>
@@ -24,17 +24,20 @@ export default {
       if (this.getGameStatus === 'start') {
         return 'Game Started';
       }
-      if (['', 'finish'].includes(this.getGameStatus)) {
+      if (this.getGameStatus === '') {
         return 'Start Game';
+      }
+      if (this.getGameStatus === 'finish') {
+        return 'Game Finished';
       }
     },
     
     changeBtnName(name) {
+      if (this.getGameStatus === 'finish') { return }
       this.CHANGE_GAME_STATUS(name);
     },
 
     clear() {
-      this.$emit('clear');
       this.CHANGE_CLEAR_BOARD(true);
     },
 

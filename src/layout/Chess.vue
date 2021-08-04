@@ -70,6 +70,7 @@ export default {
       if (newVal) {
         this.GAME.clearField();
         this.CHANGE_CLEAR_BOARD(false);
+        this.CHANGE_GAME_STATUS('');
       }
     }
   },
@@ -88,7 +89,7 @@ export default {
     ...mapGetters(['getGameStatus']),
   },
   methods: {
-    ...mapActions(['CHANGE_GAME_RESULT', 'CHANGE_GAME_STATUS', 'CHANGE_CLEAR_BOARD']),
+    ...mapActions(['CHANGE_GAME_RESULT', 'CHANGE_GAME_STATUS', 'CHANGE_CLEAR_BOARD', 'CHANGE_SHOW_MODAL']),
 
     init() {
       this.GAME = new Game();
@@ -143,6 +144,9 @@ export default {
           description: `No one won, it's a draw`
         }
         this.CHANGE_GAME_RESULT(obj);
+      }
+      if (this.getGameStatus === 'finish') {
+        this.CHANGE_SHOW_MODAL(true);
       }
     },
 
@@ -303,7 +307,7 @@ export default {
   }
 }
 .check {
-  background: darkred;
+  background: lightcoral;
 }
 .lastMoveOldPosition {
   background: olivedrab;

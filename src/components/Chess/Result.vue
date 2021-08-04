@@ -1,14 +1,14 @@
 <template>
 	<transition name="fade">
-		<div class="modal" v-if="getGameStatus === 'finish'">
+		<div class="modal" v-if="getGameStatus === 'finish' && getShowModal">
 			<div class="mask"/>
 			<div class="resultChess center">
 				<div class="resultChess__close" @click="close()"></div>
 				<div class="resultChess__title">{{ getGameResult.title }}</div>
 				<div class="resultChess__description">{{ getGameResult.description }}</div>
 				<div class="resultChess__btns">
-					<div class="resultChess__btn">Analyze Game</div>
-					<div class="resultChess__btn">New Game</div>
+					<!-- <div class="resultChess__btn">Analyze Game</div> -->
+					<div class="resultChess__btn" @click="newGame()">New Game</div>
 				</div>
 			</div>
 		</div>
@@ -21,16 +21,22 @@ const { mapGetters, mapActions } = createNamespacedHelpers('chess');
 export default {
 	name: "ResultChess",
 	computed: {
-		...mapGetters(['getGameResult', 'getGameStatus'])
+		...mapGetters(['getGameResult', 'getGameStatus', 'getShowModal'])
 	},
   methods: {
-    ...mapActions(['CHANGE_GAME_RESULT', 'CHANGE_GAME_STATUS']),
+    ...mapActions(['CHANGE_GAME_RESULT', 'CHANGE_GAME_STATUS', 'CHANGE_CLEAR_BOARD', 'CHANGE_SHOW_MODAL']),
 
     close() {
       const obj = {title: '', description: ''};
       this.CHANGE_GAME_RESULT(obj);
-      this.CHANGE_GAME_STATUS('')
-    }
+			this.CHANGE_SHOW_MODAL(false);
+    },
+
+		newGame() {
+			this.close();
+			this.CHANGE_GAME_STATUS('start');
+			this.CHANGE_CLEAR_BOARD(true);
+		}
   }
 }
 </script>
@@ -40,5 +46,8 @@ export default {
   &__description {
     font-size: rem(25);
   }
+	&__btns {
+		justify-content: center;
+	}
 }
 </style>

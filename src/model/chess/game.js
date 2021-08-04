@@ -130,6 +130,10 @@ export default class Game {
     this.newPosition = null;
     this.whoMoves = 'white';
     this.historyOfMoves = [];
+    this.defendMoves = [];
+    this.isCheckmate = false;
+    this.isStalemate = false;
+    this.isCheck = false;
     this.createFigures();
   }
 
@@ -376,13 +380,14 @@ export default class Game {
   figureMoves(figure) {
     if (figure.name === "King") { return }
     let figureMove = figure.available(this.field.board);
-    if (this.isCheck) { return figureMove }
+    // console.log({who: this.whoMoves});
 
     const playerDefend = figure.color === this.playerWhite.side ? this.playerWhite : this.playerBlack;
     const playerAttack = playerDefend.side === 'white' ? this.playerBlack : this.playerWhite;
 
     // if figure defend king: no move or kill the attack figure
     const attackFigures = playerAttack.getAttackFigures(this.field.board, true);
+
     if (attackFigures.length === 0) { return figureMove }
 
     attackFigures.forEach(attackFigure => {
@@ -397,9 +402,12 @@ export default class Game {
         return acc;
       }, [])
 
+      // this is check 
+      if (defenders.length === 0) { return }
+
       // there are 2 or more defenders
       if (defenders.length > 1) { return }
-
+      // console.log(figure.position, defenders, defenders[0]);
       if (figure.position.x !== defenders[0].position.x || figure.position.y !== defenders[0].position.y ) {
         return;
       }

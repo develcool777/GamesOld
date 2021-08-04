@@ -6,14 +6,16 @@ export default {
       title: "",
       description: ""
     },
+    showModal: false,
     returnMove: false,
     clearBoard: false
   },
   getters: {
     getGameStatus: state => state.gameStatus,
     getGameResult: state => state.gameResult,
+    getShowModal: state => state.showModal,
     getReturnMove: state => state.returnMove,
-    getClearField: state => state.clearBoard
+    getClearField: state => state.clearBoard,
   },
   mutations: {
     changeGameStatus(state, status="") {
@@ -30,6 +32,12 @@ export default {
         throw Error(`chess.mutations.changeGameResult(state, result) result must be Object with keys: 'title', 'description'`)
       }
       state.gameResult = result;
+    },
+    changeShowModal(state, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`chess.mutations.changeShowModal(state, bool) bool must be Boolean`)
+      }
+      state.showModal = bool;
     },
     changeReturnMove(state, bool) {
       if (typeof bool !== 'boolean') {
@@ -50,6 +58,9 @@ export default {
     },
     CHANGE_GAME_RESULT({commit}, result) {
       commit('changeGameResult', result);
+    },
+    CHANGE_SHOW_MODAL({commit}, bool) {
+      commit('changeShowModal', bool);
     },
     CHANGE_RETURN_MOVE({commit}, bool) {
       commit('changeReturnMove', bool);
