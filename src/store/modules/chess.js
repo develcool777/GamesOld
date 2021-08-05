@@ -88,7 +88,7 @@ export default {
         const data = doc.data();
         DATA.push(data)
       })
-      console.log(DATA);
+      // console.log(DATA);
       commit('setFigures', DATA);
     }
   }

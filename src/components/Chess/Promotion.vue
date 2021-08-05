@@ -1,31 +1,39 @@
 <template>
   <div class="promotion" :style="determine(index)">
-    <div class="promotion__figure" v-for="(name, i) in figures[index]" :key="i" @click="chooseFigure(name)">
-      <img class="promotion__img" :src="require(`@/assets/chess/${name}`)" alt="">
+    <div class="promotion__figure" v-for="(figure, i) in figures[index]" :key="i" @click="chooseFigure(figure.name)">
+      <img class="promotion__img" :src="figure.url" :alt="figure.name">
     </div>
   </div>
 </template>
 
 <script>
+import { createNamespacedHelpers } from 'vuex'
+const { mapGetters } = createNamespacedHelpers('chess');
 export default {
   name: 'Promotion',
   props: {
     index: Number
   },
+  created() {
+    this.setFigures();
+  },
+  computed: {
+    ...mapGetters(['getFigures'])
+  },
   data() {
     return {
       figures: [
         [
-          'whiteQueen.png',
-          'whiteRook.png',
-          'whiteKnight.png',
-          'whiteBishop.png'
-        ], 
+          { name: 'whiteQueen', url: '' },
+          { name: 'whiteRook', url: ''  },
+          { name: 'whiteKnight', url: '' },
+          { name: 'whiteBishop', url: '' }
+        ],
         [
-          'blackBishop.png',
-          'blackKnight.png',
-          'blackRook.png',
-          'blackQueen.png'
+          { name: 'blackBishop', url: '' },
+          { name: 'blackKnight', url: '' },
+          { name: 'blackRook', url: '' },
+          { name: 'blackQueen', url: '' },
         ], 
       ]
     }
@@ -40,6 +48,19 @@ export default {
         return {top: 0};
       }
       return {bottom: 0};
+    },
+    setFigures() {
+      this.figures.forEach((arr, i) => {
+        arr.forEach((Figure, j) => {
+          this.getFigures.forEach(figure => {
+            if (figure.name === Figure.name) {
+              this.figures[i][j].url = figure.url;
+              return;
+            }
+          })
+        })
+      })
+      console.log(this.figures);
     }
   }
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="figure" :style="{cursor: cursorStyle}">
-    <img v-if="figureName !== ''" :src="figure.url" :alt="figure.name">
+    <img v-if="check()" :src="figure.url" :alt="figure.name">
   </div>
 </template>
 
@@ -10,6 +10,11 @@ export default {
   props: {
     figure: Object,
     cursorStyle: String,
+  },
+  methods: {
+    check() {
+      return Object.keys(this.figure).length === 0 ? false : true
+    }
   }
 }
 </script>

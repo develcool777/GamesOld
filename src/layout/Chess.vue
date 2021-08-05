@@ -105,7 +105,7 @@ export default {
     },
 
     createFigure(cell) {
-      if (cell.figure === null) { return '' }
+      if (cell.figure === null) { return {} }
       const name = cell.figure.color + cell.figure.name;
       return this.getFigures.reduce((acc, obj) => {
         if (obj.name === name) {
