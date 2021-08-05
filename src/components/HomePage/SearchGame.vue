@@ -57,17 +57,18 @@ export default {
   methods: {
     searchGame() {
       if (this.lockSearch) { return }
-      const obj = {};
-      obj.arrayOfIds = this.showVariants(this.field);
-      obj.field = this.field;
-      obj.found = false;
-      this.$emit('searchResult', obj);
-      this.hideVariants();
+      this.samePart(this.showVariants(this.field), this.field);
+      // const obj = {};
+      // obj.arrayOfIds = this.showVariants(this.field);
+      // obj.field = this.field;
+      // obj.found = false;
+      // this.$emit('searchResult', obj);
+      // this.hideVariants();
     },
     foundGameInVariants(variant) {
       if (this.lockSearch) { return }
       this.lockSearch = true;
-      this.samePart([variant.id], this.field, true)
+      this.samePart([variant.id], this.field, true);
       // const obj = {};
       // obj.arrayOfIds = [variant.id];
       // obj.field = this.field;
@@ -106,6 +107,7 @@ export default {
       return result.map(i => i.id);
     },
     showAll() { 
+      this.hideVariants();
       this.$emit('showAll');
     },
     hideVariants() {

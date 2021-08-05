@@ -39,6 +39,7 @@ export default {
 
     clear() {
       this.CHANGE_CLEAR_BOARD(true);
+      this.CHANGE_GAME_STATUS('');
     },
 
     returnMove() {

@@ -1,6 +1,6 @@
 <template>
   <div class="figure" :style="{cursor: cursorStyle}">
-    <img v-if="figureName !== ''" :src="require(`@/assets/chess/${figureName}`)" alt="">
+    <img v-if="figureName !== ''" :src="figure.url" :alt="figure.name">
   </div>
 </template>
 
@@ -8,7 +8,7 @@
 export default {
   name: 'Figure',
   props: {
-    figureName: String,
+    figure: Object,
     cursorStyle: String,
   }
 }

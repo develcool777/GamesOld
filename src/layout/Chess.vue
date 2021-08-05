@@ -16,7 +16,7 @@
             <div v-if="cell.isAvailableFor === 'kill'" class="chess__downLeft"></div>
             <div v-if="cell.isAvailableFor === 'castle'" class="chess__castle"></div>  
             <Figure 
-              :figureName="createFigureName(cell)"
+              :figure="createFigure(cell)"
               :cursorStyle="showCursorPointer(cell)"
             />
             <Promotion 
@@ -70,7 +70,6 @@ export default {
       if (newVal) {
         this.GAME.clearField();
         this.CHANGE_CLEAR_BOARD(false);
-        this.CHANGE_GAME_STATUS('');
       }
     }
   },
@@ -81,17 +80,20 @@ export default {
       dontClick: false,
     }
   },
-  created() {
-    this.init();
+  async created() {
+    await this.init();
   },
   computed: {
     ...mapState(['clearBoard']),
-    ...mapGetters(['getGameStatus']),
+    ...mapGetters(['getGameStatus', 'getFigures']),
   },
   methods: {
-    ...mapActions(['CHANGE_GAME_RESULT', 'CHANGE_GAME_STATUS', 'CHANGE_CLEAR_BOARD', 'CHANGE_SHOW_MODAL']),
+    ...mapActions(['CHANGE_GAME_RESULT', 'CHANGE_GAME_STATUS', 'CHANGE_CLEAR_BOARD', 
+      'CHANGE_SHOW_MODAL', 'SET_FIGURES'
+    ]),
 
-    init() {
+    async init() {
+      await this.SET_FIGURES();
       this.GAME = new Game();
       this.GAME.createField();
       this.GAME.createFigures();
@@ -102,10 +104,15 @@ export default {
       this.board = this.GAME.field.board;
     },
 
-    createFigureName(cell) {
+    createFigure(cell) {
       if (cell.figure === null) { return '' }
-      const name = cell.figure.color + cell.figure.name + '.png';
-      return name;
+      const name = cell.figure.color + cell.figure.name;
+      return this.getFigures.reduce((acc, obj) => {
+        if (obj.name === name) {
+          acc = obj
+        }
+        return acc;
+      }, {})
     },
 
     clearAvailableMove() {

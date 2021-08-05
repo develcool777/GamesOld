@@ -1,3 +1,7 @@
+import firebase from 'firebase/app';
+import "firebase/firestore";
+import "firebase/storage";
+
 export default {
   namespaced: true,
   state: {
@@ -6,6 +10,7 @@ export default {
       title: "",
       description: ""
     },
+    figures: [],
     showModal: false,
     returnMove: false,
     clearBoard: false
@@ -13,6 +18,7 @@ export default {
   getters: {
     getGameStatus: state => state.gameStatus,
     getGameResult: state => state.gameResult,
+    getFigures: state => state.figures,
     getShowModal: state => state.showModal,
     getReturnMove: state => state.returnMove,
     getClearField: state => state.clearBoard,
@@ -50,6 +56,12 @@ export default {
         throw Error(`chess.mutations.changeClearBoard(state, bool) bool must be Boolean`)
       }
       state.clearBoard = bool;
+    },
+    setFigures(state, array) {
+      if (!Array.isArray(array)) {
+        throw Error(`chess.mutations.setFigures(state, array) array must be Array`)
+      }
+      state.figures = array;
     }
   },
   actions: {
@@ -67,6 +79,17 @@ export default {
     },
     CHANGE_CLEAR_BOARD({commit}, bool) {
       commit('changeClearBoard', bool);
+    },
+    async SET_FIGURES({commit}) {
+      const DATA = [];
+      const db = firebase.firestore();
+      const collection = await db.collection('Chess').get();
+      collection.docs.forEach(doc => {
+        const data = doc.data();
+        DATA.push(data)
+      })
+      console.log(DATA);
+      commit('setFigures', DATA);
     }
   }
 }
