@@ -39,9 +39,8 @@ export default {
       }
 
       await getData();
-
       DATA.sort((a, b) => a.id - b.id);
-      console.log(DATA);
+
       commit('setData', DATA);
       dispatch('PARSE_DATA');
       commit('changeIsDataLoaded', true);
@@ -57,7 +56,7 @@ export default {
 
       commit('setParsedData', parsedData)
     },
-    UPDATE_PLAYED({ commit }, docId) {
+    async UPDATE_PLAYED({ commit }, docId) {
       const update = async () => {
         const db = firebase.firestore();
         const doc = await db.collection('Games').doc(docId);
@@ -66,7 +65,7 @@ export default {
           played: docData.data().played + 1
         })
       }
-      update();
+      await update();
       commit('changeIsDataLoaded', true);
     }
   }

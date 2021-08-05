@@ -69,9 +69,7 @@ export default {
       } else {
         this.message = `Found ${len} ${len === 1 ? 'game' : 'games'} at '${obj.field}'`;
       }
-      this.games = obj.arrayOfIds.map(id => {
-        return this.getData[id];
-      })
+      this.games = this.getData.filter(game => obj.arrayOfIds.includes(game.id));
     },
     showAll() {
       this.result = false;
@@ -79,7 +77,7 @@ export default {
       this.games = this.getData;
     },
     async updatePlayed(docId) {
-      this.UPDATE_PLAYED(docId);
+      await this.UPDATE_PLAYED(docId);
       await this.INIT();
     }
   }
@@ -98,6 +96,7 @@ export default {
   &__games {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     margin: rem(40) 0;
   }
   &__game {

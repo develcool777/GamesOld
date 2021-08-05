@@ -14,11 +14,11 @@
             class="searchBar__variant" 
             v-for="(variant, i) in variants" 
             :key="i"
-            @click="findGame(variant)"
+            @click="foundGameInVariants(variant)"
           >{{ variant.name }}</div>
         </div>
       </div>
-      <div class="searchBar__containerImg" @click="findGame()">
+      <div class="searchBar__containerImg" @click="searchGame()">
         <img 
           class="searchBar__img" 
           src="@/assets/searchGame/search.png" 
@@ -41,7 +41,6 @@ export default {
       field: '',
       variants: [],
       displayVariants: false,
-      placeHolder: '',
       lockSearch: false
     } 
   },
@@ -56,18 +55,32 @@ export default {
     }
   },
   methods: {
-    findGame(game) {
+    searchGame() {
       if (this.lockSearch) { return }
       const obj = {};
-      if (game !== undefined) {
-        this.lockSearch = true;
-        obj.arrayOfIds =  [game.id],
-        obj.field = this.field
-        obj.founded = true
-      } else {
-        obj.arrayOfIds = this.showVariants(this.field),
-        obj.field = this.field
-      }
+      obj.arrayOfIds = this.showVariants(this.field);
+      obj.field = this.field;
+      obj.found = false;
+      this.$emit('searchResult', obj);
+      this.hideVariants();
+    },
+    foundGameInVariants(variant) {
+      if (this.lockSearch) { return }
+      this.lockSearch = true;
+      this.samePart([variant.id], this.field, true)
+      // const obj = {};
+      // obj.arrayOfIds = [variant.id];
+      // obj.field = this.field;
+      // obj.founded = true;
+
+      // this.$emit('searchResult', obj);
+      // this.hideVariants();
+    },
+    samePart(array, field, found=false) {
+      const obj = {}
+      obj.arrayOfIds = array;
+      obj.field = field;
+      obj.founded = found;
       this.$emit('searchResult', obj);
       this.hideVariants();
     },
@@ -77,19 +90,20 @@ export default {
         return;
       }
       const fieldLow = field.toLowerCase();
-      const result = [];
-      this.data.forEach(item => {
+      const result = this.data.reduce((acc, item) => {
         const name = item.name.toLowerCase();
         if (name.substring(0, fieldLow.length) === fieldLow) {
-          result.push(item);
+          acc.push(item);
         }
-      })
+        return acc;
+      }, [])
+
       if (result.length > 0) {
         this.variants = result;
         this.displayVariants = true;  
       }
       this.lockSearch = false;
-      return result.map(item => item.id);
+      return result.map(i => i.id);
     },
     showAll() { 
       this.$emit('showAll');

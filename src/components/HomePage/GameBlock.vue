@@ -5,11 +5,12 @@
         <video 
           class="gBlock__video"
           ref="video" 
-          :src="block.videoUrl" 
+          :src="block.videoUrl"
           :poster="block.imgUrl"
           preload="none"
+          muted="muted"  
           loop
-        ></video>
+        />
       </div>
       <div class="gBlock__title">{{ block.name }}</div>
       <div class="gBlock__text">{{ block.text }}</div>
@@ -31,7 +32,7 @@ export default {
   watch: {
     hovered: function(newVal) {
       if (newVal) {
-        this.$refs.video.play()
+        this.$refs.video.play();
       } else {
         this.$refs.video.pause();
         this.$refs.video.currentTime = 0;
@@ -56,7 +57,7 @@ export default {
   }
   &__block:hover {
     background: $color-primary-1;
-    transform: scale(1.05);
+    transform: scale(1.01);
     @include boxShadow(0.7);
   }
   &__container {
