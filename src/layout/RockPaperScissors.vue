@@ -1,10 +1,12 @@
 <template>
   <div class="rps">
     <div class="rps__game">
+
       <section class="score-board">
         <span class="user-score">{{ userScore }}:</span>
         <span class="comp-score">{{ compScore }}</span>
       </section>
+
       <section class="result">
         <div class="between" v-if="getResultOfMove">
           <div class="block left">
@@ -19,13 +21,15 @@
         <p v-if="getResultOfMove">{{ display.result }}</p>
         <p v-else>User VS Computer. Who will win?</p>
       </section>
+
       <section class="choices">
           <div class="choice" v-for="(choice, i) in choices" :key="i">
               <img 
-                :src="require(`@/assets/RockPaperScissors/${choice.src}`)" 
+                :src="choice.src"
                 :class="choice.class" 
                 :alt="choice.alt"
                 @click="play(choice.item)"
+                draggable="false"
               >
           </div>
       </section>
@@ -67,6 +71,7 @@
         <p v-else class="rps__nodata">History is empty. Play more.</p>
       </section>
     </div>  
+
     <Instruction class="rps__instruction"/>
   </div>
 </template>
@@ -86,9 +91,9 @@ export default {
       game: {},
       display: {},
       choices: [
-        { src: 'rock.png', class: 'img', alt: 'rock', item: 'r' },
-        { src: 'paper.png', class: 'img', alt: 'paper', item: 'p' },
-        { src: 'scissors.png', class: 'img', alt: 'scissors', item: 's' }
+        { src: '', class: 'img', alt: 'rock', item: 'r' },
+        { src: '', class: 'img', alt: 'paper', item: 'p' },
+        { src: '', class: 'img', alt: 'scissors', item: 's' }
       ],
       headHistory: [
         { name: '№'},
@@ -123,14 +128,16 @@ export default {
       }
     }
   },
-  created() {
+  async created() {
+    await this.SET_CHOICES()
+    this.setImages();
     this.game = new Game();
   },
   computed: {
     ...mapState(['clear', 'showHistory', 'showAnalitics']),
     ...mapGetters([
       'getImpossible', 'getEasy', 'getWithoutDraw', 
-      'getResultOfMove', 'getShowHistory', 'getShowAnalitics'
+      'getResultOfMove', 'getShowHistory', 'getShowAnalitics', 'getChoices'
     ]), 
     userScore() {
       return this.game.userScore;
@@ -149,7 +156,8 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['CHANGE_CLEAR', 'CHANGE_SHOW_HISTORY', 'CHANGE_RESULT_OF_MOVE']),
+    ...mapActions(['CHANGE_CLEAR', 'CHANGE_SHOW_HISTORY', 'CHANGE_RESULT_OF_MOVE', 'SET_CHOICES']),
+
     play(move) {
       let moves;
       if (this.getImpossible) {
@@ -169,6 +177,7 @@ export default {
       this.setAnaliticsData();
       this.setHistoryData();
     },
+
     clearField() {
       this.game.clean();
       this.CHANGE_CLEAR(false);
@@ -176,9 +185,11 @@ export default {
       this.historyData = [];
       this.analiticsData = [];
     },
+
     convertMove(move) {
       return move === 'r' ? 'Rock' : move === 'p' ? 'Paper' : 'Scissors';
     },
+
     convertResult(info) {
       if (info === 'draw') {
         return `It's a draw`
@@ -190,6 +201,7 @@ export default {
         return `Computer win`
       }
     },
+
     displayResult() {
       const history = this.game.history;
       const info = history[history.length - 1];
@@ -198,6 +210,7 @@ export default {
       this.display.result = this.convertResult(info.result);
       this.display.res = info.result;
     },
+
     setHistoryData() {
       const history = this.game.history;
       const arr = []
@@ -212,6 +225,7 @@ export default {
       })
       this.historyData = arr;
     },
+
     setAnaliticsData() {
       const data = this.game.analytics();
       let res = [];
@@ -232,6 +246,14 @@ export default {
           return item; 
         })
       })
+    },
+
+    setImages() {
+      const imgs = this.getChoices;
+      this.choices = this.choices.map(c => {
+        c.src = imgs[c.alt];
+        return c;
+      })
     }
   }
 }
@@ -250,6 +272,7 @@ export default {
     margin: rem(20) 0;
   }
 }
+
 .score-board {
   position: relative;
   width: 200px;
@@ -299,7 +322,6 @@ export default {
   display: inline-block;
   margin: 0 20px;
   border: 5px solid white;
-  /* padding: 10px; */
   border-radius: 50%;
   cursor: pointer;
   transition-duration: .5s;
@@ -312,6 +334,8 @@ export default {
 .img {
   display: block;
   width: 100px;
+  height: 100px;
+  background: grey;
   border-radius: 50%;
   transition-duration: .5s;
 }
@@ -319,7 +343,6 @@ export default {
 .choice:hover > .img {
   transform: rotate(-90deg) 
 } 
-
 
 .result {
   display: flex;
@@ -336,33 +359,37 @@ export default {
   justify-content: space-between;
   width: inherit;
 }
+
 .move {
   text-align: center;
 }
+
 .left {
   padding-left: rem(80);
 }
+
 table {
-    border-collapse: collapse;
-    margin: 50px auto;
-    color: white;
+  border-collapse: collapse;
+  margin: 50px auto;
+  color: white;
 }
+
 th {
-    padding: 10px 20px;
-    border: 1px solid white;
-    
-    font-size: 20px;
-    background: #E25840;
+  padding: 10px 20px;
+  border: 1px solid white;
+  font-size: 20px;
+  background: #E25840;
 }
 
 td {
-    border: 1px solid white;
-    padding: 10px 20px; 
-    font-size: 14px;
-    text-align: center;
+  border: 1px solid white;
+  padding: 10px 20px; 
+  font-size: 14px;
+  text-align: center;
 }
+
 tr:hover {
-    background-color: tomato;
-    cursor: default;
+  background-color: tomato;
+  cursor: default;
 }
 </style>

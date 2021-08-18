@@ -121,7 +121,6 @@ export default class Queen extends Figures {
     }
     super.clearWayToKing(available);
 
-    // console.log({available}, "Queen");
     return available;
   }
 

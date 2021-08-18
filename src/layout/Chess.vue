@@ -90,6 +90,9 @@ export default {
   async created() {
     await this.init();
   },
+  beforeUnmount() {
+    this.CHANGE_GAME_STATUS('');
+  },
   computed: {
     ...mapState(['clearBoard']),
     ...mapGetters(['getGameStatus', 'getFigures']),

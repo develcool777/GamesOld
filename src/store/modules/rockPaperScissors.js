@@ -1,3 +1,6 @@
+import firebase from 'firebase/app';
+import "firebase/firestore";
+
 export default {
   namespaced: true,
   state: {
@@ -8,6 +11,7 @@ export default {
     showHistory: false,
     showAnalitics: false,
     resultOfMove: false,
+    choices: {}
   },
   getters: {
     getImpossible: state => state.impossible,
@@ -16,7 +20,8 @@ export default {
     getClear: state => state.clear,
     getShowHistory: state => state.showHistory,
     getShowAnalitics: state => state.showAnalitics,
-    getResultOfMove: state => state.resultOfMove
+    getResultOfMove: state => state.resultOfMove,
+    getChoices: state => state.choices
   },
   mutations: {
     changeImpossible(state, boolean) {
@@ -39,6 +44,15 @@ export default {
     },
     changeResultOfMove(state, boolean) {
       state.resultOfMove = boolean;
+    },
+    setChoices(state, array) {
+      if (!Array.isArray(array)) {
+        throw Error(`rockPaperScissors.mutations.setChoices(state, array) array must be Array`);
+      }
+      state.choices = array.reduce((acc, obj) => {
+        acc[obj.name] = obj.url;
+        return acc;
+      }, {});
     }
   },
   actions: {
@@ -74,6 +88,16 @@ export default {
     },
     CHANGE_RESULT_OF_MOVE({commit}, boolean) {
       commit('changeResultOfMove', boolean);     
+    },
+    async SET_CHOICES({commit}) {
+      const DATA = [];
+      const db = firebase.firestore();
+      const collection = await db.collection('rockPaperScissors').get();
+      collection.docs.forEach(doc => {
+        const data = doc.data();
+        DATA.push(data)
+      })
+      commit('setChoices', DATA);
     }
   }
 }
