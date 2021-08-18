@@ -51,13 +51,8 @@ export default {
     },
     setFigures() {
       this.figures.forEach((arr, i) => {
-        arr.forEach((Figure, j) => {
-          this.getFigures.forEach(figure => {
-            if (figure.name === Figure.name) {
-              this.figures[i][j].url = figure.url;
-              return;
-            }
-          })
+        arr.forEach((figure, j) => {
+          this.figures[i][j].url = this.getFigures[figure.name];
         })
       })
       console.log(this.figures);
