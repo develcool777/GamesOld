@@ -10,7 +10,7 @@ export default {
       title: "",
       description: ""
     },
-    figures: [],
+    figures: {},
     showModal: false,
     returnMove: false,
     clearBoard: false
@@ -35,33 +35,36 @@ export default {
     },
     changeGameResult(state, result) {
       if (Object.keys(result).join('|') !== 'title|description') {
-        throw Error(`chess.mutations.changeGameResult(state, result) result must be Object with keys: 'title', 'description'`)
+        throw Error(`chess.mutations.changeGameResult(state, result) result must be Object with keys: 'title', 'description'`);
       }
       state.gameResult = result;
     },
     changeShowModal(state, bool) {
       if (typeof bool !== 'boolean') {
-        throw Error(`chess.mutations.changeShowModal(state, bool) bool must be Boolean`)
+        throw Error(`chess.mutations.changeShowModal(state, bool) bool must be Boolean`);
       }
       state.showModal = bool;
     },
     changeReturnMove(state, bool) {
       if (typeof bool !== 'boolean') {
-        throw Error(`chess.mutations.changeReturnMove(state, bool) bool must be Boolean`)
+        throw Error(`chess.mutations.changeReturnMove(state, bool) bool must be Boolean`);
       }
       state.returnMove = bool;
     },
     changeClearBoard(state, bool) {
       if (typeof bool !== 'boolean') {
-        throw Error(`chess.mutations.changeClearBoard(state, bool) bool must be Boolean`)
+        throw Error(`chess.mutations.changeClearBoard(state, bool) bool must be Boolean`);
       }
       state.clearBoard = bool;
     },
     setFigures(state, array) {
       if (!Array.isArray(array)) {
-        throw Error(`chess.mutations.setFigures(state, array) array must be Array`)
+        throw Error(`chess.mutations.setFigures(state, array) array must be Array`);
       }
-      state.figures = array;
+      state.figures = array.reduce((acc, obj) => {
+        acc[obj.name] = obj.url;
+        return acc;
+      }, {});
     }
   },
   actions: {
@@ -88,7 +91,6 @@ export default {
         const data = doc.data();
         DATA.push(data)
       })
-      // console.log(DATA);
       commit('setFigures', DATA);
     }
   }

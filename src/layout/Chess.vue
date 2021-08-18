@@ -8,17 +8,24 @@
             v-for="(cell, j) in row" 
             :key="j"
             @click="clickOnCell(cell, i, j)"
+            @drop="onDrop($event, cell)"
+            @dragenter="dragEnter($event, cell)"
+            @dragleave="dragLeave($event)"
+            @dragover.prevent
           >
             <div v-if="cell.isAvailableFor === 'move'" class="chess__move"></div>
             <div v-if="cell.isAvailableFor === 'kill'" class="chess__upRight"></div>
             <div v-if="cell.isAvailableFor === 'kill'" class="chess__upLeft"></div>
             <div v-if="cell.isAvailableFor === 'kill'" class="chess__downRight"></div>
             <div v-if="cell.isAvailableFor === 'kill'" class="chess__downLeft"></div>
-            <div v-if="cell.isAvailableFor === 'castle'" class="chess__castle"></div>  
+            <div v-if="cell.isAvailableFor === 'castle'" class="chess__castle"></div>
             <Figure 
               :figure="createFigure(cell)"
               :cursorStyle="showCursorPointer(cell)"
-            />
+              :draggable="defineDrag(cell)"
+              @dragstart="startDrag($event, cell)"
+
+            />  
             <Promotion 
               v-if="cell.isAvailableFor === 'promotion'" 
               v-on:promotion="pawnPromotion($event, i, j)"
@@ -30,16 +37,16 @@
         <div v-if="GAME.isPawnPromotion" class="chess__mask"></div>
 
         <div class="chess__borderLeft">
-          <div class="chess__letter" v-for="(num, i) in 8" :key="i">{{ 9 - num  }}</div>
+          <div class="chess__number" v-for="(num, i) in 8" :key="i">{{ 9 - num  }}</div>
         </div>
         <div class="chess__borderDown">
-          <div class="chess__number" v-for="(num, i) in 8" :key="i">{{ String.fromCharCode(64 + num) }}</div>
+          <div class="chess__letter" v-for="(num, i) in 8" :key="i">{{ String.fromCharCode(64 + num) }}</div>
         </div>
         <div class="chess__borderRight">
-          <div class="chess__letter" v-for="(num, i) in 8" :key="i">{{ 9 - num }}</div>
+          <div class="chess__number" v-for="(num, i) in 8" :key="i">{{ 9 - num }}</div>
         </div>
         <div class="chess__borderUp">
-          <div class="chess__number" v-for="(num, i) in 8" :key="i">{{ String.fromCharCode(64 + num) }}</div>
+          <div class="chess__letter" v-for="(num, i) in 8" :key="i">{{ String.fromCharCode(64 + num) }}</div>
         </div>
  
       </div>
@@ -77,7 +84,7 @@ export default {
     return {
       GAME: {},
       board: [],
-      dontClick: false,
+      dontClick: false
     }
   },
   async created() {
@@ -93,10 +100,10 @@ export default {
     ]),
 
     async init() {
-      await this.SET_FIGURES();
       this.GAME = new Game();
       this.GAME.createField();
       this.GAME.createFigures();
+      await this.SET_FIGURES();
       this.draw();
     },
 
@@ -105,19 +112,45 @@ export default {
     },
 
     createFigure(cell) {
-      if (cell.figure === null) { return {} }
+      if (cell.figure === null) { return [] }
       const name = cell.figure.color + cell.figure.name;
-      return this.getFigures.reduce((acc, obj) => {
-        if (obj.name === name) {
-          acc = obj
-        }
-        return acc;
-      }, {})
+      return [name, this.getFigures[name]];
     },
 
     clearAvailableMove() {
       this.GAME.clearAvailableMove();
       this.draw();
+    },
+
+    startDrag(event, cell) {
+      if (this.getGameStatus !== 'start' || this.GAME.whoMoves !== cell.figure.color) { return }
+      this.clickOnCell(cell, cell.position.x, cell.position.y);
+      event.dataTransfer.dropEffect = 'move';
+      event.dataTransfer.effectAllowed = 'move';
+    },
+
+    onDrop(event, cell) {
+      if (this.getGameStatus !== 'start') { return }  
+      this.clickOnCell(cell, cell.position.x, cell.position.y);
+      event.target.style.background = ''
+    },
+
+    dragEnter(event, cell) {
+      if (['move', 'castle'].includes(cell.isAvailableFor)) {
+        event.target.style.background = 'darkgreen';
+      }
+      if ('kill' === cell.isAvailableFor) {
+        event.target.style.background = 'red';
+      }
+    },
+
+    dragLeave(event) {
+      event.target.style.background = '';
+    },
+
+    defineDrag(cell) {
+      if (cell.figure === null || this.getGameStatus !== 'start') { return false }
+      return cell.figure.color === this.GAME.whoMoves;
     },
 
     clickOnCell(cell, x, y) {
@@ -163,6 +196,9 @@ export default {
     },
 
     chooseCellColor(cell, x, y) {
+      if (cell.figure !== null && cell.figure.name === 'King' && cell.figure.color === this.GAME.whoMoves && this.GAME.isCheckmate) {
+        return 'checkMate';
+      }
       if (this.GAME.selectedCell !== null && this.GAME.selectedCell.position.x === x && this.GAME.selectedCell.position.y === y) {
         return 'selected';
       }
@@ -230,23 +266,18 @@ export default {
   &__borderDown {
     bottom: -30px;
   }
-  &__letter {
-    height: rem(78);
-    width: 100%;
-    vertical-align: middle;
-    line-height: rem(78);
-    text-align: center;
+  &__letter, &__number {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     color: white;
     font-size: rem(20);
   }
-  &__number {
-    height: 100%;
+  &__letter {
     width: rem(78);
-    vertical-align: middle;
-    line-height: 30px;
-    text-align: center;
-    color: white;
-    font-size: rem(20);
+  }
+  &__number {
+    height: rem(78);
   }
   &__mask {
     position: absolute;
@@ -315,6 +346,9 @@ export default {
 }
 .check {
   background: lightcoral;
+}
+.checkMate {
+  background: crimson;
 }
 .lastMoveOldPosition {
   background: olivedrab;

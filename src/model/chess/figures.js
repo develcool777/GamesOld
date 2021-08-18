@@ -37,8 +37,8 @@ export default class Figures {
     figure.position.x = x;
     figure.position.y = y;
     field[ figure.position.x ][ figure.position.y ].figure = old;
-  } 
-
+  }
+   
   clearWayToKing(available) {
     if (available.check.length === 0) {
       available.wayToKing = [];

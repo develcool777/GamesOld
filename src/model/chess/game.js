@@ -187,6 +187,7 @@ export default class Game {
       this.clickOnFigure(cell);
       return;
     }
+  
     
     // if figure was clicked but new click was not on available moves
     if (cell.isAvailableFor === '') { 
