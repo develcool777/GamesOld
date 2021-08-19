@@ -33,3 +33,9 @@ vue-cli-service electron:serve
 ```
 npm run serve
 ```
+
+## Documentation
+```
+node_modules/.bin/jsdoc -c jsdoc.json
+```
+After this command creates folder with name `docs` click on it and then open `index.html` in browser 
