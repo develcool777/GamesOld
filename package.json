@@ -11,7 +11,8 @@
     "electron:serve": "vue-cli-service electron:serve",
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps",
-    "production": "vue-cli-service serve --mode production"
+    "production": "vue-cli-service serve --mode production",
+    "jsDoc": "node_modules/.bin/jsdoc -c jsdoc.json"
   },
   "main": "background.js",
   "dependencies": {
@@ -30,10 +31,12 @@
     "@vue/cli-service": "~4.5.0",
     "@vue/compiler-sfc": "^3.0.0",
     "babel-eslint": "^10.1.0",
+    "docdash": "^1.2.0",
     "electron": "^11.0.0",
     "electron-devtools-installer": "^3.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^7.0.0",
+    "jsdoc": "^3.6.7",
     "node-sass": "^4.12.0",
     "sass-loader": "^8.0.2",
     "vue-cli-plugin-electron-builder": "~2.0.0-rc.6"

@@ -1,28 +1,73 @@
+
+/**
+ * @class 
+ * @alias Board
+ * @memberof TicTacToe
+ * @classdesc This class have methods to build the board, [`more info`]{@link https://alialaa.com/blog/tic-tac-toe-js}
+ * @constructor
+ */
 class Board {
   constructor(state = ['','','','','','','','','']) {
     this.state = state;
   }
+  /**
+   * @method 
+   * @alias isEmpty
+   * @memberof Board#
+   * @description Returns true if every cell is empty otherwise false 
+   * @returns {Boolean}
+   * @example const isEmpty = this.isEmpty()
+   */
   isEmpty() {
-      return this.state.every(cell => !cell);
+    return this.state.every(cell => !cell);
   }
+
+  /**
+   * @method 
+   * @alias isFull
+   * @memberof Board#
+   * @description Returns true if there is no empty cell otherwise false 
+   * @returns {Boolean}
+   * @example const isFull = this.isFull() 
+   */
   isFull() {
     return this.state.every(cell => cell);
   }
 
+  /**
+   * @method 
+   * @alias insert
+   * @memberof Board#
+   * @param {String} symbol - Value must be 'x' or 'o'
+   * @param {Number} position - Value must be Integer in range(0, 8)
+   * @throws Error - if symbol is not 'x' or 'o'
+   * @throws Error - if position is not in range(0, 8)
+   * @description Insert `symbol` in `this.state` at the `position` in case of success return true, otherwise false
+   * @returns {Boolean} 
+   * @example const isInserted = this.insert('x', 4); 
+   */
   insert(symbol, position) {
-      if(![0,1,2,3,4,5,6,7,8].includes(position)) {
-          throw new Error(`Cell index ${position} does not exist!`)
-      }
-      if(!['x','o'].includes(symbol)) {
-          throw new Error('The symbol can only be x or o!')
-      }
-      if(this.state[position]) {
-          return false;
-      }
+    if(![0,1,2,3,4,5,6,7,8].includes(position)) {
+      throw new Error(`Cell index ${position} does not exist!`)
+    }
+    if(!['x','o'].includes(symbol)) {
+      throw new Error('The symbol can only be x or o!')
+    }
+    if(this.state[position]) {
+      return false;
+    }
     this.state[position] = symbol;
     return true;
   }
 
+  /**
+   * @method 
+   * @alias getAvailableMoves
+   * @memberof Board#
+   * @description Return array of available positions
+   * @returns {Array} 
+   * @example const availablePos = this.getAvailableMoves()
+   */
   getAvailableMoves() {
     const moves = [];
     this.state.forEach((cell, index) => {
@@ -31,6 +76,14 @@ class Board {
     return moves;
   }
 
+  /**
+   * @method 
+   * @alias isTerminal
+   * @memberof Board#
+   * @description If there is a winner or it's draw returns object otherwise boolean(false)
+   * @returns {Boolean|Object} 
+   * @example const result = this.isTerminal()
+   */
   isTerminal() {
     if(this.isEmpty()) return false;
     if(this.state[0] === this.state[1] && this.state[0] === this.state[2] && this.state[0]) {
@@ -70,12 +123,32 @@ class Board {
   }
 }
 
-
+/**
+ * @class 
+ * @alias minMax
+ * @memberof TicTacToe
+ * @classdesc This class represent logic of computer thinking, otherwise determine the best move for computer, 
+ * [`more info`]{@link https://alialaa.com/blog/tic-tac-toe-js-minimax}
+ * @constructor 
+ */
 class minMax {
   constructor(maxDepth = -1) {
     this.maxDepth = maxDepth;
     this.nodesMap = new Map();
   }
+  /**
+   * @method getBestMove
+   * @memberof minMax#
+   * @param {InstanceType} board 
+   * @param {Boolean} maximizing 
+   * @param {Function} callback 
+   * @param {Number} depth 
+   * @description This method define the best move for computer with MinMax algorithm 
+   * @returns {Number}
+   * @example 
+   * const b = new Board();
+   * const best = this.getBestMove(b);
+   */
   getBestMove(board, maximizing = true, callback = () => {}, depth = 0) {
     if(depth == 0) this.nodesMap.clear();
   

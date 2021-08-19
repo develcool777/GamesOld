@@ -122,7 +122,7 @@ export default {
     },
     draw() {
       // this.game.log();
-      this.fieldForDraw = this.game.getField();
+      this.fieldForDraw = this.game.getFieldForDraw();
     },
     clearField() {
       this.game.clear();
