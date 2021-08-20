@@ -1,8 +1,11 @@
+import firebase from 'firebase/app';
+import "firebase/firestore";
+
 export default {
   namespaced: true,
   state: {
     gameFinished: false,
-    isPlaying: undefined,
+    isPlaying: false,
     restart: false,
     showHint: false,
     level: null,
@@ -11,6 +14,7 @@ export default {
     timeForReset: null,
     itemsForCompare: [],
     result: '',
+    data: []
   },
   getters: {
     getGameFinished: state => state.gameFinished,
@@ -22,25 +26,44 @@ export default {
     getTimer: state => state.timer,
     getTimeForReset: state => state.timeForReset,
     getItemsForCompare: state => state.itemsForCompare,
-    getResult: state => state.result
+    getResult: state => state.result,
+    getData: state => state.data
   },
   mutations: {
-    changeGameFinished(state, boolean) {
-      state.gameFinished = boolean;
+    changeGameFinished(state, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`memoji.mutation.changeGameFinished bool must Boolean`);
+      }
+      state.gameFinished = bool;
     },
-    changeIsPlaying(state, boolean) {
-      state.isPlaying = boolean;
+    changeIsPlaying(state, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`memoji.mutation.changeIsPlaying bool must Boolean`);
+      }
+      state.isPlaying = bool;
     },
-    changeRestart(state, boolean) {
-      state.restart = boolean;
+    changeRestart(state, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`memoji.mutation.changeRestart bool must Boolean`);
+      }
+      state.restart = bool;
     },
-    changeShowHint(state, boolean) {
-      state.showHint = boolean;
+    changeShowHint(state, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`memoji.mutation.changeShowHint bool must Boolean`);
+      }
+      state.showHint = bool;
     },
     changeLevel(state, level) {
+      if (!Number.isInteger(level)) {
+        throw Error(`memoji.mutation.changeLevel level must Integer`);
+      }
       state.level = level;
     },
     setAmountOfLevels(state, levels) {
+      if (!Number.isInteger(levels)) {
+        throw Error(`memoji.mutation.setAmountOfLevels levels must Integer`);
+      }
       state.amountOfLevels = levels;
     },
     changeTimer(state, seconds) {
@@ -51,16 +74,31 @@ export default {
       }
     },
     setTimeForReset(state, seconds) {
+      if (!Number.isInteger(seconds)) {
+        throw Error(`memoji.mutation.setTimeForReset seconds must Integer`);
+      }
       state.timeForReset = seconds;
     },
-    AddItemsForCompare(state, item) {
+    addItemsForCompare(state, item) {
+      if (typeof item !== 'object' && item !== null) {
+        throw Error(`memoji.mutation.addItemsForCompare item must Object`);
+      }
       state.itemsForCompare.push(item);
     },
     removeItemsForCompare(state) {
       state.itemsForCompare.splice(0);
     },
     changeResult(state, result='') {
+      if (typeof result !== 'string') {
+        throw Error(`memoji.mutation.changeResult result must String`);
+      }
       state.result = result;
+    },
+    setData(state, arr=[]) {
+      if (!Array.isArray(arr)) {
+        throw Error(`memoji.mutation.setData arr must Array`);
+      }
+      state.data = arr;
     }
   },
   actions: {
@@ -69,12 +107,12 @@ export default {
       commit('changeTimer', payload.time);
       commit('changeLevel', payload.level);
       commit('setAmountOfLevels', payload.levels);
-      commit('changeIsPlaying', undefined);
+      commit('changeIsPlaying', false);
       commit('changeGameFinished', false);
       commit('removeItemsForCompare');
     },
     ADD_ITEMS_FOR_COMPARE({commit}, item) {
-      commit('AddItemsForCompare', item);
+      commit('addItemsForCompare', item);
     },
     REMOVE_ITEMS_FOR_COMPARE({commit}) {
       commit('removeItemsForCompare');
@@ -93,7 +131,7 @@ export default {
     },
     CLEAN_GAME({commit}) {
       commit('changeGameFinished', false);
-      commit('changeIsPlaying', undefined);
+      commit('changeIsPlaying', false)
       commit('changeResult', '');
       commit('changeTimer');
       commit('changeShowHint', false);
@@ -105,6 +143,17 @@ export default {
     },
     CHANGE_SHOW_HINT({commit}, boolean) {
       commit('changeShowHint', boolean);
+    },
+    async GET_DATA({commit}) {
+      const DATA = [];
+      const db = firebase.firestore();
+      const collection = await db.collection('Memoji_levels').get();
+      collection.docs.forEach(doc => {
+        const data = doc.data();
+        data.level = +doc.id;
+        DATA.push(data)
+      })
+      commit('setData', DATA);
     }
   } 
 }

@@ -81,10 +81,13 @@ export default {
       return this.attempts > 0 ? `Show hint(${this.attempts}/3)` : 'Run out of attempts'
     },
     start() {
-      return this.getIsPlaying === undefined ? 'Start' : this.getIsPlaying ? 'Started' : 'Start';
+      return  this.getIsPlaying ? 'Started' : 'Start';
     },
     stop() {
-      return this.getIsPlaying === undefined ? 'Stop' : !this.getIsPlaying ? 'Stoped' : 'Stop';
+      if (this.getTimeForReset === this.getTimer) { 
+        return 'Stop'
+      }
+      return !this.getIsPlaying ? 'Stoped' : 'Stop';
     }
   },
   methods: {

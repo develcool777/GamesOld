@@ -20,8 +20,8 @@ export default class Game {
     })
   }
 
-  log() {
-    console.log({cards: this.cards, cardsData: this.cardsData});
+  get log() {
+    return console.log({cards: this.cards, cardsData: this.cardsData});
   }
 
   setCardData() {

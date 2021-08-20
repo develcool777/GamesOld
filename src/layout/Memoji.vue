@@ -39,7 +39,6 @@
 <script>
 import { createNamespacedHelpers } from 'vuex'
 const { mapState, mapActions, mapGetters } = createNamespacedHelpers('memoji');
-import DATA from '@/data/dataForMemoji';
 import Field from '@/model/memoji/field';
 import Game from '@/model/memoji/game';
 import Instruction from '@/components/Memoji/Instruction';
@@ -68,14 +67,16 @@ export default {
       } 
     }
   },
-  created() {
-    this.field = new Field(DATA);
+  async created() {
+    await this.GET_DATA();
+    this.field = new Field(this.getData)
     this.createGame();
   },
   computed: {
     ...mapState(['showHint', 'gameFinished']),
-    ...mapGetters(['getItemsForCompare', 'getIsPlaying']),
+    ...mapGetters(['getItemsForCompare', 'getIsPlaying', 'getData']),
     setFieldWidth() {
+      if (this.game.cards === undefined) { return '100px' }
       const amountOfCards = this.game.cards.length;
       const calcWidth = (koef) => 130 * koef + 25 * koef;
       if (amountOfCards <= 4) {
@@ -91,7 +92,7 @@ export default {
     ...mapActions([
       'INIT_STATE', 'ADD_ITEMS_FOR_COMPARE', 
       'REMOVE_ITEMS_FOR_COMPARE', 'CLEAN_GAME',
-      'CHANGE_SHOW_HINT', 'CHANGE_RESTART', 'END_GAME'
+      'CHANGE_SHOW_HINT', 'CHANGE_RESTART', 'END_GAME', 'GET_DATA'
     ]),
     createGame() {
       this.game = new Game(this.field.getCardsForGame());

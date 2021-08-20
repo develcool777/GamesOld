@@ -1,26 +1,19 @@
 export default class Field {
   constructor(data) {
-    if (typeof data !== 'object') {
-      throw Error(`Field.constructor data must be Object`);
+    if (!Array.isArray(data)) {
+      throw Error(`Field.constructor data must be Array`);
     }
-    if (Object.keys(data)[0] !== 'Levels') { 
-      throw Error(`Field.constructor data.keys must be String named 'Levels'`);
+    if (!data.every(obj => ['time', 'level', 'cards'].every(prop => Object.prototype.hasOwnProperty.call(obj, prop)))) {
+      throw Error(`Field.constructor every element of data must be Object with props: 'time', 'level', 'cards'`);
     }
-    const dL = data.Levels;
-    if (Object.keys(dL).some(item => isNaN(item) || !Number.isInteger(+item))) { 
-      throw Error(`Field.constructor data.keys must be Number`);
+    if (!data.every(obj => Number.isInteger(obj.time) && Number.isInteger(obj.level) && obj.time > 0 && obj.level > 0)) {
+      throw Error(`Field.constructor every time and level must be Integer and greater than 0`);
     }
-    if (!Object.keys(dL).every(key => Object.keys(dL[+key]).join(' ') === 'time cards' ) ) {
-      throw Error(`Field.constructor every level must contain keys: time cards`);
+    if (!data.every(obj => Array.isArray(obj.cards))) {
+      throw Error(`Field.constructor every cards must be Array`)
     }
-    if (!Object.keys(dL).every(key => Number.isInteger(dL[+key].time))) {
-      throw Error(`Field.constructor every time must be Integer`);
-    }
-    if (!Object.keys(dL).every(key => Array.isArray(dL[+key].cards))) {
-      throw Error(`Field.constructor cards must be Array`);
-    }
-    if (!Object.keys(dL).every(key => dL[+key].cards.every(item => typeof item === 'string'))) {
-      throw Error(`Field.constructor every element in arrayOfCards must be typeof string`);
+    if (!data.every(obj => obj.cards.every(item => typeof item === 'string'))) {
+      throw Error(`Field.constructor every cards item must be String`)
     }
     let level = 1;
     Object.defineProperties(this, {
@@ -35,43 +28,29 @@ export default class Field {
           }
           level = value;
         }
-      },
-      getCards: {
-        get: () => (data) => data.Levels[level].cards
-      },
-      getTime: {
-        get: () => (data) => data.Levels[level].time
-      },
-      getLevels: {
-        get: () => (data) => Object.keys(data.Levels)
       }
     })
-    Object.freeze(this);
   }
-  log() {
-    console.log({CurrentLevel: this.level});
+
+  get log() {
+    return console.log({CurrentLevel: this.level, data: this.data});
   }
   
   getCardsForGame() {
-    const clone = JSON.parse(JSON.stringify(this.data));
-    const result = this.getCards(clone);
-    return result; 
+    return this.data.find(obj => obj.level === this.level).cards;
   }
 
   time() {
-    const clone = JSON.parse(JSON.stringify(this.data));
-    const result = this.getTime(clone);
-    return result;
+    return this.data.find(obj => obj.level === this.level).time;
   }
 
   changeLevel(value) {
-    const levels = Object.keys(this.data.Levels);
-    if (levels.map(Number).includes(this.level + value)) {
+    const levels = this.data.map(obj => obj.level);
+    if (levels.includes(this.level + value)) {
       this.level += value;
     }
   }
   amountOfLevels() {
-    const levels = this.getLevels(this.data);
-    return levels.length;
+    return this.data.length;
   }
 }
