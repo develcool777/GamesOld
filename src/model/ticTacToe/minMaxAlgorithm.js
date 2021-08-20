@@ -2,7 +2,7 @@
 /**
  * @class 
  * @alias Board
- * @memberof TicTacToe
+ * @memberof TicTacToe#
  * @classdesc This class have methods to build the board, [`more info`]{@link https://alialaa.com/blog/tic-tac-toe-js}
  * @constructor
  */
@@ -13,7 +13,7 @@ class Board {
   /**
    * @method 
    * @alias isEmpty
-   * @memberof Board#
+   * @memberof TicTacToe#Board#
    * @description Returns true if every cell is empty otherwise false 
    * @returns {Boolean}
    * @example const isEmpty = this.isEmpty()
@@ -25,7 +25,7 @@ class Board {
   /**
    * @method 
    * @alias isFull
-   * @memberof Board#
+   * @memberof TicTacToe#Board#
    * @description Returns true if there is no empty cell otherwise false 
    * @returns {Boolean}
    * @example const isFull = this.isFull() 
@@ -37,7 +37,7 @@ class Board {
   /**
    * @method 
    * @alias insert
-   * @memberof Board#
+   * @memberof TicTacToe#Board#
    * @param {String} symbol - Value must be 'x' or 'o'
    * @param {Number} position - Value must be Integer in range(0, 8)
    * @throws Error - if symbol is not 'x' or 'o'
@@ -63,7 +63,7 @@ class Board {
   /**
    * @method 
    * @alias getAvailableMoves
-   * @memberof Board#
+   * @memberof TicTacToe#Board#
    * @description Return array of available positions
    * @returns {Array} 
    * @example const availablePos = this.getAvailableMoves()
@@ -79,7 +79,7 @@ class Board {
   /**
    * @method 
    * @alias isTerminal
-   * @memberof Board#
+   * @memberof TicTacToe#Board#
    * @description If there is a winner or it's draw returns object otherwise boolean(false)
    * @returns {Boolean|Object} 
    * @example const result = this.isTerminal()
@@ -126,7 +126,7 @@ class Board {
 /**
  * @class 
  * @alias minMax
- * @memberof TicTacToe
+ * @memberof TicTacToe#
  * @classdesc This class represent logic of computer thinking, otherwise determine the best move for computer, 
  * [`more info`]{@link https://alialaa.com/blog/tic-tac-toe-js-minimax}
  * @constructor 
@@ -138,7 +138,7 @@ class minMax {
   }
   /**
    * @method getBestMove
-   * @memberof minMax#
+   * @memberof TicTacToe#minMax#
    * @param {InstanceType} board 
    * @param {Boolean} maximizing 
    * @param {Function} callback 

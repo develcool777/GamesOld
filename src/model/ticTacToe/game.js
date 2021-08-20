@@ -6,7 +6,7 @@ import { minMax, Board } from './minMaxAlgorithm';
 /**
  * @class 
  * @alias Game
- * @memberof TicTacToe
+ * @memberof TicTacToe#
  * @classdesc This class representing logic of TicTacToe game
  * @constructor
  */
@@ -68,9 +68,8 @@ export default class Game {
     })
   }
   /**
-   * @method
-   * @alias log
-   * @memberof Game#
+   * @method log
+   * @memberof TicTacToe#Game#
    * @description show in console all fields of class
    * @returns {undefined}
    * @example this.log
@@ -86,9 +85,8 @@ export default class Game {
   }
 
   /**
-   * @method
-   * @alias getFieldForDraw
-   * @memberof Game#
+   * @method getFieldForDraw
+   * @memberof TicTacToe#Game#
    * @description Generates array of objects for draw 
    * @returns {Array}
    * @example const res = this.getFieldForDraw();
@@ -114,9 +112,8 @@ export default class Game {
   }
 
   /**
-   * @method
-   * @alias clear
-   * @memberof Game#
+   * @method clear
+   * @memberof TicTacToe#Game#
    * @description resets the values of the class fields to their initial state
    * @returns {undefined}
    * @example this.clear();
@@ -130,12 +127,11 @@ export default class Game {
   }
 
   /**
-   * @method
-   * @alias play
-   * @memberof Game#
+   * @method play
+   * @memberof TicTacToe#Game#
    * @param {Number} cordX - cordX must be Integer
    * @param {Number} cordY - cordY must be Integer
-   * @description firstly check if there is a winner, then call [`makeMove()`]{@link Game#makeMove} function, then changes `currentPlayer` and call `checkWinner()` function
+   * @description firstly check if there is a winner, then call [`makeMove()`]{@link TicTacToe#Game#makeMove} function, then changes `currentPlayer` and call [`checkWinner()`]{@link TicTacToe#Game#checkWinner} function
    * @returns {undefined}
    * @example this.play(0, 0);
    */
@@ -147,9 +143,8 @@ export default class Game {
   }
 
   /**
-   * @method
-   * @alias makeMove
-   * @memberof Game#
+   * @method makeMove
+   * @memberof TicTacToe#Game#
    * @param {String} player - player must be 'x' or 'o'
    * @param {Number} cordX - cordX must be Integer
    * @param {Number} cordY - cordY must be Integer
@@ -182,9 +177,8 @@ export default class Game {
   }
 
   /**
-   * @method
-   * @alias returnMove
-   * @memberof Game#
+   * @method returnMove
+   * @memberof TicTacToe#Game#
    * @param {Boolean} withComp - if playing against computer this value must be true, otherwise false
    * @param {Boolean} compFirstMove - if computer made first move this value must be true, otherwise false
    * @description If `moves` is empty or there is a winner or there is no cell for move: return from function, 
@@ -194,7 +188,7 @@ export default class Game {
    * this.returnMove() // in this case it's user vs user, so it removes one move
    * this.returnMove(true) // in this case it's user vs comp, so it removes two moves
    * this.returnMove(true, true) // in this case it's user vs comp, but computer made first move,
-   * so if there are less or equal to 2 moves were maden than it wont remove moves, but if more 
+   * // so if there are less or equal to 2 moves were maden than it wont remove moves, but if more 
    */
   returnMove(withComp=false, compFirstMove=false) {
     if (this.moves.length === 0 || this.winner !== '' || this.moves.length === 9) { return }
@@ -213,9 +207,8 @@ export default class Game {
   }
 
   /**
-   * @method
-   * @alias checkWinner
-   * @memberof Game#
+   * @method checkWinner
+   * @memberof TicTacToe#Game#
    * @description Check is there a winner or a draw
    * @returns {undefined}
    * @example this.checkWinner();
@@ -258,12 +251,11 @@ export default class Game {
   }
 
   /**
-   * @method
-   * @alias playWithComputer
-   * @memberof Game#
+   * @method playWithComputer
+   * @memberof TicTacToe#Game#
    * @param {String} difficulty - difficulty can be 'easy' or 'hard'
-   * @description If `difficulty` is easy call [`computerMoveRandom`]{@link Game#computerMoveRandom}, if hard call [`computerMoveClever`]{@link Game#computerMoveClever},
-   * the result of function will be received in format[x, y](if the result of function is empty array, return from function), which then passes as an argument into [`play`]{@link Game#play} function. 
+   * @description If `difficulty` is easy call [`computerMoveRandom`]{@link TicTacToe#Game#computerMoveRandom}, if hard call [`computerMoveClever`]{@link TicTacToe#Game#computerMoveClever},
+   * the result of function will be received in format[x, y](if the result of function is empty array, return from function), which then passes as an argument into [`play`]{@link TicTacToe#Game#play} function. 
    * @returns {undefined}
    * @example 
    * this.playWithComputer(); // difficulty is easy
@@ -276,11 +268,10 @@ export default class Game {
   }
 
   /**
-   * @method
-   * @alias computerMoveClever
-   * @memberof Game#
-   * @description Return best move, method needs 2 classes [`Board`]{@link Board} and [`minMax`]{@link minMax}, 
-   * last one has method [`getBestMove`]{@link minMax#getBestMove} in which takes as an argument 
+   * @method computerMoveClever
+   * @memberof TicTacToe#Game#
+   * @description Return best move, method needs 2 classes [`Board`]{@link TicTacToe#Board} and [`minMax`]{@link TicTacToe#minMax}, 
+   * last one has method [`getBestMove`]{@link TicTacToe#minMax#getBestMove} in which takes as an argument 
    * instance of [`Board`]{@link Board} and maximazing value(if currentPlayer is 'x' pass true otherwise false)
    * @returns {Array} [x, y]
    * @example const compMove = this.computerMoveClever();
@@ -295,9 +286,8 @@ export default class Game {
   }
 
   /**
-   * @method
-   * @alias computerMoveRandom
-   * @memberof Game#
+   * @method computerMoveRandom
+   * @memberof TicTacToe#Game#
    * @description Returns computer move, first call [`availableMoves`]{@link Game#availableMoves}
    * function which return all available moves, then choose random move.  
    * @returns {Array} [x, y] or []
@@ -310,9 +300,8 @@ export default class Game {
   }
 
   /**
-   * @method
-   * @alias availableMoves
-   * @memberof Game#
+   * @method availableMoves
+   * @memberof TicTacToe#Game#
    * @param {Array} field - field must be matrix 3x3
    * @description Return available moves, used 2 [`map`]{@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map}
    * to iterate `field`, if cell is empty then return cordinates, otherwise return false, after use 
