@@ -55,7 +55,6 @@ export default {
           this.figures[i][j].url = this.getFigures[figure.name];
         })
       })
-      console.log(this.figures);
     }
   }
 }

@@ -70,7 +70,7 @@ export default class Game {
   /**
    * @method log
    * @memberof TicTacToe#Game#
-   * @description show in console all fields of class
+   * @description Shows in console all fields of class
    * @returns {undefined}
    * @example this.log
    */
@@ -114,7 +114,7 @@ export default class Game {
   /**
    * @method clear
    * @memberof TicTacToe#Game#
-   * @description resets the values of the class fields to their initial state
+   * @description Resets the values of the class fields to their initial state
    * @returns {undefined}
    * @example this.clear();
    */
@@ -131,7 +131,7 @@ export default class Game {
    * @memberof TicTacToe#Game#
    * @param {Number} cordX - cordX must be Integer
    * @param {Number} cordY - cordY must be Integer
-   * @description firstly check if there is a winner, then call [`makeMove()`]{@link TicTacToe#Game#makeMove} function, then changes `currentPlayer` and call [`checkWinner()`]{@link TicTacToe#Game#checkWinner} function
+   * @description Firstly check if there is a winner, then call [`makeMove()`]{@link TicTacToe#Game#makeMove} function, then changes `currentPlayer` and call [`checkWinner()`]{@link TicTacToe#Game#checkWinner} function
    * @returns {undefined}
    * @example this.play(0, 0);
    */
@@ -270,7 +270,7 @@ export default class Game {
   /**
    * @method computerMoveClever
    * @memberof TicTacToe#Game#
-   * @description Return best move, method needs 2 classes [`Board`]{@link TicTacToe#Board} and [`minMax`]{@link TicTacToe#minMax}, 
+   * @description Returns best move, method needs 2 classes [`Board`]{@link TicTacToe#Board} and [`minMax`]{@link TicTacToe#minMax}, 
    * last one has method [`getBestMove`]{@link TicTacToe#minMax#getBestMove} in which takes as an argument 
    * instance of [`Board`]{@link Board} and maximazing value(if currentPlayer is 'x' pass true otherwise false)
    * @returns {Array} [x, y]
@@ -303,7 +303,7 @@ export default class Game {
    * @method availableMoves
    * @memberof TicTacToe#Game#
    * @param {Array} field - field must be matrix 3x3
-   * @description Return available moves, used 2 [`map`]{@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map}
+   * @description Returns available moves, used 2 [`map`]{@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map}
    * to iterate `field`, if cell is empty then return cordinates, otherwise return false, after use 
    * [`filter`]{@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter}
    * to leave only pairs [x, y]   

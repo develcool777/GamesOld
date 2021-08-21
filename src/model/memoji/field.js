@@ -1,4 +1,19 @@
 export default class Field {
+  /**
+   * @class 
+   * @alias Field
+   * @memberof Memoji#
+   * @classdesc Operates with `data` that comes from [`firebase`]{@link https://firebase.google.com}
+   * @param {Array} data array of levels
+   * @property {Array} data this is `data` 
+   * @property {Number} level by default it's value is 1
+   * @throws Error - if `data` is not Array
+   * @throws Error - if every element of `data` is not object with keys: 'time', 'level', 'cards'
+   * @throws Error - if every element of `data` the value of keys('time', 'level') are not Integer
+   * @throws Error - if every element of `data` the value of key('cards') is not Array
+   * @throws Error - if every element of `data` the value of key('cards') is not array of strings 
+   * @constructor
+   */
   constructor(data) {
     if (!Array.isArray(data)) {
       throw Error(`Field.constructor data must be Array`);
@@ -32,24 +47,67 @@ export default class Field {
     })
   }
 
+  /**
+   * @method log
+   * @memberof Memoji#Field#
+   * @description shows in console all class fields
+   * @returns {undefined}
+   * @example this.log()
+   */
   get log() {
     return console.log({CurrentLevel: this.level, data: this.data});
   }
   
+  /**
+   * @method getCardsForGame
+   * @memberof Memoji#Field#
+   * @description returns array of cards
+   * @returns {Array}
+   * @example const cards = this.getCardsForGame()
+   */
   getCardsForGame() {
     return this.data.find(obj => obj.level === this.level).cards;
   }
 
+  /**
+   * @method time
+   * @memberof Memoji#Field#
+   * @description returns time 
+   * @returns {Number}
+   * @example const time = this.time()
+   */
   time() {
     return this.data.find(obj => obj.level === this.level).time;
   }
 
+  /**
+   * @method changeLevel
+   * @memberof Memoji#Field#
+   * @param {Number} value this is step 
+   * @description Changes level if 1 increases level, if -1 decreases level
+   * @throws Error - if value is not 1 or -1
+   * @returns {undefined}
+   * @example 
+   * this.changeLevel(1) // increases level
+   * this.changeLevel(-1) // decreases level
+   */
   changeLevel(value) {
+    if (Math.abs(value) !== 1) {
+      throw Error(`Field.changeLevel(value) value must be 1 or -1`)
+    }
     const levels = this.data.map(obj => obj.level);
     if (levels.includes(this.level + value)) {
       this.level += value;
     }
   }
+
+  /**
+   * @method amountOfLevels
+   * @memberof Memoji#Field#
+   * @description Returns amount of levels
+   * @returns {Number}
+   * @example const levels = this.amountOfLevels()
+   */
   amountOfLevels() {
     return this.data.length;
   }

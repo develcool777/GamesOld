@@ -44,7 +44,7 @@ export default class Game {
   /**
    * @method log
    * @memberof RockPaperScissors#Game#
-   * @description shows value of all class properties in console
+   * @description Shows value of all class properties in console
    * @returns {undefined}
    * @example this.log
    */
@@ -106,7 +106,7 @@ export default class Game {
    * @memberof RockPaperScissors#Game#
    * @param {String} user - user choice ('r' for Rock, 'p' for Paper, 's' for Scissors)
    * @throws Error - if `user` value is not ('r' or 'p' or 's')
-   * @description computer chooses the worst move against user(ex. user chooses rock, so computer will choose scissors)
+   * @description Computer chooses the worst move against user(ex. user chooses rock, so computer will choose scissors)
    * @returns {Object}
    * @example const moves = this.easyMode('r') // {user: 'r', comp: 's'}
    */
@@ -130,7 +130,7 @@ export default class Game {
    * @memberof RockPaperScissors#Game#
    * @param {String} user - user choice ('r' for Rock, 'p' for Paper, 's' for Scissors)
    * @throws Error - if `user` value is not ('r' or 'p' or 's')
-   * @description computer chooses random move against user
+   * @description Computer chooses random move against user
    * @returns {Object}
    * @example const moves = this.normalGame('r')
    */
@@ -269,7 +269,7 @@ export default class Game {
    * @memberof RockPaperScissors#Game#
    * @param {String} move must be 'r' or 'p' or 's'
    * @throws Error - if `move` is not 'r' or 'p' or 's'
-   * @description returns number of draws by `move`
+   * @description Returns number of draws by `move`
    * @returns {Number}
    * @example const draws = this.getAllDrawsByMove('r') // returns number of draws by rock
    */

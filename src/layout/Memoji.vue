@@ -122,7 +122,7 @@ export default {
       }
     },
     draw() {
-      this.fieldForDraw = this.game.cardsForDraw();
+      this.fieldForDraw = this.game.cardsData;
     },
     check() {
       const isMatch = this.game.checkMatch(...this.getItemsForCompare);

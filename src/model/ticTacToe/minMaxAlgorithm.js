@@ -5,6 +5,7 @@
  * @memberof TicTacToe#
  * @classdesc This class have methods to build the board, [`more info`]{@link https://alialaa.com/blog/tic-tac-toe-js}
  * @constructor
+ * @param {Array} state - field for game
  */
 class Board {
   constructor(state = ['','','','','','','','','']) {
@@ -64,7 +65,7 @@ class Board {
    * @method 
    * @alias getAvailableMoves
    * @memberof TicTacToe#Board#
-   * @description Return array of available positions
+   * @description Returns array of available positions
    * @returns {Array} 
    * @example const availablePos = this.getAvailableMoves()
    */

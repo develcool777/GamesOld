@@ -1,15 +1,30 @@
+/**
+ * @namespace Memoji
+ */
+
 export default class Game {
-  constructor(arrayOfCards) {
-    if (!Array.isArray(arrayOfCards)) {
-      throw Error(`Game.constructor arrayOfCards must be Array`);
+  /**
+   * @class 
+   * @alias Game
+   * @memberof Memoji#
+   * @classdesc This class represents logic of Memoji game
+   * @constructor
+   * @param {Array} arrayOfCardsName - array of cards name
+   * @property {Array} cardsData - array of cards data, every element is object{id: 0, name: 'fox', class: 'ec ec-fox img', isMatch: null, isFlipped: null}
+   * @property {Array} cards - this is `arrayOfCardsName`
+   * @throws Error - if `arrayOfCardsName` is not Array or every element of `arrayOfCardsName` is not String
+   */
+  constructor(arrayOfCardsName) {
+    if (!Array.isArray(arrayOfCardsName)) {
+      throw Error(`Game.constructor arrayOfCardsName must be Array`);
     }
-    if (!arrayOfCards.every(item => typeof item === 'string')) {
-      throw Error(`Game.constructor every element in arrayOfCards must be typeof string`);
+    if (!arrayOfCardsName.every(item => typeof item === 'string')) {
+      throw Error(`Game.constructor every element in arrayOfCardsName must be typeof string`);
     }
     let cardsData = []
     Object.defineProperties(this, {
       cards: {
-        get: () => arrayOfCards
+        get: () => arrayOfCardsName
       },
       cardsData: {
         get: () => cardsData,
@@ -20,10 +35,24 @@ export default class Game {
     })
   }
 
+  /**
+   * @method log
+   * @memberof Memoji#Game#
+   * @description Shows in console all fields of class
+   * @returns {undefined}
+   * @example this.log
+   */
   get log() {
     return console.log({cards: this.cards, cardsData: this.cardsData});
   }
 
+  /**
+   * @method setCardData
+   * @memberof Memoji#Game#
+   * @description This method set `this.cardsData`
+   * @returns {undefined}
+   * @example this.setCardData()
+   */
   setCardData() {
     const arr = []
     const doubled = this.cards.concat(this.cards);
@@ -41,14 +70,27 @@ export default class Game {
     this.cardsData = arr;
   }
 
+  /**
+   * @method shuffleCards
+   * @memberof Memoji#Game#
+   * @param {Array} arr Array of cards
+   * @description Shuffles array 
+   * @returns {undefined}
+   * @example this.shuffleCards(array)
+   */
   shuffleCards(arr) {
     arr.sort(() => 0.5 - Math.random());
   }
 
-  cardsForDraw() {
-    return this.cardsData
-  }
-
+  /**
+   * @method checkMatch
+   * @memberof Memoji#Game#
+   * @param {Object} card1 first card
+   * @param {Object} card2 second card
+   * @description If name of cards are the same return true, otherwise false
+   * @returns {Boolean}
+   * @example const isMatch = this.checkMatch(card1, card2);
+   */
   checkMatch(card1, card2) {
     if (card1.name === card2.name) {
       [card1.id, card2.id].forEach(id => {
@@ -64,19 +106,49 @@ export default class Game {
     return false;
   }
 
+  /**
+   * @method checkWin
+   * @memberof Memoji#Game#
+   * @description Checks if all cards are matched
+   * @returns {Boolean}
+   * @example const isWin = this.checkWin();
+   */
   checkWin() {
     return this.cardsData.every(item => item.isMatch === true);
   }
 
+  /**
+   * @method clickOnCard
+   * @memberof Memoji#Game#
+   * @param {Object} card card that was clicked
+   * @description When card was clicked sets `card.isFlipped` to `true`
+   * @returns {undefined}
+   * @example this.clickOnCard(card)
+   */
   clickOnCard(card) {
     this.cardsData[card.id].isFlipped = true;
   }
 
+  /**
+   * @method reset
+   * @memberof Memoji#Game#
+   * @param {Object} card card that was clicked
+   * @description Sets `card.isFlipped` and `card.isMatch` to `null`
+   * @returns {undefined}
+   * @example this.reset(card)
+   */
   reset(card) {
     this.cardsData[card.id].isFlipped = null;
     this.cardsData[card.id].isMatch = null;
   }
 
+  /**
+   * @method clean
+   * @memberof Memoji#Game#
+   * @description After game, shuffles card and sets `card.isFlipped` and `card.isMatch` to `null`
+   * @returns {undefined}
+   * @example this.clean()
+   */
   clean() {
     this.shuffleCards(this.cardsData);
     this.cardsData = this.cardsData.map((card, i) => {
@@ -87,9 +159,19 @@ export default class Game {
     })
   }
 
-  showOrHideHint(boolean) {
+  /**
+   * @method showOrHideHint
+   * @memberof Memoji#Game#
+   * @param {Boolean} bool
+   * @description Hides or shows unmatched cards
+   * @returns {undefined}
+   * @example 
+   * this.showOrHideHint(true) // show all unmatched cards
+   * this.showOrHideHint(false) // hide all unmatched cards
+   */
+  showOrHideHint(bool) {
     this.cardsData = this.cardsData.map(card => {
-      const value = boolean ? true : card.isMatch ? true : null;
+      const value = bool ? true : card.isMatch ? true : null;
       card.isFlipped = value;
       return card;
     })
