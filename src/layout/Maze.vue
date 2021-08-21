@@ -23,7 +23,6 @@
 <script>
 import { createNamespacedHelpers } from 'vuex'
 const { mapActions, mapState, mapGetters } = createNamespacedHelpers('maze');
-import DATA from '@/data/dataForMaze'
 import Field from '@/model/maze/field' 
 import Game from '@/model/maze/game'
 import ResultMaze from '@/components/Maze/Result'
@@ -41,8 +40,9 @@ export default {
       headerHeight: 0
     }
   },
-  created() {
-    this.field = new Field(DATA);
+  async created() {
+    await this.SET_DATA();
+    this.field = new Field(this.getData);
     this.createGame();
   },
   watch: {
@@ -58,12 +58,12 @@ export default {
   },
   computed: {
     ...mapState(['level', 'isPlaying', 'showPath', 'showHint']),
-    ...mapGetters(['getShowPath', 'getShowHint'])
+    ...mapGetters(['getShowPath', 'getShowHint', 'getData'])
   },
   methods: {
     ...mapActions([
       'INIT_STATE', 'END_GAME', 'CLEAN_GAME', 'CHANGE_ISPLAYING', 
-      'CHANGE_RESTART', 'CHANGE_ARROW', 'CHANGE_STOP_CLICK'
+      'CHANGE_RESTART', 'CHANGE_ARROW', 'CHANGE_STOP_CLICK', 'SET_DATA'
     ]),
     createGame() {
       const obj = {

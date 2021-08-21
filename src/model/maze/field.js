@@ -1,62 +1,38 @@
 export default class Field {
   constructor(data) {
-    if (typeof data !== 'object') {
-      throw Error(`Field.constructor data must be Object`);
+    if (!Array.isArray(data)) {
+      throw Error(`Field.constructor data must be Array`);
     }
-    if (Object.keys(data)[0] !== 'Levels') { 
-      throw Error(`Field.constructor data.keys must be String named 'Levels'`);
+    if (!data.every(obj => ['time', 'level', 'field', 'winPath', 'startPosition', 'endPosition'].every(prop => Object.prototype.hasOwnProperty.call(obj, prop)))) {
+      throw Error(`Field.constructor every element of data must be Object with props: 'time', 'level', 'field', 'winPath', 'startPosition', 'endPosition'`);
     }
-    const dL = data.Levels;
-    if (Object.keys(dL).some(item => isNaN(item) || !Number.isInteger(+item))) { 
-      throw Error(`Field.constructor data.keys must be Number`);
+    // 'time', 'level'
+    if (!data.every(obj => Number.isInteger(obj.time) && Number.isInteger(obj.level) && obj.time > 0 && obj.level > 0)) {
+      throw Error(`Field.constructor every time and level must be Integer and greater than 0`);
     }
-    if (!Object.keys(dL).every(key => Object.keys(dL[+key]).join(' ') === 'time startPosition endPosition winPath field' ) ) {
-      throw Error(`Field.constructor every level must contain keys: time field startPosition endPosition winPath field`);
+    // field
+    if (!data.every(obj => Array.isArray(obj.field))) {
+      throw Error(`Field.constructor every field must be Array`)
     }
-    if (!Object.keys(dL).every(key => Number.isInteger(dL[+key].time))) {
-      throw Error(`Field.constructor every time must be Integer`);
+    if (!data.every(obj => obj.field.every(item => Array.isArray(item)))) {
+      throw Error(`Field.constructor every field element must be Array`)
     }
-    if (!Object.keys(dL).every(key => Object.keys(dL[+key].startPosition).join(' ') === 'x y')) {
-      throw Error(`Field.constructor every startPosition must contain keys: x, y`);
+    // winPath
+    if (!data.every(obj => Array.isArray(obj.winPath))) {
+      throw Error(`Field.constructor every winPath must be Array`)
     }
-    if (!Object.keys(dL).every(key => Object.keys(dL[+key].endPosition).join(' ') === 'x y')) {
-      throw Error(`Field.constructor every endPosition must contain keys: x, y`);
+    if (!data.every(obj => obj.winPath.every(obj => ['x', 'y'].every(prop => Object.prototype.hasOwnProperty.call(obj, prop))))) {
+      throw Error(`Field.constructor every winPath item element must be Object with props: 'x', 'y'`);
     }
-    if (!Object.keys(dL).every(key => Array.isArray(dL[+key].field) && dL[+key].field.every(item => Array.isArray(item)))) {
-      throw Error(`Field.constructor every field must be Matrix`);
+    //startPosition 
+    if (!data.every(obj => ['x', 'y'].every(prop => Object.prototype.hasOwnProperty.call(obj.startPosition, prop)))) {
+      throw Error(`Field.constructor every startPosition must be Object with props: 'x', 'y'`);
     }
-    const cheak = Object.keys(dL).every(key => {
-      const array = dL[+key].field.flat();
-      const test = array.filter(item => item === 0 || item === 1);
-      return array.length === test.length;
-    });
-    if (!cheak) {
-      throw Error(`Field.constructor every field must contain elements: 1 and 0`);
+    // endPosition
+    if (!data.every(obj => ['x', 'y'].every(prop => Object.prototype.hasOwnProperty.call(obj.endPosition, prop)))) {
+      throw Error(`Field.constructor every endPosition must be Object with props: 'x', 'y'`);
     }
-    const cheackPosition = (point1, point2, key) => {
-      const first = Number.isInteger(point1) && point1 >=0 && point1 <= dL[+key].field.length;
-      const second = Number.isInteger(point2) && point2 >=0 && point2 <= dL[+key].field[0].length;
-      return first && second;
-    }
-    const cheak2 = Object.keys(dL).every(key => {
-      const start = Object.values(dL[+key].startPosition);
-      const end = Object.values(dL[+key].endPosition);
-      const cheakStart = cheackPosition(...start, key);
-      const cheakEnd = cheackPosition(...end, key);
-      return cheakStart && cheakEnd;
-    })
-    if (!cheak2) {
-      throw Error(`Field.constructor every startPosition and endPosition keys(x, y) must be Integers in range of field`)
-    }
-    if (!Object.keys(dL).every(key => Array.isArray(dL[+key].winPath))) {
-      throw Error(`Field.constructor every winPath must be Array of objects`);
-    }
-    if (!Object.keys(dL).every(key => dL[+key].winPath.every(item => item.x !== undefined && item.y !== undefined))) {
-      throw Error(`Field.constructor every object in winPath Array must have keys: 'x', 'y'`);
-    }
-    if (!Object.keys(dL).every(key => dL[+key].winPath.every(item => dL[+key].field[item.x][item.y] === 0))) {
-      throw Error(`Field.constructor every pair of 'x' and 'y' in winPath Array, must be zero when field[x][y]`); // ???????
-    }
+
     let level = 1;
     Object.defineProperties(this, {
       data: {
@@ -71,30 +47,13 @@ export default class Field {
           level = value;
         }
       },
-      getField: {
-        get: () => (data) => data.Levels[level].field
-      },
-      getTime: {
-        get: () => (data) => data.Levels[level].time
-      },
-      getStart: {
-        get: () => (data) => data.Levels[level].startPosition
-      },
-      getEnd: {
-        get: () => (data) => data.Levels[level].endPosition
-      },
-      getLevels: {
-        get: () => (data) => Object.keys(data.Levels)
-      },
-      getHint: {
-        get: () => (data) => data.Levels[level].winPath
-      }
     })
-    Object.freeze(this);
   }
-  log() {
-    console.log({CurrentLevel: this.level});
+
+  get log() {
+    return console.log({CurrentLevel: this.level, data: this.data});
   }
+
   generateFieldForDraw(field, start, end) {
     const fieldForDraw = field.map((arr, i) => {
       return arr.map((item, j) => {
@@ -122,7 +81,8 @@ export default class Field {
   generateFieldWith(gameField, path, hint) {
     const copy = gameField.map(arr => arr.slice());
     if (hint) {
-      this.getHint(this.data).forEach(item => {
+      const hint = this.data.find(obj => obj.level === this.level).winPath;
+      hint.forEach(item => {
         if (copy[item.x][item.y] === 0) {
           copy[item.x][item.y] = "#"
         }
@@ -158,27 +118,28 @@ export default class Field {
   }
 
   dataForGame() {
-    const clone = JSON.parse(JSON.stringify(this.data));
-    const field = this.getField(clone);
-    const start = this.getStart(clone);
-    const end = this.getEnd(clone);
-    return [field, start, end];
+    const curentLevel = this.data.find(obj => obj.level === this.level);
+    const fieldCopy = curentLevel.field.map(arr => arr.slice());
+    const start = curentLevel.startPosition;
+    const end = curentLevel.endPosition;
+    return [fieldCopy, start, end];
   }
 
   time() {
-    const clone = JSON.parse(JSON.stringify(this.data));
-    const result = this.getTime(clone);
-    return result;
+    return this.data.find(obj => obj.level === this.level).time;
   }
 
   changeLevel(value) {
-    const levels = Object.keys(this.data.Levels);
-    if (levels.map(Number).includes(this.level + value)) {
+    if (Math.abs(value) !== 1) {
+      throw Error(`Field.changeLevel(value) value must be 1 or -1`)
+    }
+    const levels = this.data.map(obj => obj.level);
+    if (levels.includes(this.level + value)) {
       this.level += value;
     }
   }
+
   amountOfLevels() {
-    const levels = this.getLevels(this.data);
-    return levels.length;
+    return this.data.length;
   }
 }

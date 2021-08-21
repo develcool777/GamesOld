@@ -32,30 +32,35 @@ export default {
       }
       state.gameStatus = status;
     },
+
     changeGameResult(state, result) {
       if (Object.keys(result).join('|') !== 'title|description') {
         throw Error(`chess.mutations.changeGameResult(state, result) result must be Object with keys: 'title', 'description'`);
       }
       state.gameResult = result;
     },
+
     changeShowModal(state, bool) {
       if (typeof bool !== 'boolean') {
         throw Error(`chess.mutations.changeShowModal(state, bool) bool must be Boolean`);
       }
       state.showModal = bool;
     },
+
     changeReturnMove(state, bool) {
       if (typeof bool !== 'boolean') {
         throw Error(`chess.mutations.changeReturnMove(state, bool) bool must be Boolean`);
       }
       state.returnMove = bool;
     },
+
     changeClearBoard(state, bool) {
       if (typeof bool !== 'boolean') {
         throw Error(`chess.mutations.changeClearBoard(state, bool) bool must be Boolean`);
       }
       state.clearBoard = bool;
     },
+
     setFigures(state, array) {
       if (!Array.isArray(array)) {
         throw Error(`chess.mutations.setFigures(state, array) array must be Array`);
@@ -70,18 +75,23 @@ export default {
     CHANGE_GAME_STATUS({commit}, status) {
       commit('changeGameStatus', status);
     },
+
     CHANGE_GAME_RESULT({commit}, result) {
       commit('changeGameResult', result);
     },
+
     CHANGE_SHOW_MODAL({commit}, bool) {
       commit('changeShowModal', bool);
     },
+
     CHANGE_RETURN_MOVE({commit}, bool) {
       commit('changeReturnMove', bool);
     },
+
     CHANGE_CLEAR_BOARD({commit}, bool) {
       commit('changeClearBoard', bool);
     },
+    
     async SET_FIGURES({commit}) {
       const DATA = [];
       const db = firebase.firestore();

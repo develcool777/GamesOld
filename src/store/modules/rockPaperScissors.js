@@ -24,27 +24,55 @@ export default {
     getChoices: state => state.choices
   },
   mutations: {
-    changeImpossible(state, boolean) {
-      state.impossible = boolean;
+    changeImpossible(state, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`rockPaperScissors.mutation.changeImpossible bool must Boolean`);
+      }
+      state.impossible = bool;
     },
-    changeEasy(state, boolean) {
-      state.easy = boolean;
+
+    changeEasy(state, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`rockPaperScissors.mutation.changeEasy bool must Boolean`);
+      }
+      state.easy = bool;
     },
-    changeWithoutDraw(state, boolean) {
-      state.withoutDraw = boolean;
+
+    changeWithoutDraw(state, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`rockPaperScissors.mutation.changeWithoutDraw bool must Boolean`);
+      }
+      state.withoutDraw = bool;
     },
-    changeClear(state, boolean) {
-      state.clear = boolean;
+
+    changeClear(state, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`rockPaperScissors.mutation.changeClear bool must Boolean`);
+      }
+      state.clear = bool;
     },
-    changeShowHistory(state, boolean) {
-      state.showHistory = boolean;
+
+    changeShowHistory(state, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`rockPaperScissors.mutation.changeShowHistory bool must Boolean`);
+      }
+      state.showHistory = bool;
     },
-    changeShowAnalitics(state, boolean) {
-      state.showAnalitics = boolean;
+
+    changeShowAnalitics(state, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`rockPaperScissors.mutation.changeShowAnalitics bool must Boolean`);
+      }
+      state.showAnalitics = bool;
     },
-    changeResultOfMove(state, boolean) {
-      state.resultOfMove = boolean;
+
+    changeResultOfMove(state, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`rockPaperScissors.mutation.changeResultOfMove bool must Boolean`);
+      }
+      state.resultOfMove = bool;
     },
+    
     setChoices(state, array) {
       if (!Array.isArray(array)) {
         throw Error(`rockPaperScissors.mutations.setChoices(state, array) array must be Array`);
@@ -63,32 +91,41 @@ export default {
       commit('changeResultOfMove', false);
       commit('changeShowAnalitics', false);
     },
+
     RESET_MODE({commit}) {
       commit('changeImpossible', false);
       commit('changeEasy', false);
       commit('changeWithoutDraw', false); 
     },
+
     CHANGE_IMPOSSIBLE({commit}, boolean) {
       commit('changeImpossible', boolean);     
     },
+
     CHANGE_EASY({commit}, boolean) {
       commit('changeEasy', boolean);     
     },
+
     CHANGE_WITHOUT_DRAW({commit}, boolean) {
       commit('changeWithoutDraw', boolean);     
     },
+
     CHANGE_CLEAR({commit}, boolean) {
       commit('changeClear', boolean);     
     },
+
     CHANGE_SHOW_HISTORY({commit}, boolean) {
       commit('changeShowHistory', boolean);     
     },
+
     CHANGE_SHOW_ANALITICS({commit}, boolean) {
       commit('changeShowAnalitics', boolean);     
     },
+
     CHANGE_RESULT_OF_MOVE({commit}, boolean) {
       commit('changeResultOfMove', boolean);     
     },
+
     async SET_CHOICES({commit}) {
       const DATA = [];
       const db = firebase.firestore();

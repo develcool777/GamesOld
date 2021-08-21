@@ -21,18 +21,34 @@ export default {
     getWinner: state => state.winner,
   },
   mutations: {
-    changeIsPlaying(state, boolean) {
-      state.isPlaying = boolean;
+    changeIsPlaying(state, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`ticTacToe.mutation.changeIsPlaying bool must Boolean`);
+      }
+      state.isPlaying = bool;
     },
-    changeClear(state, boolean) {
-      state.clear = boolean;
+
+    changeClear(state, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`ticTacToe.mutation.changeClear bool must Boolean`);
+      }
+      state.clear = bool;
     },
-    changeReturnMove(state, boolean) {
-      state.returnMove = boolean;
+
+    changeReturnMove(state, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`ticTacToe.mutation.changeReturnMove bool must Boolean`);
+      }
+      state.returnMove = bool;
     },
-    changeWithComputer(state, boolean) {
-      state.playingWithComputer = boolean;
+
+    changeWithComputer(state, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`ticTacToe.mutation.changeWithComputer bool must Boolean`);
+      }
+      state.playingWithComputer = bool;
     },
+
     changeCompSettings(state, obj) {
       if (obj.userSide !== undefined) {
         state.compSettings.userSide = obj.userSide;
@@ -44,8 +60,12 @@ export default {
         state.compSettings.difficulty = obj.difficulty;
       }
     },
-    changeWinner(state, string) {
-      state.winner = string;
+
+    changeWinner(state, str) {
+      if (typeof str !== 'string') {
+        throw Error(`ticTacToe.mutation.changeWinner str must String`);
+      }
+      state.winner = str;
     },
   },
   actions: {
@@ -62,21 +82,27 @@ export default {
       commit('changeCompSettings', obj);
       commit('changeWinner', '');
     },
+
     CHANGE_IS_PLAYING({commit}, boolean) {
       commit('changeIsPlaying', boolean);     
     },
+
     CHANGE_CLEAR({commit}, boolean) {
       commit('changeClear', boolean);     
     },
+
     CHANGE_RETURN_MOVE({commit}, boolean) {
       commit('changeReturnMove', boolean);     
     },
+
     CHANGE_PLAYING_WITH_COMPUTER({commit}, boolean) {
       commit('changeWithComputer', boolean);     
     },
+
     CHANGE_COMPUTER_SETTINGS({commit}, obj) {
       commit('changeCompSettings', obj);     
     },
+
     CHANGE_WINNER({commit}, string) {
       commit('changeWinner', string);     
     }
