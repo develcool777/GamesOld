@@ -35,7 +35,11 @@ npm run serve
 ```
 
 ## Documentation
+To create documentation run following command:
 ```
 node_modules/.bin/jsdoc -c jsdoc.json
 ```
-After this command creates folder with name `docs` click on it and then open `index.html` in browser 
+It creates folder with name `docs` click on it and then open `index.html` in browser or run command:
+```
+open docs/index.html
+```
