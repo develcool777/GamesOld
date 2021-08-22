@@ -45,7 +45,7 @@ export default class Game {
    * @method log
    * @memberof RockPaperScissors#Game#
    * @description Shows value of all class properties in console
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example this.log
    */
   get log() {
@@ -63,7 +63,7 @@ export default class Game {
    * @throws Error - if `user` value is not ('r' or 'p' or 's')
    * @description Computer can not choose the same item as user(ex. user choose rock, 
    * so computer will choose between paper and scissors)
-   * @returns {Object}
+   * @returns {Object} {user, comp}
    * @example const moves = this.withoutDrawMode('r') // {user: 'r', comp: 'p'}
    */
   withoutDrawMode(user='') {
@@ -83,7 +83,7 @@ export default class Game {
    * @param {String} user - user choice ('r' for Rock, 'p' for Paper, 's' for Scissors)
    * @throws Error - if `user` value is not ('r' or 'p' or 's')
    * @description Computer chooses the best move against user(ex. user chooses rock, so computer will choose paper)
-   * @returns {Object}
+   * @returns {Object} {user, comp}
    * @example const moves = this.impossibleMode(r) // {user: 'r', comp: 'p'}
    */
   impossibleMode(user='') {
@@ -107,7 +107,7 @@ export default class Game {
    * @param {String} user - user choice ('r' for Rock, 'p' for Paper, 's' for Scissors)
    * @throws Error - if `user` value is not ('r' or 'p' or 's')
    * @description Computer chooses the worst move against user(ex. user chooses rock, so computer will choose scissors)
-   * @returns {Object}
+   * @returns {Object} {user, comp}
    * @example const moves = this.easyMode('r') // {user: 'r', comp: 's'}
    */
   easyMode(user='') {
@@ -131,7 +131,7 @@ export default class Game {
    * @param {String} user - user choice ('r' for Rock, 'p' for Paper, 's' for Scissors)
    * @throws Error - if `user` value is not ('r' or 'p' or 's')
    * @description Computer chooses random move against user
-   * @returns {Object}
+   * @returns {Object} {user, comp}
    * @example const moves = this.normalGame('r')
    */
   normalGame(user='') {
@@ -153,7 +153,7 @@ export default class Game {
    * Error - if `user` value is not ('r' or 'p' or 's')
    * Error - if `comp` value is not ('r' or 'p' or 's')
    * @description Determines who won or it's a draw, also pushes result of the play in `this.history` 
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example this.play('r', 'p');
    */
   play(user='', comp='') {
@@ -185,7 +185,7 @@ export default class Game {
    * @method clean
    * @memberof RockPaperScissors#Game#
    * @description Sets all class properties to initial value
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example this.clean()
    */
   clean() {
@@ -200,7 +200,7 @@ export default class Game {
    * @param {String} winner must be 'user' or 'comp'
    * @throws Error - if value of `winner` is not 'user' or 'comp'
    * @description Increase score depending on `winner` value(if winner is user then `this.userScore++`, otherwise `this.computerScore++`) 
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example this.calculateScore('user')
    */ 
   calculateScore(winner='') {
@@ -217,7 +217,7 @@ export default class Game {
    * @param {String} i1 must be 'r' or 'p' or 's'
    * @param {String} i2 must be 'r' or 'p' or 's'
    * @description Determines who won i1 or i2
-   * @returns {String}
+   * @returns {String} String
    * @example const result = this.check('r', 'p') // wins 'p', because 'p' covers 'r'
    */
   check(i1, i2) {
@@ -241,7 +241,7 @@ export default class Game {
    * Error - if `move` is not 'r' or 'p' or 's'
    * Error - if `winner` is not 'user' or 'comp'
    * @description Searches in `this.history` and returns quantity of wins by `winner` with `move` 
-   * @returns {Number}
+   * @returns {Number} Number
    * @example const userWins = this.getAllWinsByMove('r', 'user') // returns number of user wins by rock
    */
   getAllWinsByMove(move='', winner='') {
@@ -270,7 +270,7 @@ export default class Game {
    * @param {String} move must be 'r' or 'p' or 's'
    * @throws Error - if `move` is not 'r' or 'p' or 's'
    * @description Returns number of draws by `move`
-   * @returns {Number}
+   * @returns {Number} Number
    * @example const draws = this.getAllDrawsByMove('r') // returns number of draws by rock
    */
   getAllDrawsByMove(move='') {
@@ -289,7 +289,7 @@ export default class Game {
    *  draws: {r: 0, p: 0, s: 0},
    *  user: {r: 0, p: 0, s: 0}
    * }, shows how many times user and comp wins, also draws (by rock, paper, scissors)
-   * @returns {Object}
+   * @returns {Object} Object
    * @example const analytic = this.analytics()
    */
   analytics() {

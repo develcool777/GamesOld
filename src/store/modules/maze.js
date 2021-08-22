@@ -192,7 +192,6 @@ export default {
         data.level = +doc.id
         DATA.push(data)
       })
-      console.log(DATA)
       commit('setData', DATA);
     }
   } 

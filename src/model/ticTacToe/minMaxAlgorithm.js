@@ -16,7 +16,7 @@ class Board {
    * @alias isEmpty
    * @memberof TicTacToe#Board#
    * @description Returns true if every cell is empty otherwise false 
-   * @returns {Boolean}
+   * @returns {Boolean} Boolean
    * @example const isEmpty = this.isEmpty()
    */
   isEmpty() {
@@ -28,7 +28,7 @@ class Board {
    * @alias isFull
    * @memberof TicTacToe#Board#
    * @description Returns true if there is no empty cell otherwise false 
-   * @returns {Boolean}
+   * @returns {Boolean} Boolean
    * @example const isFull = this.isFull() 
    */
   isFull() {
@@ -44,7 +44,7 @@ class Board {
    * @throws Error - if symbol is not 'x' or 'o'
    * @throws Error - if position is not in range(0, 8)
    * @description Insert `symbol` in `this.state` at the `position` in case of success return true, otherwise false
-   * @returns {Boolean} 
+   * @returns {Boolean} Boolean
    * @example const isInserted = this.insert('x', 4); 
    */
   insert(symbol, position) {
@@ -66,7 +66,7 @@ class Board {
    * @alias getAvailableMoves
    * @memberof TicTacToe#Board#
    * @description Returns array of available positions
-   * @returns {Array} 
+   * @returns {Array} Array
    * @example const availablePos = this.getAvailableMoves()
    */
   getAvailableMoves() {
@@ -82,7 +82,7 @@ class Board {
    * @alias isTerminal
    * @memberof TicTacToe#Board#
    * @description If there is a winner or it's draw returns object otherwise boolean(false)
-   * @returns {Boolean|Object} 
+   * @returns {Boolean|Object} Boolean|Object
    * @example const result = this.isTerminal()
    */
   isTerminal() {
@@ -124,6 +124,8 @@ class Board {
   }
 }
 
+
+class minMax {
 /**
  * @class 
  * @alias minMax
@@ -132,7 +134,6 @@ class Board {
  * [`more info`]{@link https://alialaa.com/blog/tic-tac-toe-js-minimax}
  * @constructor 
  */
-class minMax {
   constructor(maxDepth = -1) {
     this.maxDepth = maxDepth;
     this.nodesMap = new Map();
@@ -145,7 +146,7 @@ class minMax {
    * @param {Function} callback 
    * @param {Number} depth 
    * @description This method define the best move for computer with MinMax algorithm 
-   * @returns {Number}
+   * @returns {Number} Number
    * @example 
    * const b = new Board();
    * const best = this.getBestMove(b);

@@ -12,7 +12,8 @@
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps",
     "production": "vue-cli-service serve --mode production",
-    "jsDoc": "node_modules/.bin/jsdoc -c jsdoc.json"
+    "jsDoc": "node_modules/.bin/jsdoc -c jsdoc.json",
+    "showDocumentation": "open docs/index.html"
   },
   "main": "background.js",
   "dependencies": {

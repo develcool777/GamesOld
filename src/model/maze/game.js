@@ -1,6 +1,23 @@
 import Player from './player'
 
+/**
+ * @namespace Maze
+ */
+
 export default class Game {
+  /**
+   * @class 
+   * @alias Game
+   * @memberof Maze#
+   * @param {Array} field this is matrix which filled with 1 and 0, 
+   * where 1 is block(wall), 0 is an empty cell available for move
+   * @param {Object} startPosition this is object{x, y} of start position coordinates
+   * @param {Object} winPosition this is object{x, y} of end position coordinates
+   * @constructor
+   * @classdesc This class represents logic of Maze game
+   * @property {Instance} player - Instance of class [`Player`]{@link Maze#Player}
+   * @property {Array} history - Stores all `player` moves
+   */
   constructor(field, startPosition, winPosition) {
     if (!Array.isArray(field)) {
       throw Error(`Game.constructor field must be Array`);
@@ -22,7 +39,6 @@ export default class Game {
     }
     const player = new Player(startPosition.x, startPosition.y);
     let history = [];
-    let loop = false;
     Object.defineProperties(this, {
       field: {
         get: () => field,
@@ -44,20 +60,28 @@ export default class Game {
       },
       startPos: {
         get: () => startPosition
-      },
-      loop: {
-        get: () => loop,
-        set: (value) => {
-          loop = value;
-        }
       }
     })
   }
-  log() {
+  /**
+   * @method log
+   * @memberof Maze#Game#
+   * @description Shows in console all class fields
+   * @returns {undefined} undefined
+   * @example this.log
+   */
+  get log() {
     const [x, y] = this.player.getPosition();
-    console.log({field: this.field, history: this.history, WinPosition: this.winPos, playerX: x, playerY: y});
+    return console.log({field: this.field, history: this.history, WinPosition: this.winPos, playerX: x, playerY: y});
   }
 
+  /**
+   * @method printField
+   * @memberof Maze#Game#
+   * @description Shows in console `this.field`
+   * @returns {undefined} undefined
+   * @example this.printField()
+   */
   printField() {
     console.log(`[`);
     this.field.forEach(arr => {
@@ -66,7 +90,18 @@ export default class Game {
     console.log(`]`);
   }
 
-  cheakWin(x, y) {
+  /**
+   * @method checkWin
+   * @memberof Maze#Game#
+   * @param {Number} x - x coordinate
+   * @param {Number} y - y coordinate
+   * @description Returns true if `x` and `y` equals `winPos` coordinates, otherwise false
+   * @throws Error - if `x` is not Integer
+   * @throws Error - if `y` is not Integer
+   * @returns {Boolean} Boolean
+   * @example const isWin = this.checkWin(x, y);
+   */
+  checkWin(x, y) {
     if (typeof x !== 'number' || !Number.isInteger(x)) {
       throw Error(`Game.cheakWin x must be Integer`);
     }
@@ -79,6 +114,18 @@ export default class Game {
     return false;
   }
 
+  /**
+   * @method moves
+   * @memberof Maze#Game#
+   * @param {String} move describes in which direction move('W', 'S', 'D', 'A')
+   * @description If there no wall(1) or end of field, makes move of player, otherwise show in console `no move`
+   * @returns {undefined} undefined
+   * @example 
+   * this.moves('W') // move Up
+   * this.moves('S') // move Down
+   * this.moves('D') // move Right
+   * this.moves('A') // move Left
+   */
   moves(move) {
     if (typeof move !== 'string') {
       throw Error(`Game.moves() move must be String`);
@@ -91,36 +138,48 @@ export default class Game {
       if (x > 0 && this.field[x-1][y] !== 1) {
         this.player.moveUp();
       } else {
-        console.log(`sorry no up`);
+        console.log(`no move up`);
       }
     }
     else if (move === 'S') {
       if (x < this.field.length - 1 && this.field[x+1][y] !== 1) {
         this.player.moveDown();
       } else {
-        console.log(`sorry no down`);
+        console.log(`no move down`);
       }
     }
     else if (move === 'A') {
       if (y > 0 && this.field[x][y-1] !== 1) {
         this.player.moveLeft();
       } else {
-        console.log(`sorry no left`);
+        console.log(`no move left`);
       }
     }
     else if (move === 'D' ) {
       if (y < this.field[0].length - 1 && this.field[x][y+1] !== 1) {
         this.player.moveRight();
       } else {
-        console.log(`sorry no right`);
+        console.log(`no move right`);
       }
     } 
     this.history.push(move);
     const [xC, yC] = this.player.getPosition();
     this.draw(x, y, xC, yC);
-    this.cheakWin(xC, yC);
+    this.checkWin(xC, yC);
   }
 
+  /**
+   * @method draw
+   * @memberof Maze#Game#
+   * @param {Number} xPrev previous `x` coordinate
+   * @param {Number} yPrev previous `y` coordinate
+   * @param {Number} xCurrent current `x` coordinate
+   * @param {Number} yCurrent current `y` coordinate
+   * @description Changes players position on coordinates(`xCurrent`, `yCurrent`) 
+   * and marks as a player path(coordinates(`xPrev`, `yPrev`)) 
+   * @returns {undefined} undefined
+   * @example this.draw(0, 0, 0, 1)
+   */
   draw(xPrev, yPrev, xCurrent, yCurrent) {
     if (xCurrent === undefined && yCurrent === undefined) {
       this.field[xPrev][yPrev] = '@';
@@ -130,6 +189,13 @@ export default class Game {
     }
   }
 
+  /**
+   * @method clean
+   * @memberof Maze#Game#
+   * @description Sets all class properties to initial value
+   * @returns {undefined} undefined
+   * @example this.clean()
+   */
   clean() {
     this.field = this.field.map(arr => {
       return arr.map(item => {
@@ -144,6 +210,14 @@ export default class Game {
     this.player.y = this.startPos.y;
   }
 
+  /**
+   * @method generateWinPath
+   * @memberof Maze#Game#
+   * @description Returns array of object(coordinates {x, y}),
+   * this is path that show how to get from start point to finish 
+   * @returns {Array} Array
+   * @example const winPath = this.generateWinPath()
+   */
   generateWinPath() {
     const path = this.field.map((arr, i) => {
       return arr.map((item, j) => {
@@ -158,6 +232,13 @@ export default class Game {
     return path.flat().filter(item => item.x !== undefined && item.y !== undefined);
   }
 
+  /**
+   * @method initGame
+   * @memberof Maze#Game#
+   * @description Initiates game by adding on a field player('@') on start position and adding finish('') on end position 
+   * @returns {undefined} undefined
+   * @example this.initGame()
+   */
   initGame() {
     this.field[this.startPos.x][this.startPos.y] = '@';
     this.field[this.winPos.x][this.winPos.y] = '';

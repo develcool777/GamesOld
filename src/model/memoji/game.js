@@ -39,7 +39,7 @@ export default class Game {
    * @method log
    * @memberof Memoji#Game#
    * @description Shows in console all fields of class
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example this.log
    */
   get log() {
@@ -50,7 +50,7 @@ export default class Game {
    * @method setCardData
    * @memberof Memoji#Game#
    * @description This method set `this.cardsData`
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example this.setCardData()
    */
   setCardData() {
@@ -75,7 +75,7 @@ export default class Game {
    * @memberof Memoji#Game#
    * @param {Array} arr Array of cards
    * @description Shuffles array 
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example this.shuffleCards(array)
    */
   shuffleCards(arr) {
@@ -88,7 +88,7 @@ export default class Game {
    * @param {Object} card1 first card
    * @param {Object} card2 second card
    * @description If name of cards are the same return true, otherwise false
-   * @returns {Boolean}
+   * @returns {Boolean} Boolean
    * @example const isMatch = this.checkMatch(card1, card2);
    */
   checkMatch(card1, card2) {
@@ -110,7 +110,7 @@ export default class Game {
    * @method checkWin
    * @memberof Memoji#Game#
    * @description Checks if all cards are matched
-   * @returns {Boolean}
+   * @returns {Boolean} Boolean
    * @example const isWin = this.checkWin();
    */
   checkWin() {
@@ -122,7 +122,7 @@ export default class Game {
    * @memberof Memoji#Game#
    * @param {Object} card card that was clicked
    * @description When card was clicked sets `card.isFlipped` to `true`
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example this.clickOnCard(card)
    */
   clickOnCard(card) {
@@ -134,7 +134,7 @@ export default class Game {
    * @memberof Memoji#Game#
    * @param {Object} card card that was clicked
    * @description Sets `card.isFlipped` and `card.isMatch` to `null`
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example this.reset(card)
    */
   reset(card) {
@@ -146,7 +146,7 @@ export default class Game {
    * @method clean
    * @memberof Memoji#Game#
    * @description After game, shuffles card and sets `card.isFlipped` and `card.isMatch` to `null`
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example this.clean()
    */
   clean() {
@@ -164,7 +164,7 @@ export default class Game {
    * @memberof Memoji#Game#
    * @param {Boolean} bool
    * @description Hides or shows unmatched cards
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example 
    * this.showOrHideHint(true) // show all unmatched cards
    * this.showOrHideHint(false) // hide all unmatched cards

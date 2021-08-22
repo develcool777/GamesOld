@@ -50,8 +50,8 @@ export default class Field {
   /**
    * @method log
    * @memberof Memoji#Field#
-   * @description shows in console all class fields
-   * @returns {undefined}
+   * @description Shows in console all class fields
+   * @returns {undefined} undefined
    * @example this.log()
    */
   get log() {
@@ -61,8 +61,8 @@ export default class Field {
   /**
    * @method getCardsForGame
    * @memberof Memoji#Field#
-   * @description returns array of cards
-   * @returns {Array}
+   * @description Returns array of cards
+   * @returns {Array} Array
    * @example const cards = this.getCardsForGame()
    */
   getCardsForGame() {
@@ -72,8 +72,8 @@ export default class Field {
   /**
    * @method time
    * @memberof Memoji#Field#
-   * @description returns time 
-   * @returns {Number}
+   * @description Returns time 
+   * @returns {Number} Number
    * @example const time = this.time()
    */
   time() {
@@ -86,7 +86,7 @@ export default class Field {
    * @param {Number} value this is step 
    * @description Changes level if 1 increases level, if -1 decreases level
    * @throws Error - if value is not 1 or -1
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example 
    * this.changeLevel(1) // increases level
    * this.changeLevel(-1) // decreases level
@@ -105,7 +105,7 @@ export default class Field {
    * @method amountOfLevels
    * @memberof Memoji#Field#
    * @description Returns amount of levels
-   * @returns {Number}
+   * @returns {Number} Number
    * @example const levels = this.amountOfLevels()
    */
   amountOfLevels() {

@@ -3,15 +3,13 @@ import { minMax, Board } from './minMaxAlgorithm';
  * @namespace TicTacToe
  */
 
-/**
- * @class 
- * @alias Game
- * @memberof TicTacToe#
- * @classdesc This class representing logic of TicTacToe game
- * @constructor
- */
 export default class Game {
   /**
+   * @class 
+   * @alias Game
+   * @memberof TicTacToe#
+   * @classdesc This class representing logic of TicTacToe game
+   * @constructor
    * @property {Array} field - this is matrix 3x3, '' - empty cell
    * @property {String} currentPlayer - shows whose turn to move, player with 'x' or player with 'o' 
    * @property {String} winner - shows who win, player with 'x' or player with 'o' or 'It's a draw'
@@ -71,7 +69,7 @@ export default class Game {
    * @method log
    * @memberof TicTacToe#Game#
    * @description Shows in console all fields of class
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example this.log
    */
   get log() {
@@ -88,7 +86,7 @@ export default class Game {
    * @method getFieldForDraw
    * @memberof TicTacToe#Game#
    * @description Generates array of objects for draw 
-   * @returns {Array}
+   * @returns {Array} Array
    * @example const res = this.getFieldForDraw();
    */
   getFieldForDraw() {
@@ -115,7 +113,7 @@ export default class Game {
    * @method clear
    * @memberof TicTacToe#Game#
    * @description Resets the values of the class fields to their initial state
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example this.clear();
    */
   clear() {
@@ -132,7 +130,7 @@ export default class Game {
    * @param {Number} cordX - cordX must be Integer
    * @param {Number} cordY - cordY must be Integer
    * @description Firstly check if there is a winner, then call [`makeMove()`]{@link TicTacToe#Game#makeMove} function, then changes `currentPlayer` and call [`checkWinner()`]{@link TicTacToe#Game#checkWinner} function
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example this.play(0, 0);
    */
   play(cordX, cordY) {
@@ -153,7 +151,7 @@ export default class Game {
    * @throws Error - if player is not 'x' or 'o'
    * @throws Error - if cordX and cordY are not Integer
    * @throws Error - if cordX and cordY are not in range(0, 2)
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example this.makeMove(this.currentPlayer, 0, 0);
    */
   makeMove(player, cordX, cordY) {
@@ -183,7 +181,7 @@ export default class Game {
    * @param {Boolean} compFirstMove - if computer made first move this value must be true, otherwise false
    * @description If `moves` is empty or there is a winner or there is no cell for move: return from function, 
    * otherwise define `amountOfMoves` that need to be returned then erase those moves from `moves`. 
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example 
    * this.returnMove() // in this case it's user vs user, so it removes one move
    * this.returnMove(true) // in this case it's user vs comp, so it removes two moves
@@ -210,7 +208,7 @@ export default class Game {
    * @method checkWinner
    * @memberof TicTacToe#Game#
    * @description Check is there a winner or a draw
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example this.checkWinner();
    */
   checkWinner() {
@@ -256,7 +254,7 @@ export default class Game {
    * @param {String} difficulty - difficulty can be 'easy' or 'hard'
    * @description If `difficulty` is easy call [`computerMoveRandom`]{@link TicTacToe#Game#computerMoveRandom}, if hard call [`computerMoveClever`]{@link TicTacToe#Game#computerMoveClever},
    * the result of function will be received in format[x, y](if the result of function is empty array, return from function), which then passes as an argument into [`play`]{@link TicTacToe#Game#play} function. 
-   * @returns {undefined}
+   * @returns {undefined} undefined
    * @example 
    * this.playWithComputer(); // difficulty is easy
    * this.playWithComputer('hard'); // difficulty is hard
