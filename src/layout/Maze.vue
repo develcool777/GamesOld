@@ -13,6 +13,9 @@
       v-on:clicked="actOfUser($event)"
       v-on:restart="restartGame()"
     />
+    <transition name="fade">
+      <Loading v-if="loading" class="maze__loading" :step="1.5"/>
+    </transition>  
   </div>
   <ResultMaze
     v-on:changeLevel="changeLevel($event)"
@@ -27,23 +30,25 @@ import Field from '@/model/maze/field'
 import Game from '@/model/maze/game'
 import ResultMaze from '@/components/Maze/Result'
 import Instruction from '@/components/Maze/Instruction'
+import Loading from '@/components/Loading'
 export default {
   components: {
     Instruction,
-    ResultMaze
+    ResultMaze,
+    Loading
   },
   data() {
     return {
       field: {},
       game: {},
       fieldForDraw: [],
-      headerHeight: 0
+      headerHeight: 0,
+      loading: true
     }
   },
   async created() {
-    await this.SET_DATA();
-    this.field = new Field(this.getData);
-    this.createGame();
+    setTimeout(() => {this.loading = false}, 1000);
+    await this.init();
   },
   watch: {
     isPlaying: function(newValue) {
@@ -65,6 +70,11 @@ export default {
       'INIT_STATE', 'END_GAME', 'CLEAN_GAME', 'CHANGE_ISPLAYING', 
       'CHANGE_RESTART', 'CHANGE_ARROW', 'CHANGE_STOP_CLICK', 'SET_DATA'
     ]),
+    async init() {
+      await this.SET_DATA();
+      this.field = new Field(this.getData);
+      this.createGame();
+    },
     createGame() {
       const obj = {
         level: this.field.level,
@@ -159,6 +169,14 @@ export default {
   @include BasicGrid();
   &__row {
     @include Flex(center);
+  }
+  &__loading {
+    position: absolute;
+    @include Flex(center);
+    width: 100%;
+    height: 100%;
+    background: darkslategrey;
+    z-index: 100;
   }
 }
 .empty {

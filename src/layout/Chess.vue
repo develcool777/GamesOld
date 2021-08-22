@@ -51,7 +51,10 @@
  
       </div>
     </div>
-    <Instruction class="chess__instruction"/>
+    <Instruction class="chess__instruction" />
+    <transition name="fade">
+      <Loading v-if="loading" class="chess__loading" :step="0.3"/>
+    </transition>  
   </div>
   <ResultChess/>
 </template>
@@ -64,13 +67,15 @@ import Promotion from '@/components/Chess/Promotion'
 import Game from '@/model/chess/game'
 import Instruction from '@/components/Chess/Instruction'
 import ResultChess from '@/components/Chess/Result'
+import Loading from '@/components/Loading'
 export default {
   name: 'Chess',
   components: {
     Figure,
     Promotion,
     Instruction,
-    ResultChess
+    ResultChess,
+    Loading
   },
   watch: {
     clearBoard: function(newVal) {
@@ -84,10 +89,12 @@ export default {
     return {
       GAME: {},
       board: [],
-      dontClick: false
+      dontClick: false,
+      loading: true
     }
   },
   async created() {
+    setTimeout(() => {this.loading = false}, 2000);
     await this.init();
   },
   beforeUnmount() {
@@ -230,6 +237,7 @@ export default {
 .chess {
   @include BasicGrid();
   background: #24272E;
+  position: relative;
   &__row {
     @include Flex(center);
   }
@@ -345,6 +353,14 @@ export default {
     width: 30px;
     height: 30px;
     background: darkslateblue;
+  }
+  &__loading {
+    position: absolute;
+    @include Flex(center);
+    width: 100%;
+    height: 100%;
+    background: darkslategrey;
+    z-index: 100;
   }
 }
 .check {

@@ -23,6 +23,9 @@
       </div>
     </section>
     <Instruction class="tictactoe__instruction"/>
+    <transition name="fade">
+      <Loading v-if="loading" class="tictactoe__loading" :step="0.6"/>
+    </transition>
   </div>
 </template>
 
@@ -33,18 +36,21 @@ import Game from '@/model/ticTacToe/game';
 import Instruction from '@/components/TicTacToe/Instruction';
 import Cell from '@/components/TicTacToe/Cell';
 import Info from '@/components/TicTacToe/Info';
+import Loading from '@/components/Loading' 
 export default {
   name: 'TicTacToe',
   components: {
     Instruction,
     Cell,
-    Info
+    Info,
+    Loading
   },
   data() {
     return {
       game: {},
       fieldForDraw: [],
       hovered: null,
+      loading: true
     }
   },
   watch: {
@@ -65,7 +71,8 @@ export default {
     }
   },
   created() {
-    this.createGame()
+    setTimeout(() => {this.loading = false}, 1000);
+    this.init();
   },
   computed: {
     ...mapState([
@@ -83,7 +90,7 @@ export default {
       'INIT_STATE', 'CHANGE_WINNER',
       'CHANGE_IS_PLAYING'
     ]),
-    createGame() {
+    init() {
       this.game = new Game();
       this.INIT_STATE();
       this.draw();
@@ -174,6 +181,14 @@ export default {
   }
   &__lineHorizontal2 {
     left: rem(310);   
+  }
+  &__loading {
+    position: absolute;
+    @include Flex(center);
+    width: 100%;
+    height: 100%;
+    background: darkslategrey;
+    z-index: 100;
   }
 }
 .win {

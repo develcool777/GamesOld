@@ -73,6 +73,9 @@
     </div>  
 
     <Instruction class="rps__instruction"/>
+    <transition name="fade">
+      <Loading v-if="loading" class="rps__loading" :step="0.5"/>
+    </transition>
   </div>
 </template>
 
@@ -81,10 +84,12 @@ import { createNamespacedHelpers } from 'vuex'
 const { mapGetters, mapState, mapActions } = createNamespacedHelpers('rockPaperScissors');
 import Game from '@/model/RockPaperScissors/game';
 import Instruction from '@/components/RockPaperScissors/Instruction';
+import Loading from '@/components/Loading' 
 export default {
   name: 'RockPaperScissors',
   components: {
-    Instruction
+    Instruction,
+    Loading
   },
   data() {
     return {
@@ -118,7 +123,8 @@ export default {
         ]
       },
       historyData: [],
-      analiticsData: []
+      analiticsData: [],
+      loading: true
     }
   },
   watch: {
@@ -129,9 +135,8 @@ export default {
     }
   },
   async created() {
-    await this.SET_CHOICES()
-    this.setImages();
-    this.game = new Game();
+    setTimeout(() => {this.loading = false}, 1000);
+    await this.init();
   },
   computed: {
     ...mapState(['clear', 'showHistory', 'showAnalitics']),
@@ -157,7 +162,11 @@ export default {
   },
   methods: {
     ...mapActions(['CHANGE_CLEAR', 'CHANGE_SHOW_HISTORY', 'CHANGE_RESULT_OF_MOVE', 'SET_CHOICES']),
-
+    async init() {
+      await this.SET_CHOICES()
+      this.setImages();
+      this.game = new Game();
+    },
     play(move) {
       let moves;
       if (this.getImpossible) {
@@ -270,6 +279,14 @@ export default {
     color: $white;
     font-size: rem(20);
     margin: rem(20) 0;
+  }
+  &__loading {
+    position: absolute;
+    @include Flex(center);
+    width: 100%;
+    height: 100%;
+    background: darkslategrey;
+    z-index: 100;
   }
 }
 

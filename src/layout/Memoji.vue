@@ -28,6 +28,9 @@
       v-on:changeLevel="changeLevel($event)"
       v-on:restart="restartGame()"
     />
+    <transition name="fade">
+      <Loading v-if="loading" class="memoji__loading" :step="0.3"/>
+    </transition>
   </div>
   <ResultMemoji
     v-on:changeLevel="changeLevel($event)"
@@ -43,18 +46,21 @@ import Field from '@/model/memoji/field';
 import Game from '@/model/memoji/game';
 import Instruction from '@/components/Memoji/Instruction';
 import ResultMemoji from '@/components/Memoji/Result';
+import Loading from '@/components/Loading'
 export default {
   name: 'Memoji',
   components: {
     Instruction,
-    ResultMemoji
+    ResultMemoji,
+    Loading
   },
   data() {
     return {
       field: {},
       game: {},
       fieldForDraw: [],
-      timeForShow: 1000
+      timeForShow: 1000,
+      loading: true
     }
   },
   watch: {
@@ -68,9 +74,8 @@ export default {
     }
   },
   async created() {
-    await this.GET_DATA();
-    this.field = new Field(this.getData)
-    this.createGame();
+    setTimeout(() => {this.loading = false}, 2000);
+    await this.init();
   },
   computed: {
     ...mapState(['showHint', 'gameFinished']),
@@ -94,6 +99,11 @@ export default {
       'REMOVE_ITEMS_FOR_COMPARE', 'CLEAN_GAME',
       'CHANGE_SHOW_HINT', 'CHANGE_RESTART', 'END_GAME', 'GET_DATA'
     ]),
+    async init() {
+      await this.GET_DATA();
+      this.field = new Field(this.getData)
+      this.createGame();
+    },
     createGame() {
       this.game = new Game(this.field.getCardsForGame());
       this.game.setCardData();
@@ -188,6 +198,14 @@ export default {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
+  }
+  &__loading {
+    position: absolute;
+    @include Flex(center);
+    width: 100%;
+    height: 100%;
+    background: darkslategrey;
+    z-index: 100;
   }
 }
 .card__face {
