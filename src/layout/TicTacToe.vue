@@ -23,10 +23,10 @@
       </div>
     </section>
     <Instruction class="tictactoe__instruction"/>
-    <transition name="fade">
-      <Loading v-if="loading" class="tictactoe__loading" :step="0.6"/>
-    </transition>
   </div>
+  <transition name="fade">
+    <Loading v-if="loading" class="LOADING" :step="0.6"/>
+  </transition>
 </template>
 
 <script>
@@ -181,14 +181,6 @@ export default {
   }
   &__lineHorizontal2 {
     left: rem(310);   
-  }
-  &__loading {
-    position: absolute;
-    @include Flex(center);
-    width: 100%;
-    height: 100%;
-    background: darkslategrey;
-    z-index: 100;
   }
 }
 .win {

@@ -28,15 +28,15 @@
       v-on:changeLevel="changeLevel($event)"
       v-on:restart="restartGame()"
     />
-    <transition name="fade">
-      <Loading v-if="loading" class="memoji__loading" :step="0.3"/>
-    </transition>
   </div>
   <ResultMemoji
     v-on:changeLevel="changeLevel($event)"
     v-on:restart="restartGame()"
     v-on:close="cleanField()"
   />
+  <transition name="fade">
+    <Loading v-if="loading" class="LOADING" :step="0.3"/>
+  </transition>
 </template>
 
 <script>
@@ -198,14 +198,6 @@ export default {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
-  }
-  &__loading {
-    position: absolute;
-    @include Flex(center);
-    width: 100%;
-    height: 100%;
-    background: darkslategrey;
-    z-index: 100;
   }
 }
 .card__face {

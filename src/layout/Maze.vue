@@ -13,15 +13,15 @@
       v-on:clicked="actOfUser($event)"
       v-on:restart="restartGame()"
     />
-    <transition name="fade">
-      <Loading v-if="loading" class="maze__loading" :step="1.5"/>
-    </transition>  
   </div>
   <ResultMaze
     v-on:changeLevel="changeLevel($event)"
     v-on:restart="restart()"
     v-on:close="cleanField()"
   />
+  <transition name="fade">
+    <Loading v-if="loading" class="LOADING" :step="1.5"/>
+  </transition>  
 </template>
 <script>
 import { createNamespacedHelpers } from 'vuex'
@@ -120,7 +120,7 @@ export default {
       const [prevX, prevY] = this.keyPressed(key);
       const [curentX, curentY] = this.game.player.getPosition();
       this.draw(prevX, prevY, curentX, curentY);
-      if (this.game.cheakWin(curentX, curentY)) {
+      if (this.game.checkWin(curentX, curentY)) {
         this.END_GAME('Win');
       }
     },
@@ -169,14 +169,6 @@ export default {
   @include BasicGrid();
   &__row {
     @include Flex(center);
-  }
-  &__loading {
-    position: absolute;
-    @include Flex(center);
-    width: 100%;
-    height: 100%;
-    background: darkslategrey;
-    z-index: 100;
   }
 }
 .empty {

@@ -36,27 +36,27 @@
 
         <div v-if="GAME.isPawnPromotion" class="chess__mask"></div>
 
-        <div class="chess__borderLeft">
+        <div class="chess__borderLeft" v-if="navigation">
           <div class="chess__number" v-for="(num, i) in 8" :key="i">{{ 9 - num  }}</div>
         </div>
-        <div class="chess__borderDown">
+        <div class="chess__borderDown" v-if="navigation">
           <div class="chess__letter" v-for="(num, i) in 8" :key="i">{{ String.fromCharCode(64 + num) }}</div>
         </div>
-        <div class="chess__borderRight">
+        <div class="chess__borderRight" v-if="navigation">
           <div class="chess__number" v-for="(num, i) in 8" :key="i">{{ 9 - num }}</div>
         </div>
-        <div class="chess__borderUp">
+        <div class="chess__borderUp" v-if="navigation">
           <div class="chess__letter" v-for="(num, i) in 8" :key="i">{{ String.fromCharCode(64 + num) }}</div>
         </div>
  
       </div>
     </div>
     <Instruction class="chess__instruction" />
-    <transition name="fade">
-      <Loading v-if="loading" class="chess__loading" :step="0.3"/>
-    </transition>  
   </div>
   <ResultChess/>
+  <transition name="fade">
+    <Loading v-if="loading" class="LOADING" :step="0.3"/>
+  </transition>  
 </template>
 
 <script>
@@ -90,7 +90,8 @@ export default {
       GAME: {},
       board: [],
       dontClick: false,
-      loading: true
+      loading: true,
+      navigation: false
     }
   },
   async created() {
@@ -115,6 +116,7 @@ export default {
       this.GAME.createFigures();
       await this.SET_FIGURES();
       this.draw();
+      this.navigation = true;
     },
 
     draw() {
@@ -353,14 +355,6 @@ export default {
     width: 30px;
     height: 30px;
     background: darkslateblue;
-  }
-  &__loading {
-    position: absolute;
-    @include Flex(center);
-    width: 100%;
-    height: 100%;
-    background: darkslategrey;
-    z-index: 100;
   }
 }
 .check {

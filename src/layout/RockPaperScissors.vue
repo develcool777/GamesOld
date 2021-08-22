@@ -73,10 +73,10 @@
     </div>  
 
     <Instruction class="rps__instruction"/>
-    <transition name="fade">
-      <Loading v-if="loading" class="rps__loading" :step="0.5"/>
-    </transition>
   </div>
+  <transition name="fade">
+    <Loading v-if="loading" class="LOADING" :step="0.6"/>
+  </transition>
 </template>
 
 <script>
@@ -279,14 +279,6 @@ export default {
     color: $white;
     font-size: rem(20);
     margin: rem(20) 0;
-  }
-  &__loading {
-    position: absolute;
-    @include Flex(center);
-    width: 100%;
-    height: 100%;
-    background: darkslategrey;
-    z-index: 100;
   }
 }
 
