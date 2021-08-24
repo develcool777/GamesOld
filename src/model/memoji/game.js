@@ -1,3 +1,4 @@
+import Timer from "./timer";
 /**
  * @namespace Memoji
  */
@@ -14,14 +15,23 @@ export default class Game {
    * @property {Array} cards - this is `arrayOfCardsName`
    * @throws Error - if `arrayOfCardsName` is not Array or every element of `arrayOfCardsName` is not String
    */
-  constructor(arrayOfCardsName) {
+  constructor(arrayOfCardsName, time) {
     if (!Array.isArray(arrayOfCardsName)) {
       throw Error(`Game.constructor arrayOfCardsName must be Array`);
     }
     if (!arrayOfCardsName.every(item => typeof item === 'string')) {
       throw Error(`Game.constructor every element in arrayOfCardsName must be typeof string`);
     }
-    let cardsData = []
+    if (!Number.isInteger(time) && time < 1) {
+      throw Error(`Game.constructor time must Integer and greater than 0`);
+    }
+    console.log(time);
+    let cardsData = [];
+    const compare = [];
+    const timer = new Timer(time);
+    let gameStatus = '';
+    let resultTime = 0;
+    let result = '';
     Object.defineProperties(this, {
       cards: {
         get: () => arrayOfCardsName
@@ -31,6 +41,30 @@ export default class Game {
         set: (arr) => {
           cardsData = arr;
         }
+      },
+      timer: {
+        get: () => timer
+      },
+      gameStatus: {
+        get: () => gameStatus,
+        set: (value) => {
+          gameStatus = value;
+        }
+      },
+      resultTime: {
+        get: () => resultTime,
+        set: (value) => {
+          resultTime = value;
+        }
+      },
+      result: {
+        get: () => result,
+        set: (value) => {
+          result = value;
+        }
+      },
+      compare: {
+        get: () => compare
       }
     })
   }
@@ -91,12 +125,16 @@ export default class Game {
    * @returns {Boolean} Boolean
    * @example const isMatch = this.checkMatch(card1, card2);
    */
-  checkMatch(card1, card2) {
+  checkMatch() {
+    if (this.compare.length < 2) { return }
+    const [card1, card2] = this.compare;
+
     if (card1.name === card2.name) {
       [card1.id, card2.id].forEach(id => {
         this.cardsData[id].isMatch = true;
         this.cardsData[id].isFlipped = true;
       })
+      this.compare.splice(0);
       return true;
     }
     [card1.id, card2.id].forEach(id => {
@@ -127,7 +165,10 @@ export default class Game {
    */
   clickOnCard(card) {
     this.cardsData[card.id].isFlipped = true;
+    this.compare.push(card);
   }
+
+
 
   /**
    * @method reset
@@ -142,6 +183,12 @@ export default class Game {
     this.cardsData[card.id].isMatch = null;
   }
 
+  closeCards() {
+    this.cardsData.forEach(card => {
+      this.reset(card);
+    })
+  }
+
   /**
    * @method clean
    * @memberof Memoji#Game#
@@ -153,10 +200,13 @@ export default class Game {
     this.shuffleCards(this.cardsData);
     this.cardsData = this.cardsData.map((card, i) => {
       card.id = i;
-      card.isFlipped = null;
-      card.isMatch = null;
       return card;
     })
+    this.timer.reset();
+    this.gameStatus = '';
+    this.compare.splice(0);
+    this.result = ''
+    this.resultTime = 0;
   }
 
   /**
@@ -175,5 +225,22 @@ export default class Game {
       card.isFlipped = value;
       return card;
     })
+  }
+
+  startGame() {
+    this.timer.start();
+    this.gameStatus = 'start'
+  }
+
+  pauseGame() {
+    this.timer.stop();
+    this.gameStatus = 'pause'
+  }
+
+  gameFinished(str) {
+    this.resultTime = this.timer.amountOfTime();
+    this.result = str;
+    this.timer.stop();
+    this.gameStatus = 'finish'
   }
 }
