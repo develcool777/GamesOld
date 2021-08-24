@@ -1,12 +1,13 @@
 <template>
   <div class="memoji">
+
     <div class="memoji__game">
       <div class="memoji__field" :style="{width: setFieldWidth}">
         <div class="scene" v-for="(card, i) in fieldForDraw" :key="i">
           <div 
             class="card" 
             :class="displayIsFlipped(card)" 
-            :style="{cursor: getIsPlaying ? 'pointer' : 'default'}"
+            :style="cursor(card)"
           > 
             <div 
               class="card__face card__face--front" 
@@ -15,7 +16,6 @@
             <div 
               class="card__face card__face--back" 
               :class="displayIsMatch(card)" 
-              @click="clickedCard(card)"
             >
               <span :class="card.class"></span>
             </div>
@@ -23,17 +23,30 @@
         </div>
       </div>
     </div>
+
     <Instruction 
       class="memoji__instruction"
+      :timer="timer"
+      :attempts="attemptsForHint"
+      :gameStatus="status"
+      v-on:startGame="gameStarted()"
+      v-on:stopGame="gameStoped()"
+      v-on:finishGame="gameFinished()"
       v-on:changeLevel="changeLevel($event)"
       v-on:restart="restartGame()"
+      v-on:showHint="hint()"
     />
   </div>
+
   <ResultMemoji
+    :gameResult="result"
+    :status="showModal"
+    :timeInMs="resultTime"
     v-on:changeLevel="changeLevel($event)"
     v-on:restart="restartGame()"
     v-on:close="cleanField()"
   />
+
   <transition name="fade">
     <Loading v-if="loading" class="LOADING" :step="0.3"/>
   </transition>
@@ -41,7 +54,7 @@
 
 <script>
 import { createNamespacedHelpers } from 'vuex'
-const { mapState, mapActions, mapGetters } = createNamespacedHelpers('memoji');
+const { mapActions, mapGetters } = createNamespacedHelpers('memoji');
 import Field from '@/model/memoji/field';
 import Game from '@/model/memoji/game';
 import Instruction from '@/components/Memoji/Instruction';
@@ -49,37 +62,60 @@ import ResultMemoji from '@/components/Memoji/Result';
 import Loading from '@/components/Loading'
 export default {
   name: 'Memoji',
+
   components: {
     Instruction,
     ResultMemoji,
     Loading
   },
+
   data() {
     return {
       field: {},
       game: {},
+      gameCreated: false,
       fieldForDraw: [],
       timeForShow: 1000,
-      loading: true
+      timer: '0:00',
+      resultTime: 0,
+      result: '',
+      showModal: false,
+      loading: true,
+      attemptsForHint: 3,
+      status: ''
     }
   },
+
   watch: {
-    showHint: function(newVal) {
-      return newVal ? this.hint() : null;
+    gameTime(newTime) {
+      if (newTime === '00:00') { 
+        this.isFinish(true);
+      }
+      this.timer = newTime;
     },
-    gameFinished: function(newVal) {
-      if (newVal) {
-        this.game.clean();
-      } 
-    }
+
+    gameStatus(newStatus) {
+      if (newStatus === 'finish') {
+        this.showModal = true;
+        this.game.closeCards();
+      }
+      this.status = newStatus;
+    },
   },
+
   async created() {
     setTimeout(() => {this.loading = false}, 2000);
     await this.init();
   },
+
   computed: {
-    ...mapState(['showHint', 'gameFinished']),
-    ...mapGetters(['getItemsForCompare', 'getIsPlaying', 'getData']),
+    ...mapGetters(['getData']),
+
+    gameTime() {
+      if (!this.gameCreated) { return '0:00' }
+      return this.game.timer.timeForPrint;
+    },
+
     setFieldWidth() {
       if (this.game.cards === undefined) { return '100px' }
       const amountOfCards = this.game.cards.length;
@@ -91,89 +127,115 @@ export default {
         return `${calcWidth(Math.ceil(amountOfCards / 2))}px`
       }
       return `${calcWidth(6)}px`;
-    }
+    },
+
+    gameStatus() {
+      return this.game.gameStatus
+    } 
   },
+
   methods: {
-    ...mapActions([
-      'INIT_STATE', 'ADD_ITEMS_FOR_COMPARE', 
-      'REMOVE_ITEMS_FOR_COMPARE', 'CLEAN_GAME',
-      'CHANGE_SHOW_HINT', 'CHANGE_RESTART', 'END_GAME', 'GET_DATA'
-    ]),
+    ...mapActions(['INIT_STATE', 'GET_DATA']),
+
     async init() {
       await this.GET_DATA();
       this.field = new Field(this.getData)
       this.createGame();
     },
+
+    gameStarted() {
+      this.game.startGame();
+    },
+
+    gameStoped() {
+      this.game.pauseGame();
+    },
+
+    gameFinished() {
+      this.game.closeCards();
+      this.cleanField();
+    },
+
     createGame() {
-      this.game = new Game(this.field.getCardsForGame());
+      this.game = new Game(this.field.getCardsForGame(), this.field.time());
       this.game.setCardData();
+      this.attemptsForHint = 3;
       this.draw();
       const obj = {
-        time: this.field.time(),
         level: this.field.level,
         levels: this.field.amountOfLevels()
       }
       this.INIT_STATE(obj);
+      this.gameCreated = true;
     },
+
     clickedCard(card) {
-      if (this.getIsPlaying !== true ) { return }
-      if (this.getItemsForCompare.length < 2) {
-        this.ADD_ITEMS_FOR_COMPARE(card);
-        this.game.clickOnCard(card);
-        this.draw();
+      if (this.game.gameStatus !== 'start' || this.game.compare.length === 2) { return }
+
+      this.game.clickOnCard(card);
+
+      const isMatch = this.game.checkMatch();
+      setTimeout(() => {
+        if (isMatch === false) {
+          this.game.compare.forEach(card => {
+            this.game.reset(card);
+          })
+          this.game.compare.splice(0);
+        }
+      }, this.timeForShow)
+
+      this.isFinish();
+    },
+
+    isFinish(lost=false) {
+      if (lost) {
+        this.game.gameFinished('Lost');
+        this.result = this.game.result;
       }
-      if (this.getItemsForCompare.length === 2) {
-        this.check();
-      }
-      if (this.game.checkWin()) {
+      if (this.game.checkWin() && !lost) {
         setTimeout(() => {
-          this.END_GAME('Win')
-        }, this.timeForShow);
+          this.game.gameFinished('Won');
+          this.result = this.game.result;
+          this.resultTime = this.game.resultTime;
+        }, this.timeForShow)
       }
     },
+
     draw() {
       this.fieldForDraw = this.game.cardsData;
     },
-    check() {
-      const isMatch = this.game.checkMatch(...this.getItemsForCompare);
-      if (isMatch) {
-        this.REMOVE_ITEMS_FOR_COMPARE();
-        return this.draw();
-      } 
-      setTimeout(() => {
-        this.getItemsForCompare.forEach(card => {
-          this.game.reset(card);
-        }) 
-        this.REMOVE_ITEMS_FOR_COMPARE();
-        this.draw();
-      }, this.timeForShow - 250);   
-    },
+
     changeLevel(step) {
+      if (!['', 'finish'].includes(this.game.gameStatus)) { return }
       this.field.changeLevel(step);
-      this.createGame();
+      this.createGame()
+      this.showModal = false;
     },
+
     cleanField() {
       this.game.clean();
       this.draw();
-      this.CLEAN_GAME();
+      this.showModal = false;
     },
+
     restartGame() {
       this.cleanField();
-      this.CHANGE_RESTART(true);
+      this.gameStarted();
     },
+
     hint() {
-      const func = bool => {
-        this.game.showOrHideHint(bool);
-        this.draw();
-      }
+      if (this.attemptsForHint === 0  || this.game.gameStatus !== 'start') { return }
+      const func = bool => this.game.showOrHideHint(bool)
       func(true);
-      setTimeout(() => {
-        func(false);
-      }, this.timeForShow);
-      setTimeout(() => {
-        this.CHANGE_SHOW_HINT(false);
-      }, this.timeForShow * 2);
+      setTimeout(() => func(false), this.timeForShow);
+      this.attemptsForHint--;
     },
+
+    cursor(card) {
+      if (this.game.gameStatus !== 'start') { return {cursor: 'default'} }
+      if (card.isMatch === null && card.isFlipped === null) { return {cursor: 'pointer'} }
+    },
+
     displayIsMatch(card) {
       if (card.isMatch && card.isFlipped) {
         return 'match';
@@ -183,6 +245,7 @@ export default {
       }
       return '';
     },
+
     displayIsFlipped(card) {
       return card.isFlipped ? 'isFlipped' : '';
     }

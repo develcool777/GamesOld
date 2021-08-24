@@ -1,26 +1,14 @@
 <template>
   <section class="instMemoji">
     <div class="instMemoji__time">
-      <div class="instMemoji__title">Timer: {{ timeStr }}</div>
+      <div class="instMemoji__title">Timer: {{timer}}</div>
       <div class="instMemoji__mainBtns">
-        <div 
-          class="instMemoji__mainBtn" 
-          @click=" allowClick ? startGame() : null"
-        >{{ start }}</div>
-        <div
-          class="instMemoji__mainBtn"
-          @click=" !allowClick ? stopGame() : null"
-          >{{ stop }}</div>
+        <div class="instMemoji__mainBtn" @click="startGame()"> {{start}} </div>
+        <div class="instMemoji__mainBtn" @click="stopGame()"> {{stop}} </div>
+        <div class="instMemoji__mainBtn" @click="finishGame()">Finish</div>
+        <div class="instMemoji__mainBtn" @click="restartGame()">Restart</div>
+        <div class="instMemoji__mainBtn" @click="showHint()" :style="setFontSize()"> {{ hint }} </div>
       </div>
-      <div 
-        class="instMemoji__mainBtn" 
-        @click=" getIsPlaying !== undefined ? restartGame() : null"
-      >Restart</div>
-      <div 
-        class="instMemoji__mainBtn" 
-        @click="showHint()" 
-        :style="setFontSize()"
-      >{{ hint }}</div>
     </div>
     <div class="instMemoji__levels">
       <div class="instMemoji__title">Levels</div>
@@ -33,81 +21,57 @@
   </section>
 </template>
 <script>
-import Instruction from '@/mixins/instruction'
 import { createNamespacedHelpers } from 'vuex'
-const { mapActions, mapState, mapGetters } = createNamespacedHelpers('memoji')
+const { mapState, mapGetters } = createNamespacedHelpers('memoji')
 export default {
   name: 'Instruction',
-  created() {
-    this.timeForPrint(this.getTimer);
-  },
-  mixins: [Instruction],
-  data() {
-    return {
-      attempts: 3
-    }
-  },
-  watch: {
-    level: function(newVal) {
-      if (newVal) {
-        this.timeForPrint(this.getTimer);
-        this.attempts = 3;
-      }
-    },
-    timer: function(newVal) {
-      if (newVal === this.getTimeForReset) {
-        this.timeForPrint(newVal);
-        this.attempts = 3;
-      }
-    },
-    restart: function(newVal) {
-      if (newVal) {
-        this.startGame();
-        this.attempts = 3;
-      }
-    }
+  props: {
+    timer: String,
+    attempts: Number,
+    gameStatus: String 
   },
   computed: {
-    ...mapGetters([
-      'getLevel', 'getTimer',
-      'getTimeForReset', 'getIsPlaying',
-      'getShowHint'
-    ]),
-    ...mapState([
-      'gameFinished', 'level',
-      'timer', 'restart'
-    ]),
+    ...mapGetters(['getLevel']),
+
+    ...mapState(['level']),
+
     hint() {
       return this.attempts > 0 ? `Show hint(${this.attempts}/3)` : 'Run out of attempts'
     },
+
     start() {
-      return  this.getIsPlaying ? 'Started' : 'Start';
+      return  this.gameStatus === 'start' ? 'Started' : 'Start';
     },
+    
     stop() {
-      if (this.getTimeForReset === this.getTimer) { 
-        return 'Stop'
-      }
-      return !this.getIsPlaying ? 'Stoped' : 'Stop';
+      return this.gameStatus === 'pause' ? 'Stoped' : 'Stop';
     }
   },
   methods: {
-    ...mapActions([
-      'CHANGE_LEVEl', 'CHANGE_TIMER', 'CHANGE_ISPLAYING',
-      'END_GAME', 'CHANGE_RESTART',
-      'CHANGE_SHOW_HINT', 'REMOVE_ITEMS_FOR_COMPARE'
-    ]),
-    showHint() {
-      if (
-        this.attempts === 0  
-        || this.getIsPlaying !== true 
-        || this.getShowHint === true
-      ) { return }
-      this.REMOVE_ITEMS_FOR_COMPARE();
-      this.CHANGE_SHOW_HINT(true);
-      if (this.attempts > 0) {
-        this.attempts--;
-      }
+    finishGame() {
+      this.$emit('finishGame');
     },
+
+    changeLevel(step) {
+      this.$emit('changeLevel', step);
+    },
+
+    showHint() {
+      this.$emit('showHint');
+    },
+
+    restartGame() {
+      this.$emit('restart');
+    },
+
+    startGame() {
+      this.$emit('startGame');
+    },
+
+    stopGame() {
+      this.$emit('stopGame');
+    },
+
     setFontSize() {
       return this.attempts === 0 ? {fontSize: '20px'} : {};
     }

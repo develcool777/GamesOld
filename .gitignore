@@ -107,5 +107,8 @@ typings/
 #Electron-builder output
 /dist_electron
 
+#Vue production 
+dist
+
 # Documentation
 docs
