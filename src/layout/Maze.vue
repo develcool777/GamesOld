@@ -9,14 +9,23 @@
     </div>
     <Instruction 
       class="maze__instruction" 
-      v-on:changeLevel="changeLevel($event)"
-      v-on:clicked="actOfUser($event)"
+      :timer="timer"
+      :gameStatus="status"
+      v-on:startGame="startLoop()"
+      v-on:stopGame="stopLoop()"
       v-on:restart="restartGame()"
+      v-on:finishGame="cleanField()"
+      v-on:changeLevel="changeLevel($event)"
+      v-on:clicked="arrowPressed($event)"
     />
+
   </div>
   <ResultMaze
+    :gameResult="result"
+    :status="showModal"
+    :timeInMs="resultTime"
     v-on:changeLevel="changeLevel($event)"
-    v-on:restart="restart()"
+    v-on:restart="restartGame()"
     v-on:close="cleanField()"
   />
   <transition name="fade">
@@ -43,7 +52,13 @@ export default {
       game: {},
       fieldForDraw: [],
       headerHeight: 0,
-      loading: true
+      loading: true,
+      result: '',
+      resultTime: 0,
+      showModal: false,
+      status: '',
+      gameCreated: false,
+      timer: '00:00'
     }
   },
   async created() {
@@ -51,8 +66,17 @@ export default {
     await this.init();
   },
   watch: {
-    isPlaying: function(newValue) {
-      return newValue ? this.startLoop() : this.stopLoop();
+    gameStatus(newStatus) {
+      if (newStatus === 'finish') {
+        this.showModal = true;
+      }
+      this.status = newStatus;
+    },
+    gameTime(newTime) {
+      if (newTime === '00:00') { 
+        this.isFinish(true);
+      }
+      this.timer = newTime;
     },
     showPath: function(newValue) {
       this.fieldForDraw = this.field.generateFieldWith(this.game.field, newValue, this.getShowHint);
@@ -62,68 +86,79 @@ export default {
     }
   },
   computed: {
-    ...mapState(['level', 'isPlaying', 'showPath', 'showHint']),
-    ...mapGetters(['getShowPath', 'getShowHint', 'getData'])
+    ...mapState(['level', 'showPath', 'showHint']),
+    ...mapGetters(['getShowPath', 'getShowHint', 'getData']),
+    gameStatus() {
+      return this.game.gameStatus;
+    },
+    gameTime() {
+      if (!this.gameCreated) { return '0:00' }
+      return this.game.timer.timeForPrint;
+    },
   },
   methods: {
     ...mapActions([
-      'INIT_STATE', 'END_GAME', 'CLEAN_GAME', 'CHANGE_ISPLAYING', 
-      'CHANGE_RESTART', 'CHANGE_ARROW', 'CHANGE_STOP_CLICK', 'SET_DATA'
+      'INIT_STATE', 'CHANGE_ARROW', 'SET_DATA'
     ]),
+
     async init() {
       await this.SET_DATA();
       this.field = new Field(this.getData);
       this.createGame();
     },
+
     createGame() {
       const obj = {
         level: this.field.level,
-        seconds: this.field.time(),
         amountOfLevels: this.field.amountOfLevels(),
       }
       this.INIT_STATE(obj);
-      const [field, start, end] = this.field.dataForGame();
-      this.game = new Game(field, start, end)
+      const [field, start, end, time] = this.field.dataForGame();
+      this.game = new Game(field, start, end, time);
       this.fieldForDraw = this.field.generateFieldForDraw(field, start, end);
       this.game.initGame();
+      this.gameCreated = true;
     },
+
     changeLevel(step) {
       this.field.changeLevel(step);
       this.createGame();
+      this.showModal = false;
     },
+
     restartGame() {
-      window.removeEventListener('keyup', this.actOfUser);
-      this.restart();
-    },
-    restart() {
       this.cleanField();
-      this.CHANGE_RESTART(true);
+      this.startLoop();
     },
+
     cleanField() {
-      const [field, start, end] = this.field.dataForGame();
+      this.stopLoop();
       this.game.clean();
       this.game.initGame();
+      const [field, start, end] = this.field.dataForGame();
       this.fieldForDraw = this.field.generateFieldForDraw(field, start, end);
-      this.CLEAN_GAME();
+      this.showModal = false;
     },
+
     startLoop() {   
-      this.CHANGE_STOP_CLICK(false)
-      window.addEventListener('keyup', this.actOfUser); 
+      this.game.startGame();
+      window.addEventListener('keyup', this.arrowPressed); 
     },
+
     stopLoop() {
-      this.CHANGE_STOP_CLICK(true)
-      window.removeEventListener('keyup', this.actOfUser);
+      this.game.stopGame();
+      window.removeEventListener('keyup', this.arrowPressed);
     },
-    actOfUser(event) {
+
+    arrowPressed(event) {
       const eventChecker = e => typeof e === 'string' ? e : e.key;
       const key = eventChecker(event);
-      const [prevX, prevY] = this.keyPressed(key);
-      const [curentX, curentY] = this.game.player.getPosition();
+      const [prevX, prevY, curentX, curentY] = this.keyPressed(key);
       this.draw(prevX, prevY, curentX, curentY);
-      if (this.game.checkWin(curentX, curentY)) {
-        this.END_GAME('Win');
-      }
+
+      this.isFinish(false, curentX, curentY);
     },
+
     draw(prevX, prevY, curentX, curentY) {
       const insertClass = (x, y, className) => {
         const classArr = this.fieldForDraw[x][y].class.split(' ');
@@ -138,6 +173,7 @@ export default {
       insertClass(prevX, prevY, path);
       insertClass(curentX, curentY, 'player');
     },
+
     keyPressed(key) {
       const [prevX, prevY] = this.game.player.getPosition();
       if (key === 'ArrowUp') {
@@ -156,9 +192,25 @@ export default {
         this.game.moves('D');
         this.CHANGE_ARROW(4)
       }
-      // console.log(this.game.generateWinPath());
+
       setTimeout(() => { this.CHANGE_ARROW(0) }, 250);
-      return [prevX, prevY];
+      const [curentX, curentY] = this.game.player.getPosition();
+      return [prevX, prevY, curentX, curentY];
+    },
+
+    isFinish(lost=false, x, y) {
+      if (lost) { 
+        this.game.gameFinished('Lost');
+        this.result = this.game.result;
+      }
+      if (!lost && this.game.checkWin(x, y)) {
+        this.game.gameFinished('Won');
+        this.result = this.game.result;
+        this.resultTime = this.game.resultTime;
+      }
+      if (this.game.gameStatus === 'finish') {
+        window.removeEventListener('keyup', this.arrowPressed);
+      }
     }
   }
 }

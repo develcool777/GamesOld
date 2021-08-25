@@ -1,5 +1,5 @@
 import Player from './player'
-
+import Timer from '../timer'
 /**
  * @namespace Maze
  */
@@ -18,7 +18,7 @@ export default class Game {
    * @property {Instance} player - Instance of class [`Player`]{@link Maze#Player}
    * @property {Array} history - Stores all `player` moves
    */
-  constructor(field, startPosition, winPosition) {
+  constructor(field, startPosition, winPosition, time) {
     if (!Array.isArray(field)) {
       throw Error(`Game.constructor field must be Array`);
     }
@@ -39,6 +39,10 @@ export default class Game {
     }
     const player = new Player(startPosition.x, startPosition.y);
     let history = [];
+    const timer = new Timer(time);
+    let gameStatus = '';
+    let result = '';
+    let resultTime = 0;
     Object.defineProperties(this, {
       field: {
         get: () => field,
@@ -60,7 +64,28 @@ export default class Game {
       },
       startPos: {
         get: () => startPosition
-      }
+      },
+      timer: {
+        get: () => timer
+      },
+      gameStatus: {
+        get: () => gameStatus,
+        set: (arr) => {
+          gameStatus = arr;
+        }
+      },
+      result: {
+        get: () => result,
+        set: (arr) => {
+          result = arr;
+        }
+      },
+      resultTime: {
+        get: () => resultTime,
+        set: (arr) => {
+          resultTime = arr;
+        }
+      },
     })
   }
   /**
@@ -208,6 +233,10 @@ export default class Game {
     this.history = [];
     this.player.x = this.startPos.x;
     this.player.y = this.startPos.y;
+    this.resultTime = 0;
+    this.result = '';
+    this.timer.reset();
+    this.gameStatus = '';
   }
 
   /**
@@ -242,5 +271,22 @@ export default class Game {
   initGame() {
     this.field[this.startPos.x][this.startPos.y] = '@';
     this.field[this.winPos.x][this.winPos.y] = '';
+  }
+
+  startGame() {
+    this.gameStatus = 'start';
+    this.timer.start();
+  }
+
+  stopGame() {
+    this.gameStatus = 'stop';
+    this.timer.stop();
+  }
+
+  gameFinished(str) {
+    this.resultTime = this.timer.amountOfTime();
+    this.result = str;
+    this.timer.stop();
+    this.gameStatus = 'finish'
   }
 }

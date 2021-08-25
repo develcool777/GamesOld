@@ -1,26 +1,18 @@
 <template>
   <section class="instMaze">
     <div class="instMaze__time">
-      <div class="instMaze__title">Timer: {{ timeStr }}</div>
+      <div class="instMaze__title">Timer: {{ timer }}</div>
       <div class="instMaze__mainBtns">
-        <div 
-          class="instMaze__mainBtn" 
-          @click.stop=" allowClick ? startGame() : null"
-        >{{ start }}</div>
-        <div
-          class="instMaze__mainBtn"
-          @click.stop=" !allowClick ? stopGame() : null"
-          >{{ stop }}</div>
+        <div class="instMaze__mainBtn" @click="startGame()">{{ start }}</div>
+        <div class="instMaze__mainBtn" @click="stopGame()">{{ stop }}</div>
+        <div class="instMaze__mainBtn" @click="finishGame()">Finish</div>
+        <!-- <div class="instMaze__mainBtn" @click="restartGame()">Restart</div> -->
+        <div class="instMaze__mainBtn" @click="showPath()">
+          Show path: 
+          <span :style="{color: getShowPath ? 'green' : 'red'}">{{getShowPath ?'ON' : 'OFF'}}</span>
+        </div>
+        <div class="instMaze__mainBtn" @click="showHint()">{{getShowHint ? 'Hide' : 'Show'}} hint</div>
       </div>
-      <div 
-        class="instMaze__mainBtn" 
-        @click="getIsPlaying !== undefined ? restartGame() : null"
-      >Restart</div>
-      <div class="instMaze__mainBtn" @click="showPath()">
-        Show path: 
-        <span :style="{color: getShowPath ? 'green' : 'red'}">{{getShowPath ?'ON' : 'OFF'}}</span>
-      </div>
-      <div class="instMaze__mainBtn" @click="showHint()">{{getShowHint ? 'Hide' : 'Show'}} hint</div>
     </div>
     <div class="instMaze__levels">
       <div class="instMaze__title">Levels</div>
@@ -48,49 +40,70 @@
 </template>
 
 <script>
-import Instruction from '@/mixins/instruction'
+// import Instruction from '@/mixins/instruction'
 import { createNamespacedHelpers } from 'vuex'
-const { mapActions, mapState, mapGetters } = createNamespacedHelpers('maze')
+const { mapGetters, mapActions } = createNamespacedHelpers('maze')
 export default {
   name: 'Instruction',
-  mixins: [Instruction],
+  // mixins: [Instruction],
+  props: {
+    timer: String,
+    gameStatus: String 
+  },
   computed: {
     ...mapGetters([
-      'getLevel', 'getTimer', 
-      'getShowPath', 'getShowHint', 
-      'getTimeForReset', 'getStopClickArrows',
-      'getArrowClicked', 'getIsPlaying'
+      'getLevel', 'getShowPath', 'getShowHint', 'getArrowClicked'
     ]),
-    ...mapState([
-      'gameFinished', 'level',
-      'timer', 'restart'
-    ]),
+    // ...mapState([
+    //   'gameFinished', 'level',
+    //   'timer', 'restart'
+    // ]),
     start() {
-      return  this.getIsPlaying ? 'Started' : 'Start';
+      return  this.gameStatus === 'start' ? 'Started' : 'Start';
     },
     stop() {
-      if (this.getTimeForReset === this.getTimer) { 
-        return 'Stop'
-      }
-      return !this.getIsPlaying ? 'Stoped' : 'Stop';
+      return this.gameStatus === 'stop' ? 'Stoped' : 'Stop';
     }
   },
   methods: {
-    ...mapActions([
-      'CHANGE_LEVEl', 'CHANGE_TIMER', 'CHANGE_ISPLAYING',
-      'END_GAME', 'CHANGE_RESTART', 'CHANGE_SHOW_PATH',
-      'CHANGE_SHOW_HINT'
-    ]),
+    ...mapActions(['CHANGE_SHOW_PATH', 'CHANGE_SHOW_HINT']),
+
     clicked(arrow) {
-      if (!this.getStopClickArrows) {
-        this.$emit('clicked', arrow);
-      }
+      if (this.gameStatus !== 'start') { return }
+      this.$emit('clicked', arrow);
     },
+
     showPath() {
-      this.CHANGE_SHOW_PATH(!this.getShowPath);
+      this.CHANGE_SHOW_PATH(!this.getShowPath)
     },
+
     showHint() {
       this.CHANGE_SHOW_HINT(!this.getShowHint);
+    },
+
+    changeLevel(step) {
+      if (!['', 'finish'].includes(this.gameStatus)) { return }
+      this.$emit('changeLevel', step);
+    },
+
+    startGame() {
+      if (this.gameStatus === 'start') { return }
+      this.$emit('startGame');
+    },
+
+    stopGame() {
+      if (this.gameStatus === 'stop') { return }
+      this.$emit('stopGame');
+    },
+
+    restartGame() {
+      if (!['start', 'stop'].includes(this.gameStatus)) { return }
+      this.$emit('restart');
+    },
+
+    finishGame() {
+      if (!['start', 'stop'].includes(this.gameStatus)) { return }
+      this.$emit('finishGame');
     }
   }
 }

@@ -49,10 +49,12 @@ export default {
   },
   methods: {
     finishGame() {
+      if (!['start', 'stop'].includes(this.gameStatus)) { return }
       this.$emit('finishGame');
     },
 
     changeLevel(step) {
+      if (!['', 'finish'].includes(this.gameStatus)) { return }
       this.$emit('changeLevel', step);
     },
 
@@ -61,14 +63,17 @@ export default {
     },
 
     restartGame() {
+      if (!['start', 'stop'].includes(this.gameStatus)) { return }
       this.$emit('restart');
     },
 
     startGame() {
+      if (this.gameStatus === 'start') { return }
       this.$emit('startGame');
     },
 
     stopGame() {
+      if (this.gameStatus === 'stop') { return }
       this.$emit('stopGame');
     },
 

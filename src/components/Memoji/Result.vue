@@ -9,7 +9,7 @@
 					<div class="resultMemoji__text" v-if="gameResult === 'Won'">{{time}}</div>
 					<div class="resultMemoji__text" v-else>Try one more time or choose another level</div>
 				</div>
-				<div class="resultMemoji__btns" :style="{width: `${width}px`}">
+				<div class="resultMemoji__btns" :style="calcWidth">
 					<div class="resultMemoji__btn" v-if="showPrev()" @click="changeLevel(-1)">Previous level</div>
 					<div class="resultMemoji__btn" @click="restart()">Restart</div>
 					<div class="resultMemoji__btn" v-if="showNext()" @click="changeLevel(1)">Next level</div>
@@ -28,14 +28,6 @@ export default {
 		gameResult: String,
 		timeInMs: Number
 	},
-	data() {
-		return {
-			width: 400
-		}
-	},
-	created() {
-		this.calcWidth() 
-	},
 	computed: {
 		...mapGetters([
 			'getLevel', 'getAmountOfLevels'
@@ -50,16 +42,16 @@ export default {
 				return `Completed in ${min} ${cheak(min, 'minute')} ${sec} ${cheak(sec, 'second')}`;
 			}
 			return `Completed in ${seconds} ${cheak(seconds, 'second')}`;
-		}
-	},
-	methods: {
-		calcWidth() {
-			if (this.getLevel > 1 && this.getLevel < this.getAmountOfLevels) {
-				this.width = 400;
-			}
-			this.width = 300;
 		},
 
+		calcWidth() {
+			if (this.getLevel > 1 && this.getLevel < this.getAmountOfLevels) {
+				return {width: '400px'};
+			} 
+			return {width: '300px'}
+		},
+	},
+	methods: {
     restart() {
 			this.$emit('restart');
 		},

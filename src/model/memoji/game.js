@@ -1,4 +1,4 @@
-import Timer from "./timer";
+import Timer from "../timer";
 /**
  * @namespace Memoji
  */
@@ -25,7 +25,6 @@ export default class Game {
     if (!Number.isInteger(time) && time < 1) {
       throw Error(`Game.constructor time must Integer and greater than 0`);
     }
-    console.log(time);
     let cardsData = [];
     const compare = [];
     const timer = new Timer(time);

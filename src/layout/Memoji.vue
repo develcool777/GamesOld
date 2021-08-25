@@ -206,7 +206,6 @@ export default {
     },
 
     changeLevel(step) {
-      if (!['', 'finish'].includes(this.game.gameStatus)) { return }
       this.field.changeLevel(step);
       this.createGame()
       this.showModal = false;

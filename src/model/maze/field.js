@@ -184,7 +184,8 @@ export default class Field {
     const fieldCopy = curentLevel.field.map(arr => arr.slice());
     const start = curentLevel.startPosition;
     const end = curentLevel.endPosition;
-    return [fieldCopy, start, end];
+    const time = curentLevel.time;
+    return [fieldCopy, start, end, time];
   }
 
   /**
