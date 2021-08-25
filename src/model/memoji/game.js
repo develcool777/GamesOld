@@ -11,9 +11,17 @@ export default class Game {
    * @classdesc This class represents logic of Memoji game
    * @constructor
    * @param {Array} arrayOfCardsName - array of cards name
+   * @param {Number} time - time in milliseconds(30000ms = 30s)
    * @property {Array} cardsData - array of cards data, every element is object{id: 0, name: 'fox', class: 'ec ec-fox img', isMatch: null, isFlipped: null}
    * @property {Array} cards - this is `arrayOfCardsName`
-   * @throws Error - if `arrayOfCardsName` is not Array or every element of `arrayOfCardsName` is not String
+   * @property {Array} compare - this is array that stores only two elements(card that was selected) to check if they are the same
+   * @property {Instance} timer - instance of [`Timer`]{@link Timer}
+   * @property {String} gameStatus - Shows game status
+   * @property {Number} resultTime - stores time in milliseconds that was need to complete the game
+   * @property {String} result - stores result of the game('Won' or 'Lost') 
+   * @throws Error - if `arrayOfCardsName` is not Array 
+   * @throws Error - if every element of `arrayOfCardsName` is not String
+   * @throws Error - if `time` is not Integer and lower than 0
    */
   constructor(arrayOfCardsName, time) {
     if (!Array.isArray(arrayOfCardsName)) {
@@ -38,6 +46,9 @@ export default class Game {
       cardsData: {
         get: () => cardsData,
         set: (arr) => {
+          if (!Array.isArray(arr)) {
+            throw Error(`Game.cardsData.set(arr) arr must be String`);
+          }
           cardsData = arr;
         }
       },
@@ -47,18 +58,33 @@ export default class Game {
       gameStatus: {
         get: () => gameStatus,
         set: (value) => {
+          if (typeof value !== 'string') {
+            throw Error(`Game.gameStatus.set(value) value must be String`);
+          }
+          if (!['', 'start', 'stop', 'finish'].includes(value)) {
+            throw Error(`Game.gameStatus.set(value) value must be '' or 'start' or 'finish' or 'stop'`);
+          }
           gameStatus = value;
         }
       },
       resultTime: {
         get: () => resultTime,
         set: (value) => {
+          if (typeof value !== 'number') {
+            throw Error(`Game.resultTime.set(value) value must be Number`);
+          }
           resultTime = value;
         }
       },
       result: {
         get: () => result,
         set: (value) => {
+          if (typeof value !== 'string') {
+            throw Error(`Game.result.set(value) value must be String`);
+          }
+          if (!['', 'Won', 'Lost'].includes(value)) {
+            throw Error(`Game.result.set(value) value must be '' or 'Lost' or 'Won'`);
+          }
           result = value;
         }
       },
@@ -76,7 +102,15 @@ export default class Game {
    * @example this.log
    */
   get log() {
-    return console.log({cards: this.cards, cardsData: this.cardsData});
+    return console.log({
+      cards: this.cards, 
+      cardsData: this.cardsData,
+      compare: this.compare,
+      timer: this.timer,
+      gameStatus: this.gameStatus,
+      resultTime: this.resultTime,
+      result: this.result
+    });
   }
 
   /**
@@ -87,10 +121,9 @@ export default class Game {
    * @example this.setCardData()
    */
   setCardData() {
-    const arr = []
     const doubled = this.cards.concat(this.cards);
     this.shuffleCards(doubled);
-    doubled.forEach((item, i) => {
+    this.cardsData = doubled.map((item, i) => {
       const obj = {
         id: i,
         name: item,
@@ -98,9 +131,8 @@ export default class Game {
         isMatch: null,
         isFlipped: null
       }
-      arr.push(obj);
+      return obj;
     })
-    this.cardsData = arr;
   }
 
   /**
@@ -158,7 +190,7 @@ export default class Game {
    * @method clickOnCard
    * @memberof Memoji#Game#
    * @param {Object} card card that was clicked
-   * @description When card was clicked sets `card.isFlipped` to `true`
+   * @description When card was clicked sets `card.isFlipped` to `true` and adds to `compare`
    * @returns {undefined} undefined
    * @example this.clickOnCard(card)
    */
@@ -166,8 +198,6 @@ export default class Game {
     this.cardsData[card.id].isFlipped = true;
     this.compare.push(card);
   }
-
-
 
   /**
    * @method reset
@@ -182,6 +212,13 @@ export default class Game {
     this.cardsData[card.id].isMatch = null;
   }
 
+  /**
+   * @method closeCards
+   * @memberof Memoji#Game#
+   * @description Closes cards 
+   * @returns {undefined} undefined
+   * @example this.closeCards()
+   */
   closeCards() {
     this.cardsData.forEach(card => {
       this.reset(card);
@@ -191,7 +228,7 @@ export default class Game {
   /**
    * @method clean
    * @memberof Memoji#Game#
-   * @description After game, shuffles card and sets `card.isFlipped` and `card.isMatch` to `null`
+   * @description After game, shuffles cards and sets all class properties to initial value
    * @returns {undefined} undefined
    * @example this.clean()
    */
@@ -226,16 +263,37 @@ export default class Game {
     })
   }
 
+  /**
+   * @method startGame
+   * @memberof Memoji#Game#
+   * @description Starts the game
+   * @returns {undefined} undefined
+   * @example this.startGame()
+   */
   startGame() {
     this.timer.start();
     this.gameStatus = 'start'
   }
 
+  /**
+   * @method pauseGame
+   * @memberof Memoji#Game#
+   * @description Pauses the game
+   * @returns {undefined} undefined
+   * @example this.pauseGame()
+   */
   pauseGame() {
     this.timer.stop();
-    this.gameStatus = 'pause'
+    this.gameStatus = 'stop'
   }
 
+  /**
+   * @method gameFinished
+   * @memberof Memoji#Game#
+   * @description Finishes the game 
+   * @returns {undefined} undefined
+   * @example this.gameFinished()
+   */
   gameFinished(str) {
     this.resultTime = this.timer.amountOfTime();
     this.result = str;
