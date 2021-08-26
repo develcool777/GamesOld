@@ -208,7 +208,6 @@ export default class Game {
       }
     }
 
-
     this.newPosition = Object.assign({}, figure.position);
     this.makeHistory(cell.isAvailableFor, figure, this.whoMoves);
     this.selectedCell = null;
@@ -274,14 +273,14 @@ export default class Game {
     const playerDefend = this.whoMoves === 'white' ? this.playerWhite : this.playerBlack;
     const playerAttack = playerDefend.side === 'white' ? this.playerBlack : this.playerWhite;
     const attackFigures = playerAttack.getAttackFigures(this.field.board);
-
+    // if there are 2 attack figures, so in this case king must move, figures can't defend king
     if (attackFigures.length > 1) {
       this.defendMoves = [];
       return;
     }
 
     const checkMoves = attackFigures[0].available(this.field.board).wayToKing;
-    const allMoves = playerDefend.allAvailableMoves(this.field.board, 'moveAndKill');
+    const allMoves = playerDefend.checkDefendMoves(this.figureMoves.bind(this), this.field.board);
     // defendMoves from figure that made check
     this.defendMoves = allMoves.filter(move => checkMoves.some(amove => amove.x === move.x && amove.y === move.y));
   }
@@ -380,8 +379,7 @@ export default class Game {
 
   figureMoves(figure) {
     if (figure.name === "King") { return }
-    let figureMove = figure.available(this.field.board);
-    // console.log({who: this.whoMoves});
+    let figureMove = figure.available(this.field.board)
 
     const playerDefend = figure.color === this.playerWhite.side ? this.playerWhite : this.playerBlack;
     const playerAttack = playerDefend.side === 'white' ? this.playerBlack : this.playerWhite;
@@ -408,7 +406,7 @@ export default class Game {
 
       // there are 2 or more defenders
       if (defenders.length > 1) { return }
-      // console.log(figure.position, defenders, defenders[0]);
+
       if (figure.position.x !== defenders[0].position.x || figure.position.y !== defenders[0].position.y ) {
         return;
       }

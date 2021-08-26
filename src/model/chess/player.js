@@ -145,6 +145,7 @@ export default class Player {
     }
     const allFigures = this.countFigures(field);
     const figures = allFigures.all.figures;
+
     const availableMoves = figures.reduce((acc, figure) => {
       if (!['pawn', 'check', 'moveAndKill', 'cover'].includes(whatType) && figure.name === 'Pawn') { return acc }
       const moves = ['Pawn', 'Knight'].includes(figure.name) ? figure.available(field) : figure.available(field, xray);
@@ -166,6 +167,22 @@ export default class Player {
       return acc;
     }, []);
     return availableMoves;
+  }
+
+  checkDefendMoves(callback, field) {
+    const allFigures = this.countFigures(field);
+    const figures = allFigures.all.figures;
+    const availableDefendMoves = figures.reduce((acc, figure) => {
+      const moves = callback(figure);
+      if (moves.move.length > 0) {
+        acc.push(...moves.move);
+      } 
+      if (moves.kill.length > 0) {
+        acc.push(...moves.kill);
+      } 
+      return acc;
+    }, []);
+    return availableDefendMoves;
   }
 
   getAttackFigures(field, xray=false) {
