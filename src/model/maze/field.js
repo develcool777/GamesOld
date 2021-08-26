@@ -176,7 +176,7 @@ export default class Field {
    * @method dataForGame
    * @memberof Maze#Field#
    * @description Returns Array of data for the [`Game class`]{@link Maze#Game}
-   * @returns {Array} [Field, startPosition, endPosition]
+   * @returns {Array} [Field, startPosition, endPosition, time]
    * @example const data = this.dataForGame();
    */
   dataForGame() {

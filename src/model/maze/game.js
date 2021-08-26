@@ -17,6 +17,17 @@ export default class Game {
    * @classdesc This class represents logic of Maze game
    * @property {Instance} player - Instance of class [`Player`]{@link Maze#Player}
    * @property {Array} history - Stores all `player` moves
+   * @property {Instance} timer - instance of [`Timer`]{@link Timer}
+   * @property {String} gameStatus - Shows game status
+   * @property {Number} resultTime - stores time in milliseconds that was need to complete the game
+   * @property {String} result - stores result of the game('Won' or 'Lost') 
+   * @throws Error - if `field` is not Array
+   * @throws Error - if every element of `field` is not Array
+   * @throws Error - if `startPosition` is not Object with keys: 'x', 'y'
+   * @throws Error - if values of `startPosition.x` and `startPosition.y` are not Integers and lower than 0
+   * @throws Error - if `winPosition` is not Object with keys: 'x', 'y'
+   * @throws Error - if values of `winPosition.x` and `winPosition.y` are not Integers and lower than 0
+   * @throws Error - if `time` is not Integer and lower than 0
    */
   constructor(field, startPosition, winPosition, time) {
     if (!Array.isArray(field)) {
@@ -36,6 +47,9 @@ export default class Game {
     }
     if (!Object.values(winPosition).every(item => Number.isInteger(item) && item >= 0)) {
       throw Error(`Game.constructor winPosition.x and winPosition.y must be positive Integers`);
+    }
+    if (!Number.isInteger(time) && time < 0) {
+      throw Error(`Game.constructor time must be Integer and greater than 0`);
     }
     const player = new Player(startPosition.x, startPosition.y);
     let history = [];
@@ -70,20 +84,35 @@ export default class Game {
       },
       gameStatus: {
         get: () => gameStatus,
-        set: (arr) => {
-          gameStatus = arr;
-        }
-      },
-      result: {
-        get: () => result,
-        set: (arr) => {
-          result = arr;
+        set: (value) => {
+          if (typeof value !== 'string') {
+            throw Error(`Game.gameStatus.set(value) value must be String`);
+          }
+          if (!['', 'start', 'stop', 'finish'].includes(value)) {
+            throw Error(`Game.gameStatus.set(value) value must be '' or 'start' or 'finish' or 'stop'`);
+          }
+          gameStatus = value;
         }
       },
       resultTime: {
         get: () => resultTime,
-        set: (arr) => {
-          resultTime = arr;
+        set: (value) => {
+          if (typeof value !== 'number') {
+            throw Error(`Game.resultTime.set(value) value must be Number`);
+          }
+          resultTime = value;
+        }
+      },
+      result: {
+        get: () => result,
+        set: (value) => {
+          if (typeof value !== 'string') {
+            throw Error(`Game.result.set(value) value must be String`);
+          }
+          if (!['', 'Won', 'Lost'].includes(value)) {
+            throw Error(`Game.result.set(value) value must be '' or 'Lost' or 'Won'`);
+          }
+          result = value;
         }
       },
     })
@@ -97,7 +126,17 @@ export default class Game {
    */
   get log() {
     const [x, y] = this.player.getPosition();
-    return console.log({field: this.field, history: this.history, WinPosition: this.winPos, playerX: x, playerY: y});
+    return console.log({
+      field: this.field,
+      history: this.history,
+      WinPosition: this.winPos,
+      playerX: x,
+      playerY: y,
+      timer: this.timer,
+      gameStatus: this.gameStatus,
+      resultTime: this.resultTime,
+      result: this.result
+    });
   }
 
   /**
@@ -145,6 +184,8 @@ export default class Game {
    * @param {String} move describes in which direction move('W', 'S', 'D', 'A')
    * @description If there no wall(1) or end of field, makes move of player, otherwise show in console `no move`
    * @returns {undefined} undefined
+   * @throws Error - if `move` is not String
+   * @throws Error - if `move` is not 'W' or 'A' or 'S' or 'D'
    * @example 
    * this.moves('W') // move Up
    * this.moves('S') // move Down
@@ -159,34 +200,43 @@ export default class Game {
       throw Error(`Game.moves() move must be 'W' or 'A' or 'S' or 'D'`);
     }
     const [x, y] = this.player.getPosition();
-    if (move === 'W') {
-      if (x > 0 && this.field[x-1][y] !== 1) {
-        this.player.moveUp();
-      } else {
-        console.log(`no move up`);
-      }
+    switch (move) {
+      case 'W':
+        if (x > 0 && this.field[x-1][y] !== 1) {
+          this.player.moveUp();
+        } else {
+          console.log(`no move up`);
+        }
+        break;
+
+      case 'S':
+        if (x < this.field.length - 1 && this.field[x+1][y] !== 1) {
+          this.player.moveDown();
+        } else {
+          console.log(`no move down`);
+        }
+        break;
+
+      case 'A': 
+        if (y > 0 && this.field[x][y-1] !== 1) {
+          this.player.moveLeft();
+        } else {
+          console.log(`no move left`);
+        }
+        break;
+
+      case 'D':
+        if (y < this.field[0].length - 1 && this.field[x][y+1] !== 1) {
+          this.player.moveRight();
+        } else {
+          console.log(`no move right`);
+        }
+        break;
+
+      default:
+        break;
     }
-    else if (move === 'S') {
-      if (x < this.field.length - 1 && this.field[x+1][y] !== 1) {
-        this.player.moveDown();
-      } else {
-        console.log(`no move down`);
-      }
-    }
-    else if (move === 'A') {
-      if (y > 0 && this.field[x][y-1] !== 1) {
-        this.player.moveLeft();
-      } else {
-        console.log(`no move left`);
-      }
-    }
-    else if (move === 'D' ) {
-      if (y < this.field[0].length - 1 && this.field[x][y+1] !== 1) {
-        this.player.moveRight();
-      } else {
-        console.log(`no move right`);
-      }
-    } 
+
     this.history.push(move);
     const [xC, yC] = this.player.getPosition();
     this.draw(x, y, xC, yC);
@@ -273,16 +323,37 @@ export default class Game {
     this.field[this.winPos.x][this.winPos.y] = '';
   }
 
+  /**
+   * @method startGame
+   * @memberof Maze#Game#
+   * @description Starts the game
+   * @returns {undefined} undefined
+   * @example this.startGame()
+   */
   startGame() {
     this.gameStatus = 'start';
     this.timer.start();
   }
 
+  /**
+   * @method stopGame
+   * @memberof Maze#Game#
+   * @description Pauses the game
+   * @returns {undefined} undefined
+   * @example this.stopGame()
+   */
   stopGame() {
     this.gameStatus = 'stop';
     this.timer.stop();
   }
 
+  /**
+   * @method gameFinished
+   * @memberof Maze#Game#
+   * @description Finishes the game 
+   * @returns {undefined} undefined
+   * @example this.gameFinished()
+   */
   gameFinished(str) {
     this.resultTime = this.timer.amountOfTime();
     this.result = str;
