@@ -1,10 +1,31 @@
 import Figures from "../figures";
 export default class Pawn extends Figures  {
+  /**
+   * @class
+   * @alias Pawn
+   * @memberof Chess#Figures#
+   * @augments Figures
+   * @classdesc This class represents the logic of Pawn figure
+   * @param {String} color - color of the figure
+   * @param {Object} position - position of the figure 
+   * @constructor
+   * @property {String} color - this `color`
+   * @property {Object} position - this `position`
+   * @property {String} name - name of the figure
+   * @property {Boolean} firstMove - if pawn have not made move yet, the value is `true` otherwise `false`
+   * @property {Boolean} promotion - value will be `true` if pawn is ready for promotion otherwise `false`
+   * @throws Error - if `color` is not String
+   * @throws Error - if `color` is not 'white' or 'black'
+   * @throws Error - if `position` is Object with keys: 'x' and 'y'
+   */
   constructor(color, position) {
     super();
 
     if (typeof color !== 'string') {
       throw Error(`Pawn.constructor color must be String`);
+    }
+    if (!['white', 'black'].includes(color)) {
+      throw Error(`Pawn.constructor color must be 'white' or 'black'`);
     }
     if (Object.keys(position).join('') !== 'xy') {
       throw Error(`Pawn.constructor position must be Object with keys x and y`);
@@ -43,6 +64,24 @@ export default class Pawn extends Figures  {
     })
   }
 
+
+  /**
+   * @method available
+   * @memberof Chess#Figures#Pawn#
+   * @description Returns all available moves for the figure
+   * @param {Array} field chess board
+   * @returns {Object} {
+      move: [],
+      kill: [],
+      check: [],
+      wayToKing: [],
+      cover: [],
+      dontAllowKingToMove: []
+    }
+   * @example 
+   * const f = new Field()
+   * this.available(f.board);
+   */
   available(field) {
     const available = {
       move: [],
@@ -117,6 +156,16 @@ export default class Pawn extends Figures  {
     return available;
   }
 
+  /**
+   * @method makeMove
+   * @memberof Chess#Figures#Pawn#
+   * @param {Array} cordinates - new position for figure [x, y] 
+   * @param {Array} field - chess board
+   * @returns {undefined} undefined 
+   * @example 
+   * const f = new Field()
+   * this.makeMove([0, 1], f.board)
+   */
   makeMove(cordinates, field) {
     super.makeMove(cordinates, field, this);
 
@@ -127,6 +176,14 @@ export default class Pawn extends Figures  {
     this.checkPromotion(this);
   }
 
+  /**
+   * @method checkPromotion
+   * @memberof Chess#Figures#Pawn#
+   * @param {Instance} figure 
+   * @description Checks if pawn is ready for promotion
+   * @returns {undefined} undefined
+   * @example this.checkPromotion(this)
+   */
   checkPromotion(figure) {
     if (figure.position.x === 0 || figure.position.x === 7) {
       this.promotion = true;

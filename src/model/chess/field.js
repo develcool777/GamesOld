@@ -1,6 +1,14 @@
-/* eslint-disable no-empty */
 import Cell from './cell'
+
 export default class Field {
+  /**
+   * @class
+   * @alias Field
+   * @memberof Chess#
+   * @classdesc This class have methods to create chess board
+   * @constructor
+   * @property {Array} board - this is matrix where every element is instance of [`Cell`]{@link Chess#Cell}
+   */
   constructor() {
     const board = [];
     Object.defineProperties(this, {
@@ -10,6 +18,13 @@ export default class Field {
     })
   }
 
+  /**
+   * @method createField
+   * @memberof Chess#Field#
+   * @description Creates chess board
+   * @returns {undefined} undefined
+   * @example this.createField()
+   */
   createField() {
     for (let i=0; i<8; i++) {
       const row = [];
@@ -24,6 +39,14 @@ export default class Field {
     }
   }
 
+  /**
+   * @method clearField
+   * @memberof Chess#Field#
+   * @description Clears the chess board from figures
+   * @returns {undefined} undefined
+   * @throws Error - if `this.board` is Empty
+   * @example this.clearField()
+   */
   clearField() {
     if (this.board.length === 0) {
       throw Error(`Field.clearField() board is empty`);

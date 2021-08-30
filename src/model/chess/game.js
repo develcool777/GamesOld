@@ -1,7 +1,31 @@
 import Player from "./player";
 import Field from "./field";
 
+/**
+ * @namespace Chess
+ */
+
 export default class Game {
+  /**
+   * @class
+   * @alias Game
+   * @memberof Chess#
+   * @classdesc This class represents logic of chess game
+   * @constructor
+   * @property {Instance} field - instance of [`Field`]{@link Chess#Field}
+   * @property {Instance} playerWhite - instance of [`Field`]{@link Chess#Player}, white side
+   * @property {Instance} playerBlack - instance of [`Field`]{@link Chess#Player}, black side
+   * @property {Array} defendMoves - array defend moves
+   * @property {Array} historyOfMoves - array of all moves that were made during the game
+   * @property {String} whoMoves - shows who moves
+   * @property {Object} selectedCell - stores the instance of selected [`Cell`]{@link Chess#Cell}
+   * @property {Object} oldPosition - object{x, y} of old position 
+   * @property {Object} newPosition - object{x, y} of new position
+   * @property {Boolean} isCheck - value is `true` if there is a check, otherwise `false`
+   * @property {Boolean} isCheckmate - value is `true` if there is a checkmate, otherwise `false`
+   * @property {Boolean} isStalemate - value is `true` if there is a stalemate, otherwise `false`
+   * @property {Boolean} isPawnPromotion - value is `true` if pawn is ready to promote, otherwise `false`
+   */
   constructor() {
     const field = new Field();
     const playerWhite = new Player('white');
@@ -119,10 +143,24 @@ export default class Game {
     })
   }
 
+  /**
+   * @method createField
+   * @memberof Chess#Game#
+   * @description Creates field 
+   * @returns {undefined} undefined
+   * @example this.createField()
+   */
   createField() {
     this.field.createField();
   }
 
+  /**
+   * @method clearField
+   * @memberof Chess#Game#
+   * @description Sets figures to initial positions and sets all class properties to initial value 
+   * @returns {undefined} undefined
+   * @example this.clearField()
+   */
   clearField() {
     this.field.clearField();
     this.selectedCell = null;
@@ -137,6 +175,13 @@ export default class Game {
     this.createFigures();
   }
 
+  /**
+   * @method createFigures
+   * @memberof Chess#Game#
+   * @description Creates white and black figures and sets them to initial position
+   * @returns {undefined} undefined
+   * @example this.createFigures()
+   */
   createFigures() {
     this.playerWhite.createPositions();
     this.playerWhite.createFigures(this.field.board);
@@ -145,17 +190,27 @@ export default class Game {
     this.playerBlack.createFigures(this.field.board);
   }
 
-  makeHistory(typeOfMove="", figure, whoMoved) {
-    const obj = {
-      figure: figure,
-      oldPosition: this.oldPosition,
-      newPosition: this.newPosition,
-      typeOfMove: typeOfMove,
-      whoMoved: whoMoved
-    }
-    this.historyOfMoves.push(obj);
-  }
+  // makeHistory(typeOfMove="", figure, whoMoved) {
+  //   const obj = {
+  //     figure: figure,
+  //     oldPosition: this.oldPosition,
+  //     newPosition: this.newPosition,
+  //     typeOfMove: typeOfMove,
+  //     whoMoved: whoMoved
+  //   }
+  //   this.historyOfMoves.push(obj);
+  // }
 
+  /**
+   * @method clickOnFigure
+   * @memberof Chess#Game#
+   * @param {Instance} cell instance of [`Cell`]{@link Chess#Cell}
+   * @description For chosen figure, will display all available moves 
+   * @returns {undefined} undefined
+   * @example 
+   * const cell = new Cell('white', {x: 0, y: 0});
+   * this.clickOnFigure(cell);
+   */
   clickOnFigure(cell) {
     this.clearAvailableMove();
 
@@ -178,6 +233,25 @@ export default class Game {
     this.selectedCell = cell;
   }
 
+  /**
+   * @method clickOnCellForMove
+   * @memberof Chess#Game# 
+   * @param {Instance} cell instance of [`Cell`]{@link Chess#Cell}
+   * @param {Number} x `x` coordinate of a position
+   * @param {number} y `y` coordinate of a position
+   * @description If figure was clicked calls [`clickOnFigure`]{@link Chess#Game#clickOnFigure}
+   * to display available moves, next call of `clickOnCellForMove`  will move  figure on new position 
+   * if that position is available for chosen figure, 
+   * after will check for check, check defense, check checkmate, check stalemate
+   * @returns {undefined} undefined
+   * @example 
+   * const cell = new Cell('white', {x: 0, y: 0})
+   * const cell2 = new Cell('black', {x: 1, y: 0})
+   * const rook = new Rook('white', {x: 0, y: 0})
+   * cell.figure = rook
+   * this.clickOnCellForMove(cell, 0, 0); // shows available moves for rook
+   * this.clickOnCellForMove(cell2, 1, 0); // moves rook on {x: 1, y: 0} position
+   */
   clickOnCellForMove(cell, x, y) {
     if (this.isCheckmate || this.isStalemate) { return }
 
@@ -209,7 +283,7 @@ export default class Game {
     }
 
     this.newPosition = Object.assign({}, figure.position);
-    this.makeHistory(cell.isAvailableFor, figure, this.whoMoves);
+    // this.makeHistory(cell.isAvailableFor, figure, this.whoMoves);
     this.selectedCell = null;
     this.whoMoves = this.whoMoves === 'white' ? 'black' : 'white';
 
@@ -219,6 +293,13 @@ export default class Game {
     this.clearAvailableMove();
   }
 
+  /**
+   * @method clearAvailableMove
+   * @memberof Chess#Game#
+   * @description Clears available moves of a figure 
+   * @returns {undefined} undefined
+   * @example this.clearAvailableMove()
+   */
   clearAvailableMove() {
     this.field.board.forEach((row, ) => {
       row.forEach((cell, ) => {
@@ -229,6 +310,18 @@ export default class Game {
     })
   }
 
+  /**
+   * @method checkPawnPromotion
+   * @memberof Chess#Game#
+   * @param {Instance} figure instance of figure
+   * @param {Number} x `x` coordinate of a position
+   * @param {Number} y `y` coordinate of a position
+   * @description Checks is pawn ready to promote
+   * @returns {undefined} undefined
+   * @example 
+   * const pawn = new Pawn('white' {x: 7, y: 0})
+   * this.checkPawnPromotion(pawn, 7, 0) // pawn is ready to promote
+   */
   checkPawnPromotion(figure, x, y) {
     if (figure.name !== 'Pawn') {
       return;
@@ -240,6 +333,19 @@ export default class Game {
     }
   }
 
+  /**
+   * @async
+   * @method pawnPromotion
+   * @memberof Chess#Game#
+   * @param {Instance} field chess board 
+   * @param {String} figureName name of figure
+   * @param {Object} position 
+   * @returns {undefined} undefined
+   * @description Makes pawn promotion
+   * @example 
+   * const f = new Field()
+   * await this.pawnPromotion(f, 'Queen', {x: 0, y: 0});
+   */
   async pawnPromotion(field, figureName, position) {
     const color = figureName.substring(0, 5);
     const name = figureName.substring(5).toLowerCase();
@@ -252,6 +358,16 @@ export default class Game {
 
   }
 
+  /**
+   * @method checkForCheck
+   * @memberof Chess#Game#
+   * @param {Instance} figure instance of figure
+   * @description Checks if there is a check(king is under attack)
+   * @returns {undefined} undefined
+   * @example 
+   * const rook = new Rook('white', {x: 0, y: 0})
+   * this.checkForCheck(rook);
+   */
   checkForCheck(figure) {
     // determine player who make check
     const playerAttack = figure.color === this.playerWhite.side ? this.playerWhite : this.playerBlack;
@@ -269,6 +385,13 @@ export default class Game {
     this.checkForCheckmate();
   }
 
+  /**
+   * @method checkDefense
+   * @memberof Chess#Game#
+   * @description Checks how figures can defend the king
+   * @returns {undefined} undefined
+   * @example this.checkDefense()
+   */
   checkDefense() {
     const playerDefend = this.whoMoves === 'white' ? this.playerWhite : this.playerBlack;
     const playerAttack = playerDefend.side === 'white' ? this.playerBlack : this.playerWhite;
@@ -285,6 +408,13 @@ export default class Game {
     this.defendMoves = allMoves.filter(move => checkMoves.some(amove => amove.x === move.x && amove.y === move.y));
   }
 
+  /**
+   * @method checkForCheckmate
+   * @memberof Chess#Game#
+   * @description Checks if there is a checkmate
+   * @returns {undefined} undefined
+   * @example this.checkForCheckmate()
+   */
   checkForCheckmate() {
     const playerDefend = this.whoMoves === 'white' ? this.playerWhite : this.playerBlack;
     const king = playerDefend.getKing(this.field.board);
@@ -294,6 +424,13 @@ export default class Game {
     this.isCheckmate = condition;
   }
 
+  /**
+   * @method checkForStalemate
+   * @memberof Chess#Game#
+   * @description Checks if there is a stalemate
+   * @returns {undefined} undefined
+   * @example this.checkForStalemate()
+   */
   checkForStalemate() {
     if (this.isCheckmate || this.isCheck) { return }
     const playerDefend = this.whoMoves === 'white' ? this.playerWhite : this.playerBlack;
@@ -305,6 +442,16 @@ export default class Game {
     this.isStalemate = condition;
   }
 
+  /**
+   * @method kingMoves
+   * @memberof Chess#Game#
+   * @param {Instance} figure instance of figure
+   * @description Returns all available king moves
+   * @returns {Object} Object
+   * @example 
+   * const king = new King('white', {x: 0, y: 0})
+   * this.kingMoves(king)
+   */
   kingMoves(king) {
     if (king.name !== "King") { return }
 
@@ -349,18 +496,18 @@ export default class Game {
         }
       })
     }
-
+    // no available castling
     if (kingMovesWhenCastling.length === 0) {
       return AllKingMoves;
     }
-
+    // one available castling
     if (kingMovesWhenCastling.length === 2) {
       const dontAllowCastle = kingMovesWhenCastling.some(move => attackMoves.some(amove => amove.x === move.x && amove.y === move.y));
       if (dontAllowCastle) {
         AllKingMoves.castle = [];
       }
     }
-
+    // two available castling
     if (kingMovesWhenCastling.length === 4) {
       const splitInParts = [kingMovesWhenCastling.slice(0, 2), kingMovesWhenCastling.slice(2)];
       const dontAllowCastle = splitInParts.map(part => {
@@ -377,6 +524,16 @@ export default class Game {
     return AllKingMoves;
   }
 
+  /**
+   * @method figureMoves
+   * @memberof Chess#Game#
+   * @param {Instance} figure instance of figure
+   * @description Returns all available figure moves
+   * @returns {Object} Object
+   * @example 
+   * const rook = new Rook('white', {x: 0, y: 0})
+   * this.figureMoves(rook)
+   */
   figureMoves(figure) {
     if (figure.name === "King") { return }
     let figureMove = figure.available(this.field.board)

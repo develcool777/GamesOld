@@ -6,6 +6,18 @@ import Knight from '@/model/chess/figures/knight'
 import King from '@/model/chess/figures/king'
 
 export default class Player {
+  /**
+   * @class 
+   * @alias Player
+   * @memberof Chess#
+   * @param {String} side - side must be 'white' or 'black'
+   * @classdesc This class represents logic of the player
+   * @constructor
+   * @throws Error - if `side` is not String
+   * @throws Error - if `side` is not 'black' or 'white'
+   * @property {String} side - this `side`
+   * @property {Array} positions - array of figures positions which set at the beginning of the game
+   */
   constructor(side) {
     if (typeof side !== 'string') {
       throw Error(`Cell.constructor side must be String`);
@@ -15,7 +27,6 @@ export default class Player {
     }
 
     let positions = [];
-    let isCheck = false;
     Object.defineProperties(this, {
       side: {
         get: () => side 
@@ -28,18 +39,17 @@ export default class Player {
           }
           positions = value;
         }
-      },
-      isCheck: {
-        get: () => isCheck,
-        set: (value) => {
-          if (typeof value !== 'boolean') {
-            throw Error(`Player.isCheck.set(value) value must be Array`);
-          }
-        }
       }
     })
   }
 
+  /**
+   * @method createPositions
+   * @memberof Chess#Player#
+   * @description creates figures position
+   * @returns {undefined} undefined
+   * @example this.createPositions()
+   */
   createPositions() {
     const result = [];
 
@@ -55,10 +65,22 @@ export default class Player {
     }
 
     this.positions = result;
-    return result;
   }
 
+  /**
+   * @method createFigures
+   * @memberof Chess#Player#
+   * @description Creates players figures and sets them on the chess board by `this.positions` 
+   * @param {Array} field chess board
+   * @returns {undefined} undefined
+   * @example 
+   * const f = new Field()
+   * this.createFigures(f.board)
+   */
   createFigures(field) {
+    if (this.positions.length === 0) {
+      throw Error(``)
+    }
     field[this.positions[0].x][this.positions[0].y].figure = new Rook(this.side, this.positions[0]);
     field[this.positions[1].x][this.positions[1].y].figure = new Knight(this.side, this.positions[1]);
     field[this.positions[2].x][this.positions[2].y].figure = new Bishop(this.side, this.positions[2]);
@@ -73,6 +95,16 @@ export default class Player {
     }
   }
 
+  /**
+   * @method getKing
+   * @memberof Chess#Player#
+   * @param {Array} field chess board
+   * @description Returns player king
+   * @returns {Instance} Instance
+   * @example 
+   * const f = new Field()
+   * const king = this.getKing(f.board)
+   */
   getKing(field) {
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
@@ -87,12 +119,32 @@ export default class Player {
     }
   }
 
+  /**
+   * @method kingMoves
+   * @memberof Chess#Player#
+   * @param {Array} field chess board
+   * @description Returns king available moves
+   * @returns {Object} Object
+   * @example 
+   * const f = new Field()
+   * const kingMoves = this.kingMoves(f.board)
+   */
   kingMoves(field) {
     const king = this.getKing(field);
     const available = king.available(field);
     return available;
   }
 
+  /**
+   * @method countFigures
+   * @memberof Chess#Player#
+   * @param {Array} field chess board
+   * @description Counts all figure that player have except king
+   * @returns {Object} Object
+   * @example 
+   * const f = new Field()
+   * const figures = this.countFigures(f.board)
+   */
   countFigures(field) {
     let obj = {
       all: {
@@ -136,6 +188,18 @@ export default class Player {
     return obj;
   }
 
+  /**
+   * @method allAvailableMoves
+   * @memberof Chess#Player#
+   * @param {Array} field chess board 
+   * @param {String} whatType Describes which type of moves need to get
+   * @param {Boolean} xray if value `true` enables xray vision, otherwise not
+   * @description Returns array of available figures moves
+   * @returns {Array} Array
+   * @example 
+   * const f = new Field()
+   * const allMoves = this.allAvailableMoves(f.board, 'move')
+   */
   allAvailableMoves(field, whatType='', xray=false) {
     if (typeof whatType !== 'string') {
       throw Error(`Player.allAvailableMoves(field, whatType) whatType must be String`)
@@ -168,7 +232,18 @@ export default class Player {
     }, []);
     return availableMoves;
   }
-
+  /**
+   * @method checkDefendMoves
+   * @memberof Chess#Player#
+   * @param {Function} callback pass only this [`figureMoves`]{@link Chess#Game#figureMoves} function
+   * @param {Array} field chess board
+   * @description Gets all available moves and kills
+   * @returns {Array} Array
+   * @example 
+   * const g = new Game()
+   * const f = new Field()
+   * const defendMoves = this.checkDefendMoves(g.figureMoves.bind(this), f.board)
+   */
   checkDefendMoves(callback, field) {
     const allFigures = this.countFigures(field);
     const figures = allFigures.all.figures;
@@ -185,6 +260,18 @@ export default class Player {
     return availableDefendMoves;
   }
 
+  /**
+   * @method getAttackFigures
+   * @memberof Chess#Player#
+   * @param {Array} field chess board
+   * @param {Boolean} xray xray vision
+   * @description Get figures moves
+   * @returns {Array} Array
+   * @example 
+   * const f = new Field()
+   * const attackFigures = this.getAttackFigures(f.board) // without xray
+   * const attackFigures = this.getAttackFigures(f.board, true) // with xray
+   */
   getAttackFigures(field, xray=false) {
     const allFigures = this.countFigures(field);
     const figures = allFigures.all.figures
