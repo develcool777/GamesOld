@@ -12,8 +12,10 @@
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps",
     "production": "vue-cli-service serve --mode production",
-    "jsDoc": "node_modules/.bin/jsdoc -c jsdoc.json",
-    "showDocumentation": "open docs/index.html"
+    "jsdoc": "node_modules/.bin/jsdoc -c jsdoc.json",
+    "show:documentation": "open docs/index.html",
+    "unit:tests": "jest --config ./jest.config.js --coverage",
+    "show:coverage": "open tests/coverage/lcov-report/index.html"
   },
   "main": "background.js",
   "dependencies": {
@@ -37,6 +39,7 @@
     "electron-devtools-installer": "^3.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^7.0.0",
+    "jest": "^27.1.0",
     "jsdoc": "^3.6.7",
     "node-sass": "^4.12.0",
     "sass-loader": "^8.0.2",
@@ -48,8 +51,7 @@
       "node": true
     },
     "extends": [
-      "plugin:vue/vue3-essential",
-      "eslint:recommended"
+      "plugin:vue/vue3-essential"
     ],
     "parserOptions": {
       "parser": "babel-eslint"

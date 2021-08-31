@@ -96,9 +96,7 @@ export default class Game {
     if (user === 'p') { 
       return {user: 'p', comp: 's'};
     }
-    if (user === 's') { 
-      return {user: 's', comp: 'r'};
-    }
+    return {user: 's', comp: 'r'};
   }
 
   /**
@@ -120,9 +118,7 @@ export default class Game {
     if (user === 'p') { 
       return {user: 'p', comp: 'r'};
     }
-    if (user === 's') { 
-      return {user: 's', comp: 'p'};
-    }
+    return {user: 's', comp: 'p'};
   }
 
   /**
@@ -156,20 +152,17 @@ export default class Game {
    * @returns {undefined} undefined
    * @example this.play('r', 'p');
    */
-  play(user='', comp='') {
+  play(user, comp) {
     if (!['r', 'p', 's'].includes(user)) {
-      throw Error(`Game.cheak(user='', comp='') user must be 'r' or 'p' or 's'`);
+      throw Error(`Game.play(user, comp) user must be 'r' or 'p' or 's'`);
     }
     if (!['r', 'p', 's'].includes(comp)) {
-      throw Error(`Game.cheak(user='', comp='') comp must be 'r' or 'p' or 's'`);
+      throw Error(`Game.play(user, comp) comp must be 'r' or 'p' or 's'`);
     }
-    let winner;
-    if (user === comp) {
-      winner = 'draw';
-    } else {
-      const win = this.check(user, comp);
-      winner = win === user ? 'user' : 'comp';
-      this.calculateScore(winner);
+    let winner = this.check(user, comp);
+    if (winner !== 'draw') {
+      winner = winner === user ? 'user' : 'comp';
+      this.calculateScore(winner)
     }
     const result = {
       userMove: user,
@@ -216,11 +209,19 @@ export default class Game {
    * @memberof RockPaperScissors#Game#
    * @param {String} i1 must be 'r' or 'p' or 's'
    * @param {String} i2 must be 'r' or 'p' or 's'
-   * @description Determines who won i1 or i2
+   * @description Determines who won i1 or i2, or this is draw
    * @returns {String} String
+   * @throws Error - if `i1` is not 'r' or 'p' or 's'
+   * @throws Error - if `i2` is not 'r' or 'p' or 's'
    * @example const result = this.check('r', 'p') // wins 'p', because 'p' covers 'r'
    */
   check(i1, i2) {
+    if (!['r', 'p', 's'].includes(i1)) {
+      throw Error(`Game.check(i1, i2) i1 must be 'r' or 'p' or 's'`);
+    }
+    if (!['r', 'p', 's'].includes(i2)) {
+      throw Error(`Game.check(i1, i2) i2 must be 'r' or 'p' or 's'`);
+    }
     if (i1 === 'r' && i2 === 's' || i1 === 's' && i2 === 'r') {
       return 'r';
     }
@@ -230,6 +231,7 @@ export default class Game {
     if (i1 === 'p' && i2 === 'r' || i1 === 'r' && i2 === 'p') {
       return 'p';
     }
+    return 'draw';
   }
 
   /**
@@ -244,12 +246,12 @@ export default class Game {
    * @returns {Number} Number
    * @example const userWins = this.getAllWinsByMove('r', 'user') // returns number of user wins by rock
    */
-  getAllWinsByMove(move='', winner='') {
+  getAllWinsByMove(move, winner) {
     if (!['r', 'p', 's'].includes(move)) {
-      throw Error(`Game.getAllWinsBymove(move='', winner='') move must be 'r' or 'p' or 's'`);
+      throw Error(`Game.getAllWinsBymove(move, winner) move must be 'r' or 'p' or 's'`);
     }
     if (!['user', 'comp'].includes(winner)) {
-      throw Error(`Game.getAllWinsBymove(move='', winner='') winner must be 'user' or 'comp'`);
+      throw Error(`Game.getAllWinsBymove(move, winner) winner must be 'user' or 'comp'`);
     }
     const filtered = this.history.filter(item => {
       if (item.result === winner) {
