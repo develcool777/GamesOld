@@ -56,3 +56,7 @@ To see test coverage, open `index.html`(path: `/tests/coverage/lcov-report/index
 ```
 open tests/coverage/lcov-report/index.html
 ```
+
+## License
+[`MIT`](https://opensource.org/licenses/MIT)
+Copyright (c) 2021-present, Vadym Pavliuk
