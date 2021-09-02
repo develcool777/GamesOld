@@ -108,10 +108,10 @@ describe('testing methods', () => {
   });
 
   test('play()', () => {
-    expect(() => g.play(1, 'r')).toThrowError(new Error(`Game.play(user='', comp='') user must be 'r' or 'p' or 's'`));
-    expect(() => g.play('1', 'r')).toThrowError(new Error(`Game.play(user='', comp='') user must be 'r' or 'p' or 's'`));
-    expect(() => g.play('r', 1)).toThrowError(new Error(`Game.play(user='', comp='') comp must be 'r' or 'p' or 's'`));
-    expect(() => g.play('r', '1')).toThrowError(new Error(`Game.play(user='', comp='') comp must be 'r' or 'p' or 's'`));
+    expect(() => g.play(1, 'r')).toThrowError(new Error(`Game.play(user, comp) user must be 'r' or 'p' or 's'`));
+    expect(() => g.play('1', 'r')).toThrowError(new Error(`Game.play(user, comp) user must be 'r' or 'p' or 's'`));
+    expect(() => g.play('r', 1)).toThrowError(new Error(`Game.play(user, comp) comp must be 'r' or 'p' or 's'`));
+    expect(() => g.play('r', '1')).toThrowError(new Error(`Game.play(user, comp) comp must be 'r' or 'p' or 's'`));
     // draws
     expect(g.history).toEqual([]);
     expect(g.play('r', 'r')).toBeUndefined();
@@ -138,8 +138,8 @@ describe('testing methods', () => {
   });
 
   test('check()', () => {
-    expect(() => g.check(1, 'r')).toThrowError(new Error(`Game.check(i1='', i2='') i1 must be 'r' or 'p' or 's'`));
-    expect(() => g.check('p', 1)).toThrowError(new Error(`Game.check(i1='', i2='') i2 must be 'r' or 'p' or 's'`));
+    expect(() => g.check(1, 'r')).toThrowError(new Error(`Game.check(i1, i2) i1 must be 'r' or 'p' or 's'`));
+    expect(() => g.check('p', 1)).toThrowError(new Error(`Game.check(i1, i2) i2 must be 'r' or 'p' or 's'`));
     expect(g.check('p', 'p')).toBe('draw');
     expect(g.check('r', 'r')).toBe('draw');
     expect(g.check('s', 's')).toBe('draw');
@@ -152,8 +152,8 @@ describe('testing methods', () => {
   });
 
   test('getAllWinsByMove()', () => {
-    expect(() => g.getAllWinsByMove(1, 'user')).toThrowError(new Error(`Game.getAllWinsBymove(move='', winner='') move must be 'r' or 'p' or 's'`));
-    expect(() => g.getAllWinsByMove('r', 1)).toThrowError(new Error(`Game.getAllWinsBymove(move='', winner='') winner must be 'user' or 'comp'`));
+    expect(() => g.getAllWinsByMove(1, 'user')).toThrowError(new Error(`Game.getAllWinsBymove(move, winner) move must be 'r' or 'p' or 's'`));
+    expect(() => g.getAllWinsByMove('r', 1)).toThrowError(new Error(`Game.getAllWinsBymove(move, winner) winner must be 'user' or 'comp'`));
     expect(g.getAllWinsByMove('r', 'user')).toBe(1);
     expect(g.getAllWinsByMove('p', 'user')).toBe(1);
     expect(g.getAllWinsByMove('s', 'user')).toBe(1);
@@ -188,7 +188,7 @@ describe('testing methods', () => {
         "s": 1,
       },
     });
-  });3
+  });
 });
 
 

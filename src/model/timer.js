@@ -15,10 +15,10 @@ export default class Timer {
    * @throws Error - if `delay` is not Intager and lower than 0
    */
   constructor(time, delay=100) { 
-    if (!Number.isInteger(time) && time > 0) {
+    if (!Number.isInteger(time) || time < 0) {
       throw Error(`Timer.constructor(time, delay) time must be Integer and greater than 0`);
     }
-    if (!Number.isInteger(delay) && delay > 0) {
+    if (!Number.isInteger(delay) || delay < 0) {
       throw Error(`Timer.constructor(time, delay) delay must be Integer and greater than 0`);
     }
     let state = 'paused';
@@ -42,7 +42,7 @@ export default class Timer {
       time: {
         get: () => time,
         set: (value) => {
-          if (!Number.isInteger(value) && value > 0) {
+          if (!Number.isInteger(value) || value < 0) {
             throw Error(`Timer.time.set(value) value must be Integer and greater than 0`); 
           }
           time = value;
@@ -57,7 +57,7 @@ export default class Timer {
       compare: {
         get: () => compare,
         set: (value) => {
-          if (!Number.isInteger(value) && value > 0) {
+          if (!Number.isInteger(value) || value < 0) {
             throw Error(`Timer.compare.set(value) value must be Integer and greater than 0`); 
           }
           compare = value;
@@ -85,10 +85,14 @@ export default class Timer {
    * @memberof Timer#
    * @description Converts `ms` in format 00:00
    * @param {Number} ms - number in milliseconds 
-   * @returns {String} 
+   * @returns {String} String
+   * @throws Error - if `ms` is not Integer and lower than 0
    * @example const time = this.formatTime(30000) // returns 00:30
    */
   formatTime(ms) {
+    if (!Number.isInteger(ms) || ms < 0) {
+      throw Error(`Timer.formatTime(ms) ms must be Integer and greater than 0`); 
+    } 
     let hours   = Math.floor(ms / 3_600_000);
     let minutes = Math.floor((ms - (hours * 3_600_000)) / 60_000);
     let seconds = Math.floor((ms - (hours * 3_600_000) - (minutes * 60_000)) / 1000);

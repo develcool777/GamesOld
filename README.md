@@ -40,21 +40,21 @@ npm run serve
 ## Documentation
 To create documentation run following command:
 ```
-node_modules/.bin/jsdoc -c jsdoc.json
+npm run jsdoc
 ```
 It creates folder with name `docs` click on it and then open `index.html` in browser or run command:
 ```
-open docs/index.html
+npm run show:documentation
 ```
 
 ## Unit testing
 To run tests run following command:
 ```
-jest --config ./jest.config.js --coverage
+npm run unit:tests
 ```
 To see test coverage, open `index.html`(path: `/tests/coverage/lcov-report/index.html`) in browser or run command:
 ```
-open tests/coverage/lcov-report/index.html
+npm run show:coverage
 ```
 
 ## License

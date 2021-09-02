@@ -7,7 +7,12 @@ const config = {
       lines: 90,
       statements: 90
     }
-  }
+  },
+  displayName: {
+    name: 'MODEL',
+    color: 'blue',
+  },
+  modulePathIgnorePatterns: ["<rootDir>/rockScissorsPaper.test.js"],
 };
 
 module.exports = config;

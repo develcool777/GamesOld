@@ -12,7 +12,7 @@
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps",
     "production": "vue-cli-service serve --mode production",
-    "jsdoc": "node_modules/.bin/jsdoc -c jsdoc.json",
+    "jsdoc": "jsdoc -c jsdoc.json",
     "show:documentation": "open docs/index.html",
     "unit:tests": "jest --config ./jest.config.js --coverage",
     "show:coverage": "open tests/coverage/lcov-report/index.html"
