@@ -44,7 +44,7 @@ export default {
     },
     
     stop() {
-      return this.gameStatus === 'pause' ? 'Stoped' : 'Stop';
+      return this.gameStatus === 'stop' ? 'Stoped' : 'Stop';
     }
   },
   methods: {

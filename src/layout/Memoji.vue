@@ -26,9 +26,9 @@
 
     <Instruction 
       class="memoji__instruction"
-      :timer="timer"
+      :timer="gameTimeForPrint"
       :attempts="attemptsForHint"
-      :gameStatus="status"
+      :gameStatus="gameStatus"
       v-on:startGame="gameStarted()"
       v-on:stopGame="gameStoped()"
       v-on:finishGame="gameFinished()"
@@ -39,9 +39,9 @@
   </div>
 
   <ResultMemoji
-    :gameResult="result"
-    :status="showModal"
-    :timeInMs="resultTime"
+    :gameResult="gameResult"
+    :status="gameStatus"
+    :timeInMs="gameResultTime"
     v-on:changeLevel="changeLevel($event)"
     v-on:restart="restartGame()"
     v-on:close="cleanField()"
@@ -71,36 +71,29 @@ export default {
 
   data() {
     return {
-      field: {},
-      game: {},
-      gameCreated: false,
+      FIELD: {},
+      GAME: {},
       fieldForDraw: [],
       timeForShow: 1000,
-      timer: '0:00',
-      resultTime: 0,
-      result: '',
-      showModal: false,
       loading: true,
       attemptsForHint: 3,
-      status: ''
+      isHintActivated: false
     }
   },
 
   watch: {
-    gameTime(newTime) {
-      if (newTime === '00:00') { 
-        this.isFinish(true);
-      }
-      this.timer = newTime;
-    },
-
     gameStatus(newStatus) {
       if (newStatus === 'finish') {
-        this.showModal = true;
-        this.game.closeCards();
+        this.GAME.closeCards();
+        this.attemptsForHint = 3
       }
-      this.status = newStatus;
     },
+
+    gameTime(newVal) {
+      if (newVal === 0) {
+        this.isFinish(true);
+      } 
+    }
   },
 
   async created() {
@@ -111,14 +104,29 @@ export default {
   computed: {
     ...mapGetters(['getData']),
 
+    gameTimeForPrint() {
+      return this.GAME?.timer?.timeForPrint || '0:00';
+    },
+
     gameTime() {
-      if (!this.gameCreated) { return '0:00' }
-      return this.game.timer.timeForPrint;
+      return this.GAME?.timer?.time 
+    },
+
+    gameStatus() {
+      return this.GAME.gameStatus;
+    },
+
+    gameResult() {
+      return this.GAME.result;
+    },
+
+    gameResultTime() {
+      return this.GAME.resultTime;
     },
 
     setFieldWidth() {
-      if (this.game.cards === undefined) { return '100px' }
-      const amountOfCards = this.game.cards.length;
+      if (this.GAME.cards === undefined) { return '100px' }
+      const amountOfCards = this.GAME.cards.length;
       const calcWidth = (koef) => 130 * koef + 25 * koef;
       if (amountOfCards <= 4) {
         return `${calcWidth(amountOfCards)}px`
@@ -127,11 +135,7 @@ export default {
         return `${calcWidth(Math.ceil(amountOfCards / 2))}px`
       }
       return `${calcWidth(6)}px`;
-    },
-
-    gameStatus() {
-      return this.game.gameStatus
-    } 
+    }
   },
 
   methods: {
@@ -139,48 +143,58 @@ export default {
 
     async init() {
       await this.GET_DATA();
-      this.field = new Field(this.getData)
+      this.FIELD = new Field(this.getData)
       this.createGame();
     },
 
     gameStarted() {
-      this.game.startGame();
+      this.GAME.startGame();
     },
 
     gameStoped() {
-      this.game.pauseGame();
+      this.GAME.pauseGame();
     },
 
     gameFinished() {
-      this.game.closeCards();
-      this.cleanField();
+      this.GAME.closeCards();
+      this.GAME.timer.stop();
+      setTimeout(() => this.cleanField(), this.timeForShow);
+    },
+
+    cleanField() {
+      this.GAME.clean();
+      this.draw();
+      this.attemptsForHint = 3;
+    },
+
+    restartGame() {
+      this.gameFinished();
+      setTimeout(() => this.gameStarted(), this.timeForShow);
     },
 
     createGame() {
-      this.game = new Game(this.field.getCardsForGame(), this.field.time());
-      this.game.setCardData();
+      this.GAME = new Game(this.FIELD.getCardsForGame(), this.FIELD.time());
+      this.GAME.setCardData();
       this.attemptsForHint = 3;
       this.draw();
       const obj = {
-        level: this.field.level,
-        levels: this.field.amountOfLevels()
+        level: this.FIELD.level,
+        levels: this.FIELD.amountOfLevels()
       }
       this.INIT_STATE(obj);
-      this.gameCreated = true;
     },
 
     clickedCard(card) {
-      if (this.game.gameStatus !== 'start' || this.game.compare.length === 2) { return }
+      if (this.GAME.gameStatus !== 'start' || this.GAME.compare.length === 2 || this.isHintActivated) { return }
+      this.GAME.clickOnCard(card);
 
-      this.game.clickOnCard(card);
-
-      const isMatch = this.game.checkMatch();
+      const isMatch = this.GAME.checkMatch();
       setTimeout(() => {
         if (isMatch === false) {
-          this.game.compare.forEach(card => {
-            this.game.reset(card);
+          this.GAME.compare.forEach(card => {
+            this.GAME.reset(card);
           })
-          this.game.compare.splice(0);
+          this.GAME.compare.splice(0);
         }
       }, this.timeForShow)
 
@@ -188,50 +202,34 @@ export default {
     },
 
     isFinish(lost=false) {
-      if (lost) {
-        this.game.gameFinished('Lost');
-        this.result = this.game.result;
-      }
-      if (this.game.checkWin() && !lost) {
-        setTimeout(() => {
-          this.game.gameFinished('Won');
-          this.result = this.game.result;
-          this.resultTime = this.game.resultTime;
-        }, this.timeForShow)
+      if (lost) { return this.GAME.gameFinished('Lost') }
+      if (this.GAME.checkWin()) { 
+        this.GAME.timer.stop();
+        setTimeout(() => this.GAME.gameFinished('Won'), this.timeForShow); 
       }
     },
 
     draw() {
-      this.fieldForDraw = this.game.cardsData;
+      this.fieldForDraw = this.GAME.cardsData;
     },
 
     changeLevel(step) {
-      this.field.changeLevel(step);
-      this.createGame()
-      this.showModal = false;
-    },
-
-    cleanField() {
-      this.game.clean();
-      this.draw();
-      this.showModal = false;
-    },
-
-    restartGame() {
-      this.cleanField();
-      this.gameStarted();
+      this.FIELD.changeLevel(step);
+      this.createGame();
     },
 
     hint() {
-      if (this.attemptsForHint === 0  || this.game.gameStatus !== 'start') { return }
-      const func = bool => this.game.showOrHideHint(bool)
-      func(true);
-      setTimeout(() => func(false), this.timeForShow);
+      if (this.attemptsForHint === 0 || this.GAME.gameStatus !== 'start' || this.isHintActivated) { return }
+      this.isHintActivated = true;
+      this.GAME.compare.splice(0);
+      this.GAME.showOrHideHint(true)
+      setTimeout(() => this.GAME.showOrHideHint(false), this.timeForShow);
+      setTimeout(() => { this.isHintActivated = false }, this.timeForShow * 2);
       this.attemptsForHint--;
     },
 
     cursor(card) {
-      if (this.game.gameStatus !== 'start') { return {cursor: 'default'} }
+      if (this.GAME.gameStatus !== 'start') { return {cursor: 'default'} }
       if (card.isMatch === null && card.isFlipped === null) { return {cursor: 'pointer'} }
     },
 

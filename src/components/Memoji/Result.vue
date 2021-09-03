@@ -1,6 +1,6 @@
 <template>
 	<transition name="fade">
-		<div class="modal" v-if="status">
+		<div class="modal" v-if="status === 'finish'">
 			<div class="mask" @click="close()"/>
 			<div class="resultMemoji center">
 				<div class="resultMemoji__close" @click="close()"></div>
@@ -24,7 +24,7 @@ const { mapGetters } = createNamespacedHelpers('memoji');
 export default {
 	name: "ResultMemoji",
 	props: {	
-		status: Boolean,
+		status: String,
 		gameResult: String,
 		timeInMs: Number
 	},
