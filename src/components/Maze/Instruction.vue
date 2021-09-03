@@ -40,12 +40,10 @@
 </template>
 
 <script>
-// import Instruction from '@/mixins/instruction'
 import { createNamespacedHelpers } from 'vuex'
 const { mapGetters, mapActions } = createNamespacedHelpers('maze')
 export default {
   name: 'Instruction',
-  // mixins: [Instruction],
   props: {
     timer: String,
     gameStatus: String 
@@ -54,13 +52,11 @@ export default {
     ...mapGetters([
       'getLevel', 'getShowPath', 'getShowHint', 'getArrowClicked'
     ]),
-    // ...mapState([
-    //   'gameFinished', 'level',
-    //   'timer', 'restart'
-    // ]),
+
     start() {
       return  this.gameStatus === 'start' ? 'Started' : 'Start';
     },
+
     stop() {
       return this.gameStatus === 'stop' ? 'Stoped' : 'Stop';
     }
@@ -92,14 +88,14 @@ export default {
     },
 
     stopGame() {
-      if (this.gameStatus === 'stop') { return }
+      if (['', 'stop'].includes(this.gameStatus)) { return }
       this.$emit('stopGame');
     },
 
-    restartGame() {
-      if (!['start', 'stop'].includes(this.gameStatus)) { return }
-      this.$emit('restart');
-    },
+    // restartGame() {
+    //   if (!['start', 'stop'].includes(this.gameStatus)) { return }
+    //   this.$emit('restart');
+    // },
 
     finishGame() {
       if (!['start', 'stop'].includes(this.gameStatus)) { return }

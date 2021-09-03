@@ -73,7 +73,7 @@ export default {
     },
 
     stopGame() {
-      if (this.gameStatus === 'stop') { return }
+      if (['', 'stop'].includes(this.gameStatus)) { return }
       this.$emit('stopGame');
     },
 

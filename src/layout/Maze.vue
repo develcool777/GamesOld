@@ -9,8 +9,8 @@
     </div>
     <Instruction 
       class="maze__instruction" 
-      :timer="timer"
-      :gameStatus="status"
+      :timer="gameTimeForPrint"
+      :gameStatus="gameStatus"
       v-on:startGame="startLoop()"
       v-on:stopGame="stopLoop()"
       v-on:restart="restartGame()"
@@ -18,12 +18,11 @@
       v-on:changeLevel="changeLevel($event)"
       v-on:clicked="arrowPressed($event)"
     />
-
   </div>
   <ResultMaze
-    :gameResult="result"
-    :status="showModal"
-    :timeInMs="resultTime"
+    :gameResult="gameResult"
+    :status="gameStatus"
+    :timeInMs="gameResultTime"
     v-on:changeLevel="changeLevel($event)"
     v-on:restart="restartGame()"
     v-on:close="cleanField()"
@@ -48,105 +47,101 @@ export default {
   },
   data() {
     return {
-      field: {},
-      game: {},
+      FIELD: {},
+      GAME: {},
       fieldForDraw: [],
-      headerHeight: 0,
       loading: true,
-      result: '',
-      resultTime: 0,
-      showModal: false,
-      status: '',
-      gameCreated: false,
-      timer: '00:00'
     }
   },
-  async created() {
-    setTimeout(() => {this.loading = false}, 1000);
-    await this.init();
-  },
   watch: {
-    gameStatus(newStatus) {
-      if (newStatus === 'finish') {
-        this.showModal = true;
-      }
-      this.status = newStatus;
-    },
     gameTime(newTime) {
-      if (newTime === '00:00') { 
+      if (newTime === 0) { 
         this.isFinish(true);
       }
-      this.timer = newTime;
     },
+
     showPath: function(newValue) {
-      this.fieldForDraw = this.field.generateFieldWith(this.game.field, newValue, this.getShowHint);
+      this.fieldForDraw = this.FIELD.generateFieldWith(this.GAME.field, newValue, this.getShowHint);
     },
+
     showHint: function(newVal) {
-      this.fieldForDraw = this.field.generateFieldWith(this.game.field, this.getShowPath, newVal);
+      this.fieldForDraw = this.FIELD.generateFieldWith(this.GAME.field, this.getShowPath, newVal);
     }
   },
   computed: {
     ...mapState(['level', 'showPath', 'showHint']),
     ...mapGetters(['getShowPath', 'getShowHint', 'getData']),
-    gameStatus() {
-      return this.game.gameStatus;
+
+    gameTimeForPrint() {
+      return this.GAME?.timer?.timeForPrint || '0:00';
     },
+
     gameTime() {
-      if (!this.gameCreated) { return '0:00' }
-      return this.game.timer.timeForPrint;
+      return this.GAME?.timer?.time 
+    },
+
+    gameStatus() {
+      return this.GAME.gameStatus;
+    },
+
+    gameResult() {
+      return this.GAME.result;
+    },
+
+    gameResultTime() {
+      return this.GAME.resultTime;
     },
   },
+  async created() {
+    setTimeout(() => {this.loading = false}, 1000);
+    await this.init();
+  },
   methods: {
-    ...mapActions([
-      'INIT_STATE', 'CHANGE_ARROW', 'SET_DATA'
-    ]),
+    ...mapActions(['INIT_STATE', 'CHANGE_ARROW', 'SET_DATA']),
 
     async init() {
       await this.SET_DATA();
-      this.field = new Field(this.getData);
+      this.FIELD = new Field(this.getData);
       this.createGame();
     },
 
     createGame() {
       const obj = {
-        level: this.field.level,
-        amountOfLevels: this.field.amountOfLevels(),
+        level: this.FIELD.level,
+        amountOfLevels: this.FIELD.amountOfLevels(),
       }
       this.INIT_STATE(obj);
-      const [field, start, end, time] = this.field.dataForGame();
-      this.game = new Game(field, start, end, time);
-      this.fieldForDraw = this.field.generateFieldForDraw(field, start, end);
-      this.game.initGame();
-      this.gameCreated = true;
+      const [field, start, end, time] = this.FIELD.dataForGame();
+      this.GAME = new Game(field, start, end, time);
+      this.fieldForDraw = this.FIELD.generateFieldForDraw(field, start, end);
+      this.GAME.initGame();
     },
 
     changeLevel(step) {
-      this.field.changeLevel(step);
+      this.FIELD.changeLevel(step);
       this.createGame();
-      this.showModal = false;
     },
 
-    restartGame() {
-      this.cleanField();
-      this.startLoop();
-    },
+    // restartGame() {
+    //   this.cleanField();
+    //   this.startLoop();
+    // },
 
     cleanField() {
       this.stopLoop();
-      this.game.clean();
-      this.game.initGame();
-      const [field, start, end] = this.field.dataForGame();
-      this.fieldForDraw = this.field.generateFieldForDraw(field, start, end);
-      this.showModal = false;
+      this.GAME.clean();
+      this.GAME.initGame();
+      const [field, start, end] = this.FIELD.dataForGame();
+      this.fieldForDraw = this.FIELD.generateFieldForDraw(field, start, end);
     },
 
     startLoop() {   
-      this.game.startGame();
+      this.GAME.startGame();
       window.addEventListener('keyup', this.arrowPressed); 
     },
 
     stopLoop() {
-      this.game.stopGame();
+      this.GAME.stopGame();
       window.removeEventListener('keyup', this.arrowPressed);
     },
 
@@ -175,40 +170,37 @@ export default {
     },
 
     keyPressed(key) {
-      const [prevX, prevY] = this.game.player.getPosition();
+      const [prevX, prevY] = this.GAME.player.getPosition();
       if (key === 'ArrowUp') {
-        this.game.moves('W');
+        this.GAME.moves('W');
         this.CHANGE_ARROW(1)
       }
       if (key === 'ArrowLeft') {
-        this.game.moves('A');
+        this.GAME.moves('A');
         this.CHANGE_ARROW(2)
       }
       if (key === 'ArrowDown') {
-        this.game.moves('S');
+        this.GAME.moves('S');
         this.CHANGE_ARROW(3)
       }
       if (key === 'ArrowRight') {
-        this.game.moves('D');
+        this.GAME.moves('D');
         this.CHANGE_ARROW(4)
       }
 
       setTimeout(() => { this.CHANGE_ARROW(0) }, 250);
-      const [curentX, curentY] = this.game.player.getPosition();
+      const [curentX, curentY] = this.GAME.player.getPosition();
       return [prevX, prevY, curentX, curentY];
     },
 
     isFinish(lost=false, x, y) {
       if (lost) { 
-        this.game.gameFinished('Lost');
-        this.result = this.game.result;
+        this.GAME.gameFinished('Lost');
       }
-      if (!lost && this.game.checkWin(x, y)) {
-        this.game.gameFinished('Won');
-        this.result = this.game.result;
-        this.resultTime = this.game.resultTime;
+      if (!lost && this.GAME.checkWin(x, y)) {
+        this.GAME.gameFinished('Won');
       }
-      if (this.game.gameStatus === 'finish') {
+      if (this.GAME.gameStatus === 'finish') {
         window.removeEventListener('keyup', this.arrowPressed);
       }
     }

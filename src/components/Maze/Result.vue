@@ -1,6 +1,6 @@
 <template>
 	<transition name="fade">
-		<div class="modal" v-if="status">
+		<div class="modal" v-if="status === 'finish'">
 			<div class="mask" @click="close()"/>
 			<div class="resultMaze center">
 				<div class="resultMaze__close" @click="close()"></div>
@@ -24,7 +24,7 @@ const { mapGetters } = createNamespacedHelpers('maze');
 export default {
 	name: "ResultMaze",
 	props: {	
-		status: Boolean,
+		status: String,
 		gameResult: String,
 		timeInMs: Number
 	},
