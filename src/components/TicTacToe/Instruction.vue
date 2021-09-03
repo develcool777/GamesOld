@@ -2,12 +2,12 @@
   <div class="instTic">
     <div class="instTic__mainBtns">
       <div class="instTic__mainBtn" @click="startGame()">{{ start }}</div>
-      <div class="instTic__mainBtn" @click="clear()">Clear</div>
+      <div class="instTic__mainBtn" @click="clear()">Clear Field</div>
       <div class="instTic__mainBtn" @click="returnMove()">Return move</div>
-      <div class="instTic__mainBtn" :class="{active: !getPlayingWithComputer}" @click="changePlayer()">User1 VS User2</div>
-      <div class="instTic__mainBtn" :class="{active: getPlayingWithComputer}" @click="changePlayer()">User VS Comp</div>
+      <div class="instTic__mainBtn" :class="{active: !settings.playWithComputer}" @click="changePlayer(false)">User1 VS User2</div>
+      <div class="instTic__mainBtn" :class="{active: settings.playWithComputer}" @click="changePlayer(true)">User VS Comp</div>
     </div>
-    <section class="" v-if="getPlayingWithComputer">
+    <section class="" v-if="settings.playWithComputer">
       <div class="instTic__block">
         <div class="instTic__title">Users choice</div>
       </div>
@@ -16,8 +16,8 @@
           class="instTic__mainBtn" 
           v-for="(side, i) in sides"
           :key="i"
-          :class="{active: getCompSettings.compSide === side.comp}" 
-          @click="changeSide(side.comp)"
+          :class="{active: settings.compSide === side.comp}" 
+          @click="changeSide(settings.compSide === side.comp)"
         >{{ side.user }}</div> 
       </div>
      <div class="instTic__block">
@@ -28,19 +28,21 @@
           class="instTic__mainBtn" 
           v-for="(diff, i) in difficulties"
           :key="i"
-          :class="{active: getCompSettings.difficulty === diff.comp}" 
-          @click="changeDifficulty(diff.comp)"
-        >{{ diff.display }}</div>
+          :class="{active: settings.difficulty === diff}" 
+          @click="changeDifficulty(diff)"
+        >{{ diff }}</div>
       </div>
     </section>
   </div>
 </template>
 
 <script>
-import { createNamespacedHelpers } from 'vuex'
-const { mapActions, mapGetters } = createNamespacedHelpers('tictactoe');
 export default {
   name: 'Instruction',
+  props: {
+    status: String,
+    settings: Object
+  },
   data() {
     return {
       allowClick: true,
@@ -48,53 +50,37 @@ export default {
         { comp: 'o', user: 'X' },
         { comp: 'x', user: 'O' }
       ],
-      difficulties: [
-        { comp: 'easy', display: 'Easy' },
-        { comp: 'hard', display: 'Hard' }
-      ]
+      difficulties: [ 'easy', 'hard' ]
     }
   },
   computed: {
-    ...mapGetters(['getPlayingWithComputer', 'getCompSettings', 'getIsPlaying']),
     start() {
-      return this.getIsPlaying ? 'Started' : 'Start';
+      return this.status === 'start' ? 'Started' : 'Start';
     }
   },
   methods: {
-    ...mapActions([
-      'CHANGE_CLEAR', 'CHANGE_RETURN_MOVE', 
-      'CHANGE_PLAYING_WITH_COMPUTER', 'CHANGE_COMPUTER_SETTINGS',
-      'CHANGE_WINNER', 'CHANGE_IS_PLAYING'
-    ]),
     clear() {
-      this.CHANGE_CLEAR(true);
-      this.CHANGE_WINNER('');
-      this.CHANGE_IS_PLAYING(false);
+      this.$emit('finish');
     },
+
     returnMove() {
-      this.CHANGE_RETURN_MOVE(true);
+      this.$emit('returnMove');
     },
-    changePlayer() {
-      this.CHANGE_PLAYING_WITH_COMPUTER(!this.getPlayingWithComputer);
-      this.clear();
+
+    changePlayer(bool) {
+      this.$emit('changePlayingWith', bool);
     },
-    changeSide(move) {
-      const obj = {
-        compSide: move,
-        userSide: move === 'x' ? 'o' : 'x',
-      }
-      this.CHANGE_COMPUTER_SETTINGS(obj);
-      this.clear();
+
+    changeSide(bool) {
+      this.$emit('changeSide', bool);
     },
+
     changeDifficulty(diff) {
-      const obj = {
-        difficulty: diff
-      }
-      this.CHANGE_COMPUTER_SETTINGS(obj);
-      this.clear();
+      this.$emit('changeDifficulty', diff);
     },
+    
     startGame() {
-      this.CHANGE_IS_PLAYING(true);
+      this.$emit('start');
     }
   }
 }
@@ -105,6 +91,9 @@ export default {
   @include Instruction();
   &__mainBtns {
     margin-top: rem(30);
+  }
+  &__mainBtn::first-letter {
+    text-transform: uppercase;
   }
   &__block {
     margin: rem(20) 0;

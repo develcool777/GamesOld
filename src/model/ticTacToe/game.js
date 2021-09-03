@@ -15,6 +15,8 @@ export default class Game {
    * @property {String} winner - shows who win, player with 'x' or player with 'o' or 'It's a draw'
    * @property {Array} winnerCells - stores the path where winner player placed 'x' or 'o' in row, column or diagonal, [[0, 0], [1, 1], [2, 2]] 
    * @property {Array} moves - stores all moves that were made, {player: 'x', x: 0 , y: 1}
+   * @property {Object} comp - comp settings 
+   * @property {String} gameStatus - Shows game status
    */
   constructor() {
     let field = [
@@ -24,14 +26,37 @@ export default class Game {
     ]
     let currentPlayer = 'x';
     let winner = '';
+    let gameStatus = '';
     const winnerCells = [];
     const moves = [];
+    const comp = {
+      playWithComputer: true,
+      userSide: 'x',
+      compSide: 'o',
+      difficulty: 'easy'
+    }
+
     Object.defineProperties(this, {
       field: {
         get: () => field,
         set: (value) => {
           if (!Array.isArray(value)) {
             throw Error(`field.set(value) value must be Array`);
+          }
+          if (value.length !== 3) {
+            throw Error(`field.set(value) length of value must be 3`);
+          }
+          if (!value.every(arr => Array.isArray(arr))) {
+            throw Error(`field.set(value) every element of value must be Array`);
+          }
+          if (!value.every(arr => arr.length === 3 )) {
+            throw Error(`field.set(value) every subarray of value must have length 3`);
+          }
+          if (!value.every(arr => arr.every(item => typeof item === 'string'))) {
+            throw Error(`field.set(value) every element of 2D array(value) must be String`)
+          }
+          if (!value.every(arr => arr.every(item => ['', 'x', 'o'].includes(item)))) {
+            throw Error(`field.set(value) every element of 2D array(value) must be '' or 'x' or 'o'`)
           }
           field = value;
         }
@@ -54,7 +79,22 @@ export default class Game {
           if (typeof value !== 'string') {
             throw Error(`winner.set(value) value must be String`);
           }
+          if (!['draw', 'x', 'o', ''].includes(value)) {
+            throw Error(`winner.set(value) value must be 'draw' or 'x' or 'o' or ''`)
+          }
           winner = value;
+        }
+      },
+      gameStatus: {
+        get: () => gameStatus,
+        set: (value) => {
+          if (typeof value !== 'string') {
+            throw Error(`gameStatus.set(value) value must be String`);
+          }
+          if (!['start', 'finish', ''].includes(value)) {
+            throw Error(`gameStatus.set(value) value must be 'start' or 'finish' or ''`);
+          }
+          gameStatus = value;
         }
       },
       winnerCells: {
@@ -62,8 +102,11 @@ export default class Game {
       },
       moves: {
         get: () => moves
+      },
+      comp: {
+        get: () => comp
       }
-    })
+    });
   }
   /**
    * @method log
@@ -78,7 +121,9 @@ export default class Game {
       currentPlayer: this.currentPlayer,
       winnerCells: this.winnerCells,
       winner: this.winner,
-      moves: this.moves
+      moves: this.moves,
+      gameStatus: this.gameStatus,
+      comp: this.comp
     });
   }
 
@@ -122,6 +167,7 @@ export default class Game {
     this.moves.splice(0);
     this.winnerCells.splice(0);
     this.winner = '';
+    this.gameStatus = '';
   }
 
   /**
@@ -129,66 +175,41 @@ export default class Game {
    * @memberof TicTacToe#Game#
    * @param {Number} cordX - cordX must be Integer
    * @param {Number} cordY - cordY must be Integer
-   * @description Firstly check if there is a winner, then call [`makeMove()`]{@link TicTacToe#Game#makeMove} function, then changes `currentPlayer` and call [`checkWinner()`]{@link TicTacToe#Game#checkWinner} function
-   * @returns {undefined} undefined
+   * @description Returns `true` if move made successfully, otherwise `false` or throws `error` 
+   * @returns {Boolean} Boolean
+   * @throws Error - if `cordX` and `cordY` are not Integer
+   * @throws Error - if `cordX` and `cordY` are not in range(0, 2)
    * @example this.play(0, 0);
    */
   play(cordX, cordY) {
-    if (this.winner !== '') { return }
-    this.makeMove(this.currentPlayer, cordX, cordY);
-    this.currentPlayer = this.currentPlayer === 'x' ? 'o' : 'x';
-    this.checkWinner(this.field);
-  }
-
-  /**
-   * @method makeMove
-   * @memberof TicTacToe#Game#
-   * @param {String} player - player must be 'x' or 'o'
-   * @param {Number} cordX - cordX must be Integer
-   * @param {Number} cordY - cordY must be Integer
-   * @description Inserts `player` symbol('x' or 'o') in `this.field` at coordinates(`cordX`, `cordY`) 
-   * @throws Error - if player is not type of String
-   * @throws Error - if player is not 'x' or 'o'
-   * @throws Error - if cordX and cordY are not Integer
-   * @throws Error - if cordX and cordY are not in range(0, 2)
-   * @returns {undefined} undefined
-   * @example this.makeMove(this.currentPlayer, 0, 0);
-   */
-  makeMove(player, cordX, cordY) {
-    if (typeof player !== 'string') {
-      throw Error(`Game.makeMove(player, cordX, cordY) player must be String`);
-    }
-    if (['x', 'o'].indexOf(player) === -1) {
-      throw Error(`Game.makeMove(player, cordX, cordY) player must be 'x' or 'o'`);
-    }
     if (!Number.isInteger(cordX) || !Number.isInteger(cordY)) {
-      throw Error(`Game.makeMove(player, cordX, cordY) cordX and cordY must be Integer`);
+      throw Error(`Game.play(cordX, cordY) cordX and cordY must be Integer`);
     }
     if ([cordX, cordY].some(c => ![0,1,2].includes(c))) {
-      throw Error(`Game.makeMove(player, cordX, cordY) cordX and cordY must be in range(0, 2)`);
+      throw Error(`Game.play(cordX, cordY) cordX and cordY must be in range(0, 2)`);
     }
-    if (this.field[cordX][cordY] !== '') {
-      return console.log('this cell is not available for move');
-    }
-    this.moves.push({player, x: cordX, y: cordY});
-    this.field[cordX][cordY] = player;
+    if (this.winner !== '') { return false }
+    if (this.field[cordX][cordY] !== '') { return false }
+
+    this.field[cordX][cordY] = this.currentPlayer;
+    this.moves.push({player: this.currentPlayer, x: cordX, y: cordY});
+    this.currentPlayer = this.currentPlayer === 'x' ? 'o' : 'x';
+    this.checkWinner(this.field);
+    return true;
   }
+
 
   /**
    * @method returnMove
    * @memberof TicTacToe#Game#
-   * @param {Boolean} withComp - if playing against computer this value must be true, otherwise false
-   * @param {Boolean} compFirstMove - if computer made first move this value must be true, otherwise false
    * @description If `moves` is empty or there is a winner or there is no cell for move: return from function, 
    * otherwise define `amountOfMoves` that need to be returned then erase those moves from `moves`. 
    * @returns {undefined} undefined
-   * @example 
-   * this.returnMove() // in this case it's user vs user, so it removes one move
-   * this.returnMove(true) // in this case it's user vs comp, so it removes two moves
-   * this.returnMove(true, true) // in this case it's user vs comp, but computer made first move,
-   * // so if there are less or equal to 2 moves were maden than it wont remove moves, but if more 
+   * @example this.returnMove()
    */
-  returnMove(withComp=false, compFirstMove=false) {
+  returnMove() {
+    const withComp = this.comp.playWithComputer
+    const compFirstMove = this.comp.compSide === 'x';
     if (this.moves.length === 0 || this.winner !== '' || this.moves.length === 9) { return }
     let amountOfMoves = 1;
     if (withComp) {
@@ -244,14 +265,18 @@ export default class Game {
 
     // draw
     if (this.moves.length === 9 && this.winner === '') {
-      this.winner = `It's a draw`;
+      this.winner = `draw`;
+    }
+
+    // finish
+    if (this.winner !== '') {
+      this.finishGame();
     }
   }
 
   /**
    * @method playWithComputer
    * @memberof TicTacToe#Game#
-   * @param {String} difficulty - difficulty can be 'easy' or 'hard'
    * @description If `difficulty` is easy call [`computerMoveRandom`]{@link TicTacToe#Game#computerMoveRandom}, if hard call [`computerMoveClever`]{@link TicTacToe#Game#computerMoveClever},
    * the result of function will be received in format[x, y](if the result of function is empty array, return from function), which then passes as an argument into [`play`]{@link TicTacToe#Game#play} function. 
    * @returns {undefined} undefined
@@ -259,7 +284,8 @@ export default class Game {
    * this.playWithComputer(); // difficulty is easy
    * this.playWithComputer('hard'); // difficulty is hard
    */
-  playWithComputer(difficulty='easy') {
+  playWithComputer() {
+    const difficulty = this.comp.difficulty;
     const computerMove = difficulty === 'hard' ? this.computerMoveClever() : this.computerMoveRandom();
     if (computerMove.length === 0) { return }
     this.play(...computerMove);
@@ -293,8 +319,7 @@ export default class Game {
    */
   computerMoveRandom() {
     const moves = this.availableMoves(this.field);
-    const randomMove = moves[Math.floor(Math.random() * moves.length)] || [];
-    return randomMove;
+    return moves[Math.floor(Math.random() * moves.length)] || [];
   }
 
   /**
@@ -317,5 +342,30 @@ export default class Game {
         return false;
       })
     }).flat().filter(pair => pair !== false);
+  }
+
+  /**
+   * @method startGame
+   * @memberof TicTacToe#Game#
+   * @description Starts the game
+   * @returns {undefined} undefined
+   * @example this.startGame()
+   */
+  startGame() {
+    this.gameStatus = 'start';
+    if (this.comp.playWithComputer && this.comp.compSide === 'x') {
+      this.playWithComputer();
+    }
+  }
+
+  /**
+   * @method finishGame
+   * @memberof TicTacToe#Game#
+   * @description Finishes the game 
+   * @returns {undefined} undefined
+   * @example this.finishGame()
+   */
+  finishGame() {
+    this.gameStatus = 'finish';
   }
 }

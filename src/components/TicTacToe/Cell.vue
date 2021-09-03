@@ -23,12 +23,15 @@ export default {
     showO() {
       return this.whatToDraw === 'o' || this.whatToHover === 'o' && this.hover;
     },
+
     showX() {
       return this.whatToDraw === 'x'|| this.whatToHover === 'x' && this.hover;
     },
+
     styleO() {
       return this.whatToHover === 'o' && this.hover ? {background: 'lightblue'} : {};
     },
+    
     styleX() {
       return this.whatToHover === 'x' && this.hover ? {background: 'darkred'} : {};
     }

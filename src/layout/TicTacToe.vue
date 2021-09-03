@@ -1,18 +1,21 @@
 <template>
   <div class="tictactoe">
     <section class="tictactoe__game">
-      <Info/>
+      <Info
+        :settings="GAME.comp"
+        :winner="GAME.winner"
+      />
       <div class="tictactoe__field">
         <Cell 
           class="tictactoe__cell"
           v-for="(item, i) in fieldForDraw" 
           :key="i"
           :class="{win: item.winCell}"
-          :style="{cursor: item.cell === '' && game.winner === '' && getIsPlaying ? 'pointer' : 'default'}"
+          :style="styleCursor(item)"
           :whatToDraw="item.cell"
           :whatToHover="item.currentPlayer"
-          :hover="hovered === i && item.cell === '' && getIsPlaying"
-          @mouseover="hovered = i;"
+          :hover="hoverFunction(item, i)"
+          @mouseover="hovered = i"
           @mouseleave="hovered = null"
           @click="clickCell(item.coordinates)"
         />
@@ -22,7 +25,17 @@
         <div class="tictactoe__lineHorizontal2"></div>
       </div>
     </section>
-    <Instruction class="tictactoe__instruction"/>
+    <Instruction 
+      class="tictactoe__instruction"
+      :status="GAME.gameStatus"
+      :settings="GAME.comp"
+      v-on:start="gameStarted()"
+      v-on:finish="gameFinished()"
+      v-on:returnMove="returnMove()"
+      v-on:changePlayingWith="changePlay($event)"
+      v-on:changeSide="changeSide($event)"
+      v-on:changeDifficulty="changeDifficulty($event)"
+    />
   </div>
   <transition name="fade">
     <Loading v-if="loading" class="LOADING" :step="0.6"/>
@@ -30,8 +43,6 @@
 </template>
 
 <script>
-import { createNamespacedHelpers } from 'vuex'
-const { mapActions, mapState, mapGetters } = createNamespacedHelpers('tictactoe');
 import Game from '@/model/ticTacToe/game';
 import Instruction from '@/components/TicTacToe/Instruction';
 import Cell from '@/components/TicTacToe/Cell';
@@ -47,100 +58,87 @@ export default {
   },
   data() {
     return {
-      game: {},
+      GAME: {},
       fieldForDraw: [],
       hovered: null,
-      loading: true
-    }
-  },
-  watch: {
-    clear: function(newVal) {
-      if (newVal) {
-        this.clearField();
-      }
-    },
-    returnMove: function(newVal) {
-      if (newVal) {
-        this.return();
-      }
-    },
-    isPlaying: function (newVal) {
-      if (newVal && this.getPlayingWithComputer && this.getCompSettings.compSide === 'x') {
-        this.computerMove();
-      }
+      loading: true,
+      allowMove: true
     }
   },
   created() {
     setTimeout(() => {this.loading = false}, 1000);
     this.init();
   },
-  computed: {
-    ...mapState([
-      'clear', 'returnMove',
-      'playingWithComputer', 'isPlaying'
-    ]),
-    ...mapGetters([
-      'getPlayingWithComputer', 'getCompSettings', 
-      'getWinner', 'getIsPlaying'
-    ])
-  },
   methods: {
-    ...mapActions([
-      'CHANGE_CLEAR', 'CHANGE_RETURN_MOVE', 
-      'INIT_STATE', 'CHANGE_WINNER',
-      'CHANGE_IS_PLAYING'
-    ]),
     init() {
-      this.game = new Game();
-      this.INIT_STATE();
+      this.GAME = new Game();
       this.draw();
     },
-    clickCell(coordinates) {
-      if (this.getIsPlaying !== true) { return }
-      const field = this.game.field;
-      const playingWithComputer = this.getPlayingWithComputer;
-      if (field[coordinates.x][coordinates.y] !== '') {
-        return;
-      }
-      if (this.getWinner !== '') {
-        return;
-      }
-      this.userMove(coordinates)
-      if (playingWithComputer) {
-        setTimeout(() => this.computerMove(), 250);
-      }
-    },
-    userMove(coordinates) {
-      this.game.play(coordinates.x, coordinates.y);
-      this.cheakWinner();
-      this.draw();
-    },
-    computerMove() {
-      this.game.playWithComputer(this.getCompSettings.difficulty);
-      this.cheakWinner();
-      this.draw()
-    },
-    cheakWinner() {
-      const winner = this.game.winner
-      if (winner !== '') {
-        this.CHANGE_WINNER(winner);
-        this.CHANGE_IS_PLAYING(false);
-      }
-    },
+
     draw() {
-      // this.game.log();
-      this.fieldForDraw = this.game.getFieldForDraw();
+      this.fieldForDraw = this.GAME.getFieldForDraw();
     },
-    clearField() {
-      this.game.clear();
+
+    clickCell(coordinates) {
+      if (this.GAME.gameStatus !== 'start') { return }
+      const userMadeMove = this.GAME.play(coordinates.x, coordinates.y);
       this.draw();
-      this.CHANGE_CLEAR(false);
+
+      if (this.GAME.comp.playWithComputer && userMadeMove) {
+        this.allowMove = false;
+        setTimeout(() => {
+          this.GAME.playWithComputer();
+          this.draw();
+          this.allowMove = true;
+        }, 250);
+
+      }
     },
-    return() {
-      this.game.returnMove(this.getPlayingWithComputer, this.getCompSettings.compSide === 'x');
+
+    gameStarted() {
+      this.GAME.startGame();
+      if (this.GAME.comp.playWithComputer && this.GAME.comp.compSide === 'x') {
+        this.draw();
+      }
+    },
+
+    gameFinished() {
+      this.GAME.finishGame();
+      this.GAME.clear();
       this.draw();
-      this.CHANGE_RETURN_MOVE(false);
     },
+
+    changeSide(bool) {
+      if (bool) { return }
+      [this.GAME.comp.userSide, this.GAME.comp.compSide] = [this.GAME.comp.compSide, this.GAME.comp.userSide];
+      this.gameFinished();
+    },
+
+    changeDifficulty(diff) {
+      this.GAME.comp.difficulty = diff;
+      this.gameFinished()
+    },
+
+    returnMove() {
+      this.GAME.returnMove();
+      this.draw();
+    },
+
+    changePlay(bool) {
+      if (bool === this.GAME.comp.playWithComputer) { return }
+      this.GAME.comp.playWithComputer = bool;
+      this.gameFinished();
+    },
+
+    styleCursor(item) {
+      const condition = item.cell === '' && this.GAME.winner === '' && this.GAME.gameStatus === 'start' && this.allowMove;
+      return condition ? {cursor: 'pointer'} : {cursor: 'default'}
+    },
+    
+    hoverFunction(item, i) {
+      const game = this.GAME.gameStatus === 'start' && this.GAME.winner === '';
+      return this.hovered === i && item.cell === '' && game && this.allowMove;
+    }
   }
 }
 </script>

@@ -1,6 +1,6 @@
 <template>
   <section class="info">
-    <div class="info__title" v-if="getPlayingWithComputer">
+    <div class="info__title" v-if="settings.playWithComputer">
       <div>
         User:
         <span :style="userColor">{{ userSide }}</span> 
@@ -33,10 +33,12 @@
 </template>
 
 <script>
-import { createNamespacedHelpers } from 'vuex'
-const { mapGetters, mapState } = createNamespacedHelpers('tictactoe');
 export default {
   name: 'Info',
+  props: {
+    settings: Object,
+    winner: String
+  },
   data() {
     return {
       result: ''
@@ -44,41 +46,37 @@ export default {
   },
   watch: {
     winner: function(newVal) {
-      if (newVal !== '') {
-        this.resultOfBattle();
-      }
-      if (newVal === '') {
-        this.result = '';
-      }
+      this.result = newVal !== '' ? this.resultOfBattle() : '';
     }
   },
   computed: {
-    ...mapState(['winner']),
-    ...mapGetters(['getPlayingWithComputer', 'getCompSettings', 'getWinner']),
     compSide() {
-      return this.getCompSettings.compSide === 'o' ? 'O' : 'X';
+      return this.settings.compSide.toUpperCase();
     },
+
     userSide() {
-      return this.getCompSettings.userSide === 'o' ? 'O' : 'X';
+      return this.settings.userSide.toUpperCase();
     },
+
     compColor() {
-      return this.getCompSettings.compSide === 'o' ? {color: 'blue'} : {color: 'red'};
+      return this.settings.compSide === 'o' ? {color: 'blue'} : {color: 'red'};
     },
+    
     userColor() {
-      return this.getCompSettings.userSide === 'o' ? {color: 'blue'} : {color: 'red'};
+      return this.settings.userSide === 'o' ? {color: 'blue'} : {color: 'red'};
     },
 
   },
   methods: {
     resultOfBattle() {
-      const winner = this.getWinner;
-      if (this.getPlayingWithComputer) {
-        const compSide = this.getCompSettings.compSide;
-        const userSide = this.getCompSettings.userSide;
-        this.result = winner === compSide ? 'Comp win' : winner === userSide ? 'User win' : `It's a draw`;
-        return;
+      if (this.winner === 'draw') {
+        return`It's a draw`;
       }
-      this.result = winner === 'o' ? 'User2 win' : winner === 'x' ? 'User1 win' : `It's a draw`;
+      if (this.settings.playWithComputer) {
+        const compSide = this.settings.compSide;
+        return this.winner === compSide ? 'Comp win' : 'User win';
+      }
+      return this.winner === 'o' ? 'User2 win' : 'User1 win';
     }
   }
 }
