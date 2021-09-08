@@ -158,16 +158,17 @@ export default class Game {
    * @method clear
    * @memberof TicTacToe#Game#
    * @description Resets the values of the class fields to their initial state
-   * @returns {undefined} undefined
+   * @returns {Boolean} Boolean 
    * @example this.clear();
    */
   clear() {
-    this.field = this.field.map(arr => arr.map(() => ''))
+    this.field = this.field.map(arr => arr.map(() => ''));
     this.currentPlayer = 'x';
     this.moves.splice(0);
     this.winnerCells.splice(0);
     this.winner = '';
     this.gameStatus = '';
+    return true;
   }
 
   /**
@@ -203,14 +204,14 @@ export default class Game {
    * @method returnMove
    * @memberof TicTacToe#Game#
    * @description If `moves` is empty or there is a winner or there is no cell for move: return from function, 
-   * otherwise define `amountOfMoves` that need to be returned then erase those moves from `moves`. 
-   * @returns {undefined} undefined
+   * otherwise define `amountOfMoves` that need to be returned then erase those moves from `moves`. Also returns `true` if function runs correctly otherwise `false`
+   * @returns {Boolean} Boolean
    * @example this.returnMove()
    */
   returnMove() {
     const withComp = this.comp.playWithComputer
     const compFirstMove = this.comp.compSide === 'x';
-    if (this.moves.length === 0 || this.winner !== '' || this.moves.length === 9) { return }
+    if (this.moves.length === 0 || this.winner !== '') { return false }
     let amountOfMoves = 1;
     if (withComp) {
       amountOfMoves = 2; 
@@ -223,17 +224,18 @@ export default class Game {
       this.currentPlayer = move.player;
       this.field[move.x][move.y] = '';
     })
+    return true;
   }
 
   /**
    * @method checkWinner
    * @memberof TicTacToe#Game#
-   * @description Check is there a winner or a draw
-   * @returns {undefined} undefined
+   * @description Check is there a winner or a draw, also returns `true` if function runs correctly otherwise `false`
+   * @returns {Boolean} Boolean
    * @example this.checkWinner();
    */
   checkWinner() {
-    if (this.moves.length < 4) { return }
+    if (this.moves.length < 4) { return false }
     const equals = (a,b,c) => a === b && b === c && a !== '';
     const F = this.field;
 
@@ -272,23 +274,23 @@ export default class Game {
     if (this.winner !== '') {
       this.finishGame();
     }
+    return true;
   }
 
   /**
    * @method playWithComputer
    * @memberof TicTacToe#Game#
    * @description If `difficulty` is easy call [`computerMoveRandom`]{@link TicTacToe#Game#computerMoveRandom}, if hard call [`computerMoveClever`]{@link TicTacToe#Game#computerMoveClever},
-   * the result of function will be received in format[x, y](if the result of function is empty array, return from function), which then passes as an argument into [`play`]{@link TicTacToe#Game#play} function. 
-   * @returns {undefined} undefined
-   * @example 
-   * this.playWithComputer(); // difficulty is easy
-   * this.playWithComputer('hard'); // difficulty is hard
+   * the result of function will be received in format[x, y](if the is a winner, return false), which then passes as an argument into [`play`]{@link TicTacToe#Game#play} function. Also returns `true` if function runs correctly otherwise `false` 
+   * @returns {Boolean} Boolean
+   * @example this.playWithComputer(); 
    */
   playWithComputer() {
+    if (this.winner !== '') { return false }
     const difficulty = this.comp.difficulty;
     const computerMove = difficulty === 'hard' ? this.computerMoveClever() : this.computerMoveRandom();
-    if (computerMove.length === 0) { return }
     this.play(...computerMove);
+    return true;
   }
 
   /**
@@ -314,27 +316,26 @@ export default class Game {
    * @memberof TicTacToe#Game#
    * @description Returns computer move, first call [`availableMoves`]{@link Game#availableMoves}
    * function which return all available moves, then choose random move.  
-   * @returns {Array} [x, y] or []
+   * @returns {Array} [x, y] 
    * @example const compMove = this.computerMoveRandom();
    */
   computerMoveRandom() {
-    const moves = this.availableMoves(this.field);
-    return moves[Math.floor(Math.random() * moves.length)] || [];
+    const moves = this.availableMoves();
+    return moves[Math.floor(Math.random() * moves.length)];
   }
 
   /**
    * @method availableMoves
    * @memberof TicTacToe#Game#
-   * @param {Array} field - field must be matrix 3x3
    * @description Returns available moves, used 2 [`map`]{@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map}
    * to iterate `field`, if cell is empty then return cordinates, otherwise return false, after use 
    * [`filter`]{@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter}
    * to leave only pairs [x, y]   
    * @returns {Array} [[x, y], [x1, y1]]
-   * @example const moves = this.availableMoves(this.field);
+   * @example const moves = this.availableMoves();
    */
-  availableMoves(field) {
-    return field.map((arr, i) => {
+  availableMoves() {
+    return this.field.map((arr, i) => {
       return arr.map((cell, j) => {
         if (cell === '') {
           return [i, j];

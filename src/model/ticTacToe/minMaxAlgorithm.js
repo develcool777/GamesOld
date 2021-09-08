@@ -6,9 +6,25 @@
  * @classdesc This class have methods to build the board, [`more info`]{@link https://alialaa.com/blog/tic-tac-toe-js}
  * @constructor
  * @param {Array} state - field for game
+ * @throws Error - if `state` is not Array
+ * @throws Error - if `state` length is not equals to 9
+ * @throws Error - if every element of `state` is not String
+ * @throws Error - if every element of `state` is not '' or 'x' or 'o'
  */
 class Board {
   constructor(state = ['','','','','','','','','']) {
+    if (!Array.isArray(state)) {
+      throw Error(`Board.constructor(state) state must be Array`);
+    }
+    if (state.length !== 9) {
+      throw Error(`Board.constructor(state) state length must be 9`);
+    }
+    if (!state.every(item => typeof item === 'string')) {
+      throw Error(`Board.constructor(state) every element of state must be String`);
+    }
+    if (!state.every(item => ['', 'x', 'o'].includes(item))) {
+      throw Error(`Board.constructor(state) every element of state must be '' or 'x' or 'o'`);
+    }
     this.state = state;
   }
   /**
@@ -41,18 +57,22 @@ class Board {
    * @memberof TicTacToe#Board#
    * @param {String} symbol - Value must be 'x' or 'o'
    * @param {Number} position - Value must be Integer in range(0, 8)
-   * @throws Error - if symbol is not 'x' or 'o'
-   * @throws Error - if position is not in range(0, 8)
+   * @throws Error - if `symbol` is not 'x' or 'o'
+   * @throws Error - if `position` is not Integer
+   * @throws Error - if `position` is not in range(0, 8)
    * @description Insert `symbol` in `this.state` at the `position` in case of success return true, otherwise false
    * @returns {Boolean} Boolean
    * @example const isInserted = this.insert('x', 4); 
    */
   insert(symbol, position) {
-    if(![0,1,2,3,4,5,6,7,8].includes(position)) {
-      throw new Error(`Cell index ${position} does not exist!`)
-    }
     if(!['x','o'].includes(symbol)) {
-      throw new Error('The symbol can only be x or o!')
+      throw new Error(`Board.insert(symbol, position) symbol can only be x or o!`)
+    }
+    if(!Number.isInteger(position)) {
+      throw new Error(`Board.insert(symbol, position) position must be Integer`)
+    }
+    if(![0,1,2,3,4,5,6,7,8].includes(position)) {
+      throw new Error(`Board.insert(symbol, position) position must be in range(0, 8)`)
     }
     if(this.state[position]) {
       return false;
@@ -87,6 +107,7 @@ class Board {
    */
   isTerminal() {
     if(this.isEmpty()) return false;
+    //Checking Horisontal Wins
     if(this.state[0] === this.state[1] && this.state[0] === this.state[2] && this.state[0]) {
       return {'winner': this.state[0], 'direction': 'H', 'row': 1};
     }
@@ -116,6 +137,7 @@ class Board {
       return {'winner': this.state[2], 'direction': 'D', 'diagonal': 'counter'};
     }
 
+    // Draw
     if(this.isFull()) {
       return {'winner': 'draw'};
     }
@@ -133,25 +155,51 @@ class minMax {
  * @classdesc This class represent logic of computer thinking, otherwise determine the best move for computer, 
  * [`more info`]{@link https://alialaa.com/blog/tic-tac-toe-js-minimax}
  * @constructor 
+ * @param {Integer} maxDepth - max depth
+ * @throws Error - if `maxDepth` is not Integer
  */
   constructor(maxDepth = -1) {
+    if (!Number.isInteger(maxDepth)) {
+      throw Error(`minMax.constructor(maxDepth) maxDepth must be Integer`);
+    }
     this.maxDepth = maxDepth;
     this.nodesMap = new Map();
   }
   /**
    * @method getBestMove
    * @memberof TicTacToe#minMax#
-   * @param {InstanceType} board 
-   * @param {Boolean} maximizing 
-   * @param {Function} callback 
-   * @param {Number} depth 
-   * @description This method define the best move for computer with MinMax algorithm 
+   * @param {Instance} board - instance of [`Board`]{@link TicTacToe#Board}
+   * @param {Boolean} maximizing - if value is `true` will calculate best move for `x`, otherwise for `o`
+   * @param {Function} callback - callback function
+   * @param {Number} depth - depth of calculation
+   * @description This method define the best move for computer with MinMax algorithm, if best move needed for `x`, `maximazing` must be `true`, for `o` `false`. Returns position of cell
+   * @throws Error - if `board` is not instance of [`Board`]{@link TicTacToe#Board}
+   * @throws Error - if `maximazing` is not Boolean
+   * @throws Error - if `callback` is not Function
+   * @throws Error - if `depth` is not Integer
    * @returns {Number} Number
    * @example 
    * const b = new Board();
-   * const best = this.getBestMove(b);
+   * b.state = [
+   *  'x', 'o', 'x',
+   *  '',  'o',  '',
+   *  '',  '',  'x',
+   * ]
+   * const best = this.getBestMove(b, false); // best move for 'o' is to put 'o' on 7 cell 
    */
   getBestMove(board, maximizing = true, callback = () => {}, depth = 0) {
+    if (!(board instanceof Board)) {
+      throw Error(`minMax.getBestMove(board, maximizing = true, callback = () => {}, depth = 0) board must be instance of Board`);
+    }
+    if (typeof maximizing !== 'boolean') {
+      throw Error(`minMax.getBestMove(board, maximizing = true, callback = () => {}, depth = 0) maximizing must be Boolean`);
+    }
+    if (!(callback instanceof Function)) {
+      throw Error(`minMax.getBestMove(board, maximizing = true, callback = () => {}, depth = 0) callback must be Function`);
+    }
+    if (!Number.isInteger(depth)) {
+      throw Error(`minMax.getBestMove(board, maximizing = true, callback = () => {}, depth = 0) depth must be Integer`);
+    }
     if(depth == 0) this.nodesMap.clear();
   
     if(board.isTerminal() || depth === this.maxDepth ) {
