@@ -1,4 +1,4 @@
-import Game from '../src/model/RockPaperScissors/game'
+import Game from '../../src/model/RockPaperScissors/game'
 
 describe('creating instance of Game', () => {
   const g = new Game(); 
