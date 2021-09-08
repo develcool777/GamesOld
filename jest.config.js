@@ -12,7 +12,14 @@ const config = {
     name: 'MODEL',
     color: 'blue',
   },
-  modulePathIgnorePatterns: ["<rootDir>/rockScissorsPaper.test.js"],
+  silent: true,
+  modulePathIgnorePatterns: [
+    // '<rootDir>/RockPaperScissors', 
+    // '<rootDir>/timer.test.js',
+    // '<rootDir>/ticTacToe/game.test.js',
+    // '<rootDir>/ticTacToe/board.test.js',
+    // '<rootDir>/ticTacToe/minMax.test.js'
+  ],
 };
 
 module.exports = config;
