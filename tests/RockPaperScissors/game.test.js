@@ -47,10 +47,14 @@ describe('testing methods', () => {
   const g = new Game(); 
 
   test('log', () => {
+    const spy = jest.spyOn(console, 'log').mockImplementation();
     expect(g.log).toBeUndefined();
-    console.log = jest.fn();
-    console.log(g.log);
-    expect(console.log.mock.calls[0][0]).toEqual({"compScore": 0, "history": [], "userScore": 0});
+    expect(console.log.mock.calls[0][0]).toEqual({ 
+      compScore: 0,
+      history: [],
+      userScore: 0
+    });
+    spy.mockRestore();
   });
 
   test('withoutDrawMode()', () => {
