@@ -14,7 +14,7 @@
     "production": "vue-cli-service serve --mode production",
     "jsdoc": "jsdoc -c jsdoc.json",
     "show:documentation": "open docs/index.html",
-    "unit:tests": "jest --config ./jest.config.js --coverage",
+    "unit:tests": "jest --config ./jest.config.js",
     "show:coverage": "open tests/coverage/lcov-report/index.html"
   },
   "main": "background.js",

@@ -12,14 +12,20 @@ const config = {
     name: 'MODEL',
     color: 'blue',
   },
-  silent: true,
-  modulePathIgnorePatterns: [
-    // '<rootDir>/RockPaperScissors', 
+  silent: false,
+  collectCoverage: true,
+  coverageDirectory: "<rootDir>/coverage/",
+  coverageReporters: ["teamcity", "lcov", "text"],
+  modulePathIgnorePatterns: [ 
     // '<rootDir>/timer.test.js',
-    // '<rootDir>/ticTacToe/game.test.js',
-    // '<rootDir>/ticTacToe/board.test.js',
-    // '<rootDir>/ticTacToe/minMax.test.js'
+    // '<rootDir>/RockPaperScissors/game.test.js',
+    // '<rootDir>/TicTacToe/game.test.js',
+    // '<rootDir>/TicTacToe/board.test.js',
+    // '<rootDir>/TicTacToe/minMax.test.js',
+    // '<rootDir>/Memoji/field.test.js',
+    // '<rootDir>/Memoji/game.test.js'
   ],
+  detectOpenHandles: true
 };
 
 module.exports = config;
