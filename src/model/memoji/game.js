@@ -30,7 +30,7 @@ export default class Game {
     if (!arrayOfCardsName.every(item => typeof item === 'string')) {
       throw Error(`Game.constructor every element in arrayOfCardsName must be typeof string`);
     }
-    if (!Number.isInteger(time) && time < 1) {
+    if (!Number.isInteger(time) || time < 1) {
       throw Error(`Game.constructor time must Integer and greater than 0`);
     }
     let cardsData = [];
@@ -47,7 +47,28 @@ export default class Game {
         get: () => cardsData,
         set: (arr) => {
           if (!Array.isArray(arr)) {
-            throw Error(`Game.cardsData.set(arr) arr must be String`);
+            throw Error(`Game.cardsData.set(arr) arr must be Array`);
+          }
+          if (!arr.every(obj => typeof obj === 'object' && obj !== null)) {
+            throw Error(`Game.cardsData.set(arr) every element of arr must be Object`);
+          }
+          if (!arr.every(obj => ['id', 'name', 'class', 'isMatch', 'isFlipped'].every(prop => Object.prototype.hasOwnProperty.call(obj, prop)))) {
+            throw Error(`Game.cardsData.set(arr) every element of arr must be Object with keys: 'id', 'name', 'class', 'isMatch', 'isFlipped'`);
+          }
+          if (!arr.every(obj => Number.isInteger(obj.id) && obj.id >= 0)) {
+            throw Error(`Game.cardsData.set(arr) every Object of arr must have Integer value and be positive, on key 'id'`);
+          }
+          if (!arr.every(obj => typeof obj.name === 'string')) {
+            throw Error(`Game.cardsData.set(arr) every Object of arr must have String value on key 'name'`);
+          }
+          if (!arr.every(obj => typeof obj.class === 'string')) {
+            throw Error(`Game.cardsData.set(arr) every Object of arr must have String value on key 'class'`);
+          }
+          if (!arr.every(obj => obj.isMatch === null || typeof obj.isMatch === 'boolean')) {
+            throw Error(`Game.cardsData.set(arr) every Object of arr must have null or Boolean value on key 'isMatch'`);
+          }
+          if (!arr.every(obj => obj.isFlipped === null || typeof obj.isFlipped === 'boolean')) {
+            throw Error(`Game.cardsData.set(arr) every Object of arr must have null or Boolean value on key 'isFlipped'`);
           }
           cardsData = arr;
         }
@@ -70,8 +91,8 @@ export default class Game {
       resultTime: {
         get: () => resultTime,
         set: (value) => {
-          if (typeof value !== 'number') {
-            throw Error(`Game.resultTime.set(value) value must be Number`);
+          if (!Number.isInteger(value) || value < 0) {
+            throw Error(`Game.resultTime.set(value) value must be positive Integer`);
           }
           resultTime = value;
         }
@@ -139,12 +160,16 @@ export default class Game {
    * @method shuffleCards
    * @memberof Memoji#Game#
    * @param {Array} arr Array of cards
-   * @description Shuffles array 
-   * @returns {undefined} undefined
-   * @example this.shuffleCards(array)
+   * @description Returns shuffled array
+   * @throws Error - if `arr` is not Array 
+   * @returns {Array} Array
+   * @example const shuffled = this.shuffleCards(array);
    */
   shuffleCards(arr) {
-    arr.sort(() => 0.5 - Math.random());
+    if (!Array.isArray(arr)) {
+      throw Error(`Game.shuffleCards(arr) arr must be Array`);
+    }
+    return arr.sort(() => 0.5 - Math.random());
   }
 
   /**
@@ -190,13 +215,24 @@ export default class Game {
    * @method clickOnCard
    * @memberof Memoji#Game#
    * @param {Object} card card that was clicked
-   * @description When card was clicked sets `card.isFlipped` to `true` and adds to `compare`
-   * @returns {undefined} undefined
+   * @description When card was clicked sets `card.isFlipped` to `true` and adds to `compare`,
+   * returns `true` in case of success, otherwise `false`
+   * @throws Error - if `card` is not Object
+   * @throws Error - if `card` is not Object with keys: 'id', 'name', 'class', 'isMatch', 'isFlipped'
+   * @returns {Boolean} Boolean
    * @example this.clickOnCard(card)
    */
   clickOnCard(card) {
+    if (typeof card !== 'object' || card === null || Array.isArray(card)) {
+      throw Error(`Game.clickOnCard(card) card must be Object`);
+    }
+    if (!['id', 'name', 'class', 'isMatch', 'isFlipped'].every(prop => Object.prototype.hasOwnProperty.call(card, prop))) {
+      throw Error(`Game.clickOnCard(card) card must be Object with keys: 'id', 'name', 'class', 'isMatch', 'isFlipped'`);
+    }  
+    if (this.compare.length === 2) { return false }
     this.cardsData[card.id].isFlipped = true;
     this.compare.push(card);
+    return true;
   }
 
   /**
@@ -204,10 +240,18 @@ export default class Game {
    * @memberof Memoji#Game#
    * @param {Object} card card that was clicked
    * @description Sets `card.isFlipped` and `card.isMatch` to `null`
+   * @throws Error - if `card` is not Object
+   * @throws Error - if `card` is not Object with keys: 'id', 'name', 'class', 'isMatch', 'isFlipped'
    * @returns {undefined} undefined
    * @example this.reset(card)
    */
   reset(card) {
+    if (typeof card !== 'object' || card === null || Array.isArray(card)) {
+      throw Error(`Game.reset(card) card must be Object`);
+    }
+    if (!['id', 'name', 'class', 'isMatch', 'isFlipped'].every(prop => Object.prototype.hasOwnProperty.call(card, prop))) {
+      throw Error(`Game.reset(card) card must be Object with keys: 'id', 'name', 'class', 'isMatch', 'isFlipped'`);
+    }
     this.cardsData[card.id].isFlipped = null;
     this.cardsData[card.id].isMatch = null;
   }
@@ -250,12 +294,16 @@ export default class Game {
    * @memberof Memoji#Game#
    * @param {Boolean} bool
    * @description Hides or shows unmatched cards
+   * @throws Error - if `bool` is not Boolean
    * @returns {undefined} undefined
    * @example 
    * this.showOrHideHint(true) // show all unmatched cards
    * this.showOrHideHint(false) // hide all unmatched cards
    */
   showOrHideHint(bool) {
+    if (typeof bool !== 'boolean') {
+      throw Error(`Game.showOrHideHint(bool) bool must be Boolean`);
+    }
     this.cardsData = this.cardsData.map(card => {
       const value = bool ? true : card.isMatch ? true : null;
       card.isFlipped = value;
@@ -291,10 +339,18 @@ export default class Game {
    * @method gameFinished
    * @memberof Memoji#Game#
    * @description Finishes the game 
+   * @throws Error - if `str` is not String
+   * @throws Error - if `str` is 'Won' or 'Lost'
    * @returns {undefined} undefined
    * @example this.gameFinished()
    */
   gameFinished(str) {
+    if (typeof str !== 'string') {
+      throw Error(`Game.gameFinished(str) str must be String`);
+    }
+    if (!['Won', 'Lost'].includes(str)) {
+      throw Error(`Game.gameFinished(str) str must be 'Won' or 'Lost'`);
+    }
     this.resultTime = this.timer.amountOfTime();
     this.result = str;
     this.timer.stop();
