@@ -177,7 +177,7 @@ export default class Field {
    *  [1,  *,   '#',   1].
    *  [1, '$',  '#',   1]
    * ]
-   * const field = this.generateFieldWith(gameField, true, true) // will generate field with hint path and players path
+   * const field = this.render(gameField, true, true) // will generate field with hint path and players path
    */
   render(gameField, isPath, isHint) {
     if (!Array.isArray(gameField)) {
@@ -249,17 +249,6 @@ export default class Field {
     const end = curentLevel.endPosition;
     const time = curentLevel.time;
     return [fieldCopy, start, end, time, winPath];
-  }
-
-  /**
-   * @method time
-   * @memberof Maze#Field#
-   * @description Returns time 
-   * @returns {Number} Number
-   * @example const time = this.time()
-   */
-  time() {
-    return this.data.find(obj => obj.level === this.level).time;
   }
 
   /**

@@ -23,7 +23,10 @@ const config = {
     // '<rootDir>/TicTacToe/board.test.js',
     // '<rootDir>/TicTacToe/minMax.test.js',
     // '<rootDir>/Memoji/field.test.js',
-    // '<rootDir>/Memoji/game.test.js'
+    // '<rootDir>/Memoji/game.test.js',
+    // '<rootDir>/Maze/field.test.js',
+    // '<rootDir>/Maze/player.test.js',
+    // '<rootDir>/Maze/game.test.js',
   ],
   detectOpenHandles: true
 };
