@@ -8,6 +8,7 @@ export default class Field {
    * @property {Array} data this is `data` 
    * @property {Number} level by default it's value is 1
    * @throws Error - if `data` is not Array
+   * @throws Error - if every element of `data` is not object
    * @throws Error - if every element of `data` is not object with keys: 'time', 'level', 'cards'
    * @throws Error - if every element of `data` the value of keys('time', 'level') are not Integer
    * @throws Error - if every element of `data` the value of key('cards') is not Array
@@ -17,6 +18,9 @@ export default class Field {
   constructor(data) {
     if (!Array.isArray(data)) {
       throw Error(`Field.constructor data must be Array`);
+    }
+    if (!data.every(obj => typeof obj === 'object' && obj !== null && !Array.isArray(obj))) {
+      throw Error(`Field.constructor every element of data must be Object`);
     }
     if (!data.every(obj => ['time', 'level', 'cards'].every(prop => Object.prototype.hasOwnProperty.call(obj, prop)))) {
       throw Error(`Field.constructor every element of data must be Object with props: 'time', 'level', 'cards'`);
