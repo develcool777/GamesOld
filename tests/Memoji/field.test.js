@@ -29,7 +29,8 @@ describe('creating instance of Field', () => {
   test('instance of class Field', () => {
     expect(new Field(DATA)).toBeInstanceOf(Field);
     expect(() => new Field('very big data')).toThrowError(new Error(`Field.constructor data must be Array`));
-    expect(() => new Field(['element', 24356, {}])).toThrowError(new Error(`Field.constructor every element of data must be Object with props: 'time', 'level', 'cards'`));
+    expect(() => new Field([null, 24356, {}])).toThrowError(new Error(`Field.constructor every element of data must be Object`));
+    expect(() => new Field([{h: 'f'}, {id: 4}, {}])).toThrowError(new Error(`Field.constructor every element of data must be Object with props: 'time', 'level', 'cards'`));
     expect(() => new Field([{time: 'dsfd', cards: {}, level: ['1']}])).toThrowError(new Error(`Field.constructor every time and level must be Integer and greater than 0`));
     expect(() => new Field([{time: 10, cards: {card: '1'}, level: 1}])).toThrowError(new Error(`Field.constructor every cards must be Array`));
     expect(() => new Field([{time: 10, cards: [{}, 23465, 23.456, 'string'], level: 1}])).toThrowError(new Error(`Field.constructor every cards item must be String`));

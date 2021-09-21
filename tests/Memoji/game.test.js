@@ -1,5 +1,4 @@
-import { expect } from '@jest/globals';
-import e from 'express';
+import { expect, jest } from '@jest/globals';
 import Game from '../../src/model/memoji/game';
 import Timer from '../../src/model/timer';
 
