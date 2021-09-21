@@ -338,6 +338,7 @@ export default class Game {
   /**
    * @method gameFinished
    * @memberof Memoji#Game#
+   * @param {String} str - result of game('Won' or 'Lost')
    * @description Finishes the game 
    * @throws Error - if `str` is not String
    * @throws Error - if `str` is 'Won' or 'Lost'

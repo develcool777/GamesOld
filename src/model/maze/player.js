@@ -9,22 +9,22 @@ export default class Player {
    * @property {Number} y this is `y`
    * @constructor
    * @classdesc This class represents player move logic 
-   * @throws Error - if `x` is not Integer
-   * @throws Error - if `y` is not Integer
+   * @throws Error - if `x` is not positive Integer
+   * @throws Error - if `y` is not positive Integer
    */
   constructor(x, y) {
-    if (typeof x !== 'number' || !Number.isInteger(x)) {
-      throw Error(`Player.constructor x must be Integer`);
+    if (!Number.isInteger(x) || x < 0) {
+      throw Error(`Player.constructor x must be positive Integer`);
     }
-    if (typeof y !== 'number' || !Number.isInteger(y)) {
-      throw Error(`Player.constructor y must be Integer`);
+    if (!Number.isInteger(y) || y < 0) {
+      throw Error(`Player.constructor y must be positive Integer`);
     }
     Object.defineProperties(this, {
       x: {
         get: () => x,
         set: (value) => {
-          if (typeof value !== 'number' || !Number.isInteger(value)) {
-            throw Error(`x.set() value must be Integer`);
+          if (!Number.isInteger(value) || value < 0) {
+            throw Error(`Player.x.set() value must be positive Integer`);
           }
           x = value;
         }
@@ -32,8 +32,8 @@ export default class Player {
       y: {
         get: () => y,
         set: (value) => {
-          if (typeof value !== 'number' || !Number.isInteger(value)) {
-            throw Error(`y.set() value must be Integer`);
+          if (!Number.isInteger(value) || value < 0) {
+            throw Error(`Player.y.set() value must be positive Integer`);
           }
           y = value;
         }

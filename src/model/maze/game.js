@@ -22,33 +22,49 @@ export default class Game {
    * @property {Number} resultTime - stores time in milliseconds that was need to complete the game
    * @property {String} result - stores result of the game('Won' or 'Lost') 
    * @throws Error - if `field` is not Array
-   * @throws Error - if every element of `field` is not Array
+   * @throws Error - if `field` is not 2D Array
+   * @throws Error - if every element of `field` is not 1 or 0 or '^@' or '#' or '$'
+   * @throws Error - if `startPosition` is not Object 
    * @throws Error - if `startPosition` is not Object with keys: 'x', 'y'
-   * @throws Error - if values of `startPosition.x` and `startPosition.y` are not Integers and lower than 0
+   * @throws Error - if values of `startPosition.x` and `startPosition.y` are not Integers or lower than 0
+   * @throws Error - if `winPosition` is not Object 
    * @throws Error - if `winPosition` is not Object with keys: 'x', 'y'
-   * @throws Error - if values of `winPosition.x` and `winPosition.y` are not Integers and lower than 0
-   * @throws Error - if `time` is not Integer and lower than 0
+   * @throws Error - if values of `winPosition.x` and `winPosition.y` are not Integers or lower than 0
+   * @throws Error - if `time` is not Integer or lower than 0
    */
   constructor(field, startPosition, winPosition, time) {
+    // field
     if (!Array.isArray(field)) {
       throw Error(`Game.constructor field must be Array`);
     }
     if (!field.every(arr => Array.isArray(arr))) {
       throw Error(`Game.constructor field must be 2D Array`);
     }
-    if (!Object.keys(startPosition).join('') === 'xy' ) {
+    if (!field.every(arr => arr.every(item => [1, 0, '^@', '#', '$'].includes(item)))) {
+      throw Error(`Game.constructor field must be 2D Array where every element of it must be: 1 or 0 or '^@' or '#' or '$'`);
+    }
+    // startPosition
+    if (typeof startPosition !== 'object' || startPosition === null || Array.isArray(startPosition)) {
+      throw Error(`Game.constructor startPosition must be Object`);
+    }
+    if (!['x', 'y'].every(prop => Object.prototype.hasOwnProperty.call(startPosition, prop))) {
       throw Error(`Game.constructor startPosition must contain 'x' and 'y'`);
     }
     if (!Object.values(startPosition).every(item => Number.isInteger(item) && item >= 0)) {
       throw Error(`Game.constructor startPosition.x and startPosition.y must be positive Integers`);
     }
-    if (!Object.keys(winPosition).join('') === 'xy' ) {
+    // winPosition
+    if (typeof winPosition !== 'object' || winPosition === null || Array.isArray(winPosition)) {
+      throw Error(`Game.constructor winPosition must be Object`);
+    }
+    if (!['x', 'y'].every(prop => Object.prototype.hasOwnProperty.call(winPosition, prop))) {
       throw Error(`Game.constructor winPosition must contain 'x' and 'y'`);
     }
     if (!Object.values(winPosition).every(item => Number.isInteger(item) && item >= 0)) {
       throw Error(`Game.constructor winPosition.x and winPosition.y must be positive Integers`);
     }
-    if (!Number.isInteger(time) && time < 0) {
+    // time
+    if (!Number.isInteger(time) || time < 0) {
       throw Error(`Game.constructor time must be Integer and greater than 0`);
     }
     const player = new Player(startPosition.x, startPosition.y);
@@ -61,6 +77,15 @@ export default class Game {
       field: {
         get: () => field,
         set: (matrix) => {
+          if (!Array.isArray(matrix)) {
+            throw Error(`Game.field.set(matrix) matrix must be Array`);
+          }
+          if (!matrix.every(arr => Array.isArray(arr))) {
+            throw Error(`Game.field.set(matrix) matrix must be 2D Array`);
+          }
+          if (!matrix.every(arr => arr.every(item => [1, 0, '^@', '#', '$'].includes(item)))) {
+            throw Error(`Game.field.set(matrix) matrix must be 2D Array where every element of it must be: 1 or 0 or '^@' or '#' or '$'`);
+          }
           field = matrix;
         }
       },
@@ -70,6 +95,9 @@ export default class Game {
       history: {
         get: () => history,
         set: (arr) => {
+          if (!Array.isArray(arr)) {
+            throw Error(`Game.history.set(arr) arr must be Array`);
+          }
           history = arr;
         }
       },
@@ -97,8 +125,8 @@ export default class Game {
       resultTime: {
         get: () => resultTime,
         set: (value) => {
-          if (typeof value !== 'number') {
-            throw Error(`Game.resultTime.set(value) value must be Number`);
+          if (!Number.isInteger(value) || value < 0) {
+            throw Error(`Game.resultTime.set(value) value must be positive Integer`);
           }
           resultTime = value;
         }
@@ -140,21 +168,6 @@ export default class Game {
   }
 
   /**
-   * @method printField
-   * @memberof Maze#Game#
-   * @description Shows in console `this.field`
-   * @returns {undefined} undefined
-   * @example this.printField()
-   */
-  printField() {
-    console.log(`[`);
-    this.field.forEach(arr => {
-      console.log(' ', arr);
-    })
-    console.log(`]`);
-  }
-
-  /**
    * @method checkWin
    * @memberof Maze#Game#
    * @param {Number} x - x coordinate
@@ -166,11 +179,11 @@ export default class Game {
    * @example const isWin = this.checkWin(x, y);
    */
   checkWin(x, y) {
-    if (typeof x !== 'number' || !Number.isInteger(x)) {
-      throw Error(`Game.cheakWin x must be Integer`);
+    if (!Number.isInteger(x)) {
+      throw Error(`Game.cheakWin(x, y) x must be Integer`);
     }
-    if (typeof y !== 'number' || !Number.isInteger(y)) {
-      throw Error(`Game.cheakWin y must be Integer`);
+    if (!Number.isInteger(y)) {
+      throw Error(`Game.cheakWin(x, y) y must be Integer`);
     }
     if (x === this.winPos.x && y === this.winPos.y) {
       return true;
@@ -194,53 +207,41 @@ export default class Game {
    */
   moves(move) {
     if (typeof move !== 'string') {
-      throw Error(`Game.moves() move must be String`);
+      throw Error(`Game.moves(move) move must be String`);
     }
     if (!['W', 'A', 'S', 'D'].includes(move)) {
-      throw Error(`Game.moves() move must be 'W' or 'A' or 'S' or 'D'`);
+      throw Error(`Game.moves(move) move must be 'W' or 'A' or 'S' or 'D'`);
     }
     const [x, y] = this.player.getPosition();
     switch (move) {
       case 'W':
         if (x > 0 && this.field[x-1][y] !== 1) {
           this.player.moveUp();
-        } else {
-          console.log(`no move up`);
         }
         break;
 
       case 'S':
         if (x < this.field.length - 1 && this.field[x+1][y] !== 1) {
           this.player.moveDown();
-        } else {
-          console.log(`no move down`);
         }
         break;
 
       case 'A': 
         if (y > 0 && this.field[x][y-1] !== 1) {
           this.player.moveLeft();
-        } else {
-          console.log(`no move left`);
         }
         break;
 
       case 'D':
         if (y < this.field[0].length - 1 && this.field[x][y+1] !== 1) {
           this.player.moveRight();
-        } else {
-          console.log(`no move right`);
         }
-        break;
-
-      default:
         break;
     }
 
     this.history.push(move);
     const [xC, yC] = this.player.getPosition();
     this.draw(x, y, xC, yC);
-    this.checkWin(xC, yC);
   }
 
   /**
@@ -251,17 +252,55 @@ export default class Game {
    * @param {Number} xCurrent current `x` coordinate
    * @param {Number} yCurrent current `y` coordinate
    * @description Changes players position on coordinates(`xCurrent`, `yCurrent`) 
-   * and marks as a player path(coordinates(`xPrev`, `yPrev`)) 
-   * @returns {undefined} undefined
+   * and marks as a player path(coordinates(`xPrev`, `yPrev`)), returns `true` in case of success, otherwise `false`
+   * @throws Error - if `xPrev` is not positive Integer
+   * @throws Error - if `yPrev` is not positive Integer
+   * @throws Error - if `xPrev` and `yPrev` point to 1 or undefined on field
+   * @throws Error - if `xCurrent` is not positive Integer
+   * @throws Error - if `yCurrent` is not positive Integer
+   * @throws Error - if `xCurrent` and `yCurrent` point to 1 or undefined on field
+   * @returns {Boolean} Boolean
    * @example this.draw(0, 0, 0, 1)
    */
   draw(xPrev, yPrev, xCurrent, yCurrent) {
-    if (xCurrent === undefined && yCurrent === undefined) {
-      this.field[xPrev][yPrev] = '@';
-    } else {
-      this.field[xPrev][yPrev] = '*';
-      this.field[xCurrent][yCurrent] = '@'
+    if (!Number.isInteger(xPrev) || xPrev < 0) {
+      throw Error(`Game.draw(xPrev, yPrev, xCurrent, yCurrent) xPrev must be positive Integer`);
     }
+    if (!Number.isInteger(yPrev) || yPrev < 0) {
+      throw Error(`Game.draw(xPrev, yPrev, xCurrent, yCurrent) yPrev must be positive Integer`);
+    }
+    if (this.field[xPrev][yPrev] === 1 || this.field[xPrev][yPrev] === undefined) {
+      throw Error(`Game.draw(xPrev, yPrev, xCurrent, yCurrent) xPrev, yPrev must not point to 1 or undefined on field`);
+    }
+    if (!Number.isInteger(xCurrent) || xCurrent < 0) {
+      throw Error(`Game.draw(xPrev, yPrev, xCurrent, yCurrent) xCurrent must be positive Integer`);
+    }
+    if (!Number.isInteger(yCurrent) || yCurrent < 0) {
+      throw Error(`Game.draw(xPrev, yPrev, xCurrent, yCurrent) yCurrent must be positive Integer`);
+    }
+    if (this.field[xCurrent][yCurrent] === 1 || this.field[xCurrent][yCurrent] === undefined) {
+      throw Error(`Game.draw(xPrev, yPrev, xCurrent, yCurrent) xCurrent, yCurrent must not point to 1 or undefined on field`);
+    }
+    if (xPrev === xCurrent && yPrev === yCurrent) {
+      return false;
+    }
+    if (xPrev === this.startPos.x && yPrev === this.startPos.y) {
+      this.field[xPrev][yPrev] = '^';
+      this.field[xCurrent][yCurrent] = ['#', '#*'].includes(this.field[xCurrent][yCurrent]) ? '#@' : '@';
+    }
+    else if (xCurrent === this.startPos.x && yCurrent === this.startPos.y) {
+      this.field[xPrev][yPrev] = ['#', '#@'].includes(this.field[xPrev][yPrev]) ? '#*' : '*';
+      this.field[xCurrent][yCurrent] = '^@';
+    }
+    else if (xCurrent === this.winPos.x && yCurrent === this.winPos.y) {
+      this.field[xPrev][yPrev] = ['#', '#@'].includes(this.field[xPrev][yPrev]) ? '#*' : '*';
+      this.field[xCurrent][yCurrent] = '$@';
+    }
+    else {
+      this.field[xPrev][yPrev] = ['#', '#@'].includes(this.field[xPrev][yPrev]) ? '#*' : '*';
+      this.field[xCurrent][yCurrent] = ['#', '#*'].includes(this.field[xCurrent][yCurrent]) ? '#@' : '@'
+    }
+    return true;
   }
 
   /**
@@ -274,8 +313,17 @@ export default class Game {
   clean() {
     this.field = this.field.map(arr => {
       return arr.map(item => {
+        if (item === '^') {
+          item = '^@';
+        }
+        if (item === '$@') {
+          item = '$';
+        }
         if (item === '*' || item === '@') {
           item = 0;
+        }
+        if (item === '#*' || item === '#@') {
+          item = '#';
         }
         return item;
       })
@@ -288,41 +336,7 @@ export default class Game {
     this.timer.reset();
     this.gameStatus = '';
   }
-
-  /**
-   * @method generateWinPath
-   * @memberof Maze#Game#
-   * @description Returns array of object(coordinates {x, y}),
-   * this is path that show how to get from start point to finish 
-   * @returns {Array} Array
-   * @example const winPath = this.generateWinPath()
-   */
-  generateWinPath() {
-    const path = this.field.map((arr, i) => {
-      return arr.map((item, j) => {
-        const obj = {};
-        if (item === '*') {
-          obj.x = i;
-          obj.y = j;
-        }
-        return obj;
-      })
-    })
-    return path.flat().filter(item => item.x !== undefined && item.y !== undefined);
-  }
-
-  /**
-   * @method initGame
-   * @memberof Maze#Game#
-   * @description Initiates game by adding on a field player('@') on start position and adding finish('') on end position 
-   * @returns {undefined} undefined
-   * @example this.initGame()
-   */
-  initGame() {
-    this.field[this.startPos.x][this.startPos.y] = '@';
-    this.field[this.winPos.x][this.winPos.y] = '';
-  }
-
+ 
   /**
    * @method startGame
    * @memberof Maze#Game#
@@ -350,11 +364,20 @@ export default class Game {
   /**
    * @method gameFinished
    * @memberof Maze#Game#
+   * @param {String} str - result of game('Won' or 'Lost')
    * @description Finishes the game 
+   * @throws Error - if `str` is not String
+   * @throws Error - if `str` is 'Won' or 'Lost'
    * @returns {undefined} undefined
    * @example this.gameFinished()
    */
   gameFinished(str) {
+    if (typeof str !== 'string') {
+      throw Error(`Game.gameFinished(str) str must be String`);
+    }
+    if (!['Won', 'Lost'].includes(str)) {
+      throw Error(`Game.gameFinished(str) str must be 'Won' or 'Lost'`);
+    }
     this.resultTime = this.timer.amountOfTime();
     this.result = str;
     this.timer.stop();

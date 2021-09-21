@@ -61,11 +61,11 @@ export default {
     },
 
     showPath: function(newValue) {
-      this.fieldForDraw = this.FIELD.generateFieldWith(this.GAME.field, newValue, this.getShowHint);
+      this.fieldForDraw = this.FIELD.render(this.GAME.field, newValue, this.getShowHint);
     },
 
-    showHint: function(newVal) {
-      this.fieldForDraw = this.FIELD.generateFieldWith(this.GAME.field, this.getShowPath, newVal);
+    showHint: function(newValue) {
+      this.fieldForDraw = this.FIELD.render(this.GAME.field, this.getShowPath, newValue);
     }
   },
   computed: {
@@ -97,7 +97,7 @@ export default {
     await this.init();
   },
   methods: {
-    ...mapActions(['INIT_STATE', 'CHANGE_ARROW', 'SET_DATA']),
+    ...mapActions(['INIT_STATE', 'CHANGE_ARROW', 'SET_DATA', 'CHANGE_SHOW_HINT']),
 
     async init() {
       await this.SET_DATA();
@@ -111,10 +111,8 @@ export default {
         amountOfLevels: this.FIELD.amountOfLevels(),
       }
       this.INIT_STATE(obj);
-      const [field, start, end, time] = this.FIELD.dataForGame();
-      this.GAME = new Game(field, start, end, time);
-      this.fieldForDraw = this.FIELD.generateFieldForDraw(field, start, end);
-      this.GAME.initGame();
+      this.GAME = new Game(...this.FIELD.dataForGame());
+      this.render();
     },
 
     changeLevel(step) {
@@ -122,17 +120,16 @@ export default {
       this.createGame();
     },
 
-    // restartGame() {
-    //   this.cleanField();
-    //   this.startLoop();
-    // },
+    restartGame() {
+      this.cleanField();
+      this.startLoop();
+    },
 
     cleanField() {
       this.stopLoop();
       this.GAME.clean();
-      this.GAME.initGame();
-      const [field, start, end] = this.FIELD.dataForGame();
-      this.fieldForDraw = this.FIELD.generateFieldForDraw(field, start, end);
+      this.CHANGE_SHOW_HINT(false);
+      this.render()
     },
 
     startLoop() {   
@@ -148,29 +145,16 @@ export default {
     arrowPressed(event) {
       const eventChecker = e => typeof e === 'string' ? e : e.key;
       const key = eventChecker(event);
-      const [prevX, prevY, curentX, curentY] = this.keyPressed(key);
-      this.draw(prevX, prevY, curentX, curentY);
-
-      this.isFinish(false, curentX, curentY);
+      this.keyPressed(key);
+      this.render();
+      this.isFinish(false);
     },
 
-    draw(prevX, prevY, curentX, curentY) {
-      const insertClass = (x, y, className) => {
-        const classArr = this.fieldForDraw[x][y].class.split(' ');
-        if (classArr.length > 1) {
-          classArr[1] = className;
-          this.fieldForDraw[x][y].class = classArr.join(' ');
-        } else {
-          this.fieldForDraw[x][y].class += ` ${className}`
-        }
-      }
-      let path = this.getShowPath ? 'path' : '';
-      insertClass(prevX, prevY, path);
-      insertClass(curentX, curentY, 'player');
+    render() {
+      this.fieldForDraw = this.FIELD.render(this.GAME.field, this.getShowPath, this.getShowHint);
     },
 
     keyPressed(key) {
-      const [prevX, prevY] = this.GAME.player.getPosition();
       if (key === 'ArrowUp') {
         this.GAME.moves('W');
         this.CHANGE_ARROW(1)
@@ -189,17 +173,18 @@ export default {
       }
 
       setTimeout(() => { this.CHANGE_ARROW(0) }, 250);
-      const [curentX, curentY] = this.GAME.player.getPosition();
-      return [prevX, prevY, curentX, curentY];
     },
 
-    isFinish(lost=false, x, y) {
+    isFinish(lost=false) {
       if (lost) { 
         this.GAME.gameFinished('Lost');
       }
+
+      const [x, y] = this.GAME.player.getPosition();
       if (!lost && this.GAME.checkWin(x, y)) {
         this.GAME.gameFinished('Won');
       }
+
       if (this.GAME.gameStatus === 'finish') {
         window.removeEventListener('keyup', this.arrowPressed);
       }
@@ -222,7 +207,11 @@ export default {
   @include Size();
   background: $black;
 }
-.winPosition {
+.startPosition {
+  @include Size();
+  background: plum;
+}
+.endPosition {
   @include Size();
   background: $win;
 }
