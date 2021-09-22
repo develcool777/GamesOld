@@ -19,6 +19,7 @@
             <div v-if="cell.isAvailableFor === 'kill'" class="chess__downRight"></div>
             <div v-if="cell.isAvailableFor === 'kill'" class="chess__downLeft"></div>
             <div v-if="cell.isAvailableFor === 'castle'" class="chess__castle"></div>
+            <div v-if="cell.isAvailableFor === 'enPassant'" class="chess__enPassant"></div>
             <Figure 
               :figure="createFigure(cell)"
               :cursorStyle="showCursorPointer(cell)"
@@ -148,11 +149,17 @@ export default {
     },
 
     dragEnter(event, cell) {
-      if (['move', 'castle'].includes(cell.isAvailableFor)) {
+      if ('move' === cell.isAvailableFor) {
         event.target.style.background = 'darkgreen';
+      }
+      if ('castle' === cell.isAvailableFor) {
+        event.target.style.background = 'darkslateblue';
       }
       if ('kill' === cell.isAvailableFor) {
         event.target.style.background = 'red';
+      }
+      if ('enPassant' === cell.isAvailableFor) {
+        event.target.style.background = 'lightpink';
       }
     },
 
@@ -243,13 +250,16 @@ export default {
   &__row {
     @include Flex(center);
   }
-  &__cell, &__move, &__castle {
+
+  &__cell, &__move, &__castle, &__enPassant {
     @include Size(78, 78);
     position: relative;
   }
+
   &__field {
     position: relative;
   }
+
   &__borderLeft, &__borderRight {
     position: absolute;
     top: -30px;
@@ -258,12 +268,15 @@ export default {
     width: 30px;
     background: darkred;
   }
+
   &__borderLeft {
     left: -30px;
   }
+
   &__borderRight {
     right: -30px;
   }
+
   &__borderUp, &__borderDown {
     position: absolute;
     left: -30px;
@@ -273,12 +286,15 @@ export default {
     width: calc(78px * 8 + 60px);
     background: darkred;
   }
+
   &__borderUp {
     top: -30px;
   }
+
   &__borderDown {
     bottom: -30px;
   }
+
   &__letter, &__number {
     display: flex;
     justify-content: center;
@@ -286,12 +302,15 @@ export default {
     color: white;
     font-size: rem(20);
   }
+
   &__letter {
     width: rem(78);
   }
+
   &__number {
     height: rem(78);
   }
+
   &__mask {
     position: absolute;
     top: 0;
@@ -301,7 +320,8 @@ export default {
     z-index: 5;
     background-color: rgba(0, 0, 0, 0.6);
   }
-  &__move::after, &__castle::after {
+
+  &__move::after, &__castle::after, &__enPassant::after {
     position: absolute;
     content: "";
     z-index: 1;
@@ -314,12 +334,14 @@ export default {
     background: darkgreen;
     transition-duration: .5s;
   }
-  &__move:hover::after, &__castle:hover::after {
+
+  &__move:hover::after, &__castle:hover::after, &__enPassant:hover:after  {
     cursor: pointer;
     width: 100%;
     height: 100%;
     border-radius: 0;
   }
+
   &__upRight, &__upLeft, &__downLeft, &__downRight {
     position: absolute;
     width: 0;
@@ -329,54 +351,68 @@ export default {
     border-color: transparent firebrick transparent transparent;
     transition-duration: .5s;
   }
+
   &__upRight {
     right: 0;
   }
+
   &__upLeft {
     top: 0;
     transform: rotate(-90deg);   
   }
+
   &__downRight {
     bottom: 0;
     right: 0;
     transform: rotate(90deg);
   }
+
   &__downLeft {
     bottom: 0;
     transform: rotate(-180deg);
   }
+
   &__cell:hover &__upRight, 
   &__cell:hover &__upLeft, 
   &__cell:hover &__downRight, 
   &__cell:hover  &__downLeft {
     border-width: 0 20px 20px 0;
   }
+
   &__castle::after {
-    width: 30px;
-    height: 30px;
     background: darkslateblue;
   }
+
+  &__enPassant::after {
+    background: lightpink;
+  }
 }
+
 .check {
   background: lightcoral;
 }
+
 .checkMate {
   background: crimson;
 }
+
 .lastMoveOldPosition {
   background: olivedrab;
 }
+
 .lastMoveNewPosition {
   background: rgb(55, 78, 10);
 }
+
 .selected {
   background: lightgreen;
 }
+
 .white {
   background: #EDDAB9;
 }
+
 .black {
   background: #AE8868;
 }
-
 </style>

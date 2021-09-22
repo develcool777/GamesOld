@@ -159,7 +159,7 @@ export default class King extends Figures {
     }
 
     const figure = field[this.position.x][this.position.y + moves[0] * (countEmpty + 1)].figure
-    if (figure.name !== 'Rook') {
+    if (figure?.name !== 'Rook') {
       return false;
     }
 

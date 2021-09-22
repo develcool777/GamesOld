@@ -40,6 +40,7 @@ export default class Game {
     let isCheckmate = false;
     let isStalemate = false;
     let isPawnPromotion = false;
+    let enPassant = null;
     Object.defineProperties(this, {
       field: {
         get: () => field
@@ -139,8 +140,17 @@ export default class Game {
           }
           historyOfMoves = value;
         }
+      },
+      enPassant: {
+        get: () => enPassant,
+        set: (value) => {
+          if (typeof value !== 'object') {
+            throw Error(`Game.enPassant.set(value) value must be Object or null`);
+          }
+          enPassant = value;
+        } 
       }
-    })
+    });
   }
 
   /**
@@ -216,14 +226,16 @@ export default class Game {
 
     const availableMoves = cell.figure.name === 'King' 
       ? Object.entries(this.kingMoves(cell.figure)).slice(0, 3)
-      : Object.entries(this.figureMoves(cell.figure)).slice(0, 3)
+      : cell.figure.name === 'Pawn' 
+        ? Object.entries(this.figureMoves(cell.figure)).slice(0, 4)
+        : Object.entries(this.figureMoves(cell.figure)).slice(0, 3)
     const condition = (moves, move) => moves.some(dmove => dmove.x === move.x && dmove.y === move.y);
 
     availableMoves.forEach((moves) => {
       if (moves[1].length > 0) {
         moves[1].forEach(move => {
           if (this.isCheck && cell.figure.name !== 'King') {
-            this.field.board[move.x][move.y].isAvailableFor = condition(this.defendMoves, move) ? moves[0] : "";
+            this.field.board[move.x][move.y].isAvailableFor = condition(this.defendMoves, move) ? moves[0] : '';
             return;
           }
           this.field.board[move.x][move.y].isAvailableFor = moves[0];   
@@ -275,8 +287,20 @@ export default class Game {
 
     if (cell.isAvailableFor === 'castle') {
       figure.makeCastle([x,y], this.field.board);
-    } else {
+    }
+    else if (cell.isAvailableFor === 'enPassant') {
+      figure.makeEnPassant([x,y], this.enPassant, this.field.board);
+      this.enPassant = null;
+    }
+    else {
       figure.makeMove([x,y], this.field.board);
+      if (this.enPassant !== null) {
+        this.field.board[this.enPassant.x][this.enPassant.y].figure.enPassant = false; // pawn
+        this.enPassant = null;
+      }
+      if (figure.name === 'Pawn' && figure.enPassant) {
+        this.enPassant = figure.position;
+      }
       if (this.isCheck) {
         this.isCheck = false;
       }
@@ -471,7 +495,6 @@ export default class Game {
 
     // case with pawns
     const AllPawnsKills = playerAttack.allAvailableMoves(this.field.board, 'pawn');
-    // const AllPawnsCovers = playerAttack.allAvailableMoves(this.field.board, 'cover');
     AllKingMoves.move = AllKingMoves.move.filter(move => !AllPawnsKills.some(amove => amove.x === move.x && amove.y === move.y));
 
 
@@ -535,8 +558,13 @@ export default class Game {
    * this.figureMoves(rook)
    */
   figureMoves(figure) {
-    if (figure.name === "King") { return }
-    let figureMove = figure.available(this.field.board)
+    if (figure.name === 'King') { return }
+    // enPassant 
+    const enPassant = this.checkEnPassant(figure);
+    let figureMove = figure.available(this.field.board);
+    if (enPassant !== null) {
+      figureMove.enPassant.push(enPassant);
+    }
 
     const playerDefend = figure.color === this.playerWhite.side ? this.playerWhite : this.playerBlack;
     const playerAttack = playerDefend.side === 'white' ? this.playerBlack : this.playerWhite;
@@ -570,9 +598,41 @@ export default class Game {
 
       figureMove.move = figureMove.move.filter(move => wayToKing.some(amove => amove.x === move.x && amove.y === move.y));
       figureMove.kill = figureMove.kill.filter(move => wayToKing.some(amove => amove.x === move.x && amove.y === move.y));
-    })
+
+      // only for pawns
+      if (figureMove?.enPassant?.length === 1) {
+        figureMove.enPassant = [];
+      }
+    });
 
     return figureMove;
   }
 
+  checkEnPassant(pawn) {
+    if (pawn.name !== 'Pawn') { return null }
+    if (this.enPassant === null) { return null }
+    const pos = pawn.position;
+    if (pawn.color === 'white' && pos.x !== 3) { return null }
+    if (pawn.color === 'black' && pos.x !== 4) { return null }
+
+    // left
+    const leftFigure = this.field.board[pos.x][pos.y - 1]?.figure || null;
+    const lpos = leftFigure?.position.x === this.enPassant.x && leftFigure?.position.y === this.enPassant.y;
+    if (leftFigure?.name === 'Pawn' && leftFigure?.color !== pawn.color && lpos) {
+      return {
+        x: pos.x + (pawn.color === 'white' ? -1 : 1),
+        y: pos.y - 1
+      }
+    } 
+    // right
+    const rightFigure = this.field.board[pos.x][pos.y + 1]?.figure || null;
+    const rpos = rightFigure?.position.x === this.enPassant.x && rightFigure?.position.y === this.enPassant.y;
+    if (rightFigure?.name === 'Pawn' && leftFigure?.color !== pawn.color && rpos) {
+      return  {
+        x: pos.x + (pawn.color === 'white' ? -1 : 1),
+        y: pos.y + 1
+      }
+    }
+    return null;
+  }
 }

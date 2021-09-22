@@ -33,6 +33,7 @@ export default class Pawn extends Figures  {
     const name = 'Pawn';
     let firstMove = true;
     let promotion = false;
+    let enPassant = false;
     Object.defineProperties(this, {
       color: {
         get: () => color
@@ -60,7 +61,16 @@ export default class Pawn extends Figures  {
           }
           promotion = value;
         }
-      }
+      },
+      enPassant: {
+        get: () => enPassant,
+        set: (value) => {
+          if (typeof value !== 'boolean') {
+            throw Error(`Pawn.enPassant.set() value must be Boolean`);
+          }
+          enPassant = value;
+        }
+      },
     })
   }
 
@@ -87,9 +97,10 @@ export default class Pawn extends Figures  {
       move: [],
       kill: [],
       check: [],
+      enPassant: [],
       wayToKing: [],
       cover: [],
-      dontAllowKingToMove: []
+      dontAllowKingToMove: [],
     }
     let move = this.color === 'white' ? -1 : 1;
 
@@ -113,8 +124,6 @@ export default class Pawn extends Figures  {
     }, [])
 
     // kills
-
-
     const condition2 = (x, y) => {
       if (this.position.x + x === field.length || this.position.x + x < 0) {
         return null;
@@ -171,8 +180,14 @@ export default class Pawn extends Figures  {
 
     if (this.firstMove) {
       this.firstMove = false;
+      if (this.color === 'white' && this.position.x === 4) {
+        this.enPassant = true;
+      }
+      if (this.color === 'black' && this.position.x === 3) {
+        this.enPassant = true;
+      }
     }
-
+    
     this.checkPromotion(this);
   }
 
@@ -189,5 +204,9 @@ export default class Pawn extends Figures  {
       this.promotion = true;
     }
   }
-
+  
+  makeEnPassant(newPosition, pawnPositon, field) {
+    field[pawnPositon.x][pawnPositon.y].figure = null;
+    super.moveFigure(field, this, ...newPosition);
+  }
 }
