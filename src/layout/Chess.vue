@@ -49,7 +49,7 @@
           <div class="chess__letter" v-for="(num, i) in 8" :key="i">{{ String.fromCharCode(64 + num) }}</div>
         </div>
         
-        <MaterialRatio class="chess__material" :matirealRatio="getMatirealRatio"/>
+        <MaterialRatio class="chess__material" v-if="navigation" :matirealRatio="getMatirealRatio"/>
       </div>
     </div>
     <Instruction class="chess__instruction" />

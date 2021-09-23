@@ -15,7 +15,8 @@
     "jsdoc": "jsdoc -c jsdoc.json",
     "show:documentation": "open docs/index.html",
     "unit:tests": "jest --config ./jest.config.js",
-    "show:coverage": "open tests/coverage/lcov-report/index.html"
+    "show:coverage": "open tests/coverage/lcov-report/index.html",
+    "open:cypress": "node_modules/.bin/cypress open"
   },
   "main": "background.js",
   "dependencies": {
@@ -34,6 +35,7 @@
     "@vue/cli-service": "~4.5.0",
     "@vue/compiler-sfc": "^3.0.0",
     "babel-eslint": "^10.1.0",
+    "cypress": "^8.4.1",
     "docdash": "^1.2.0",
     "electron": "^11.0.0",
     "electron-devtools-installer": "^3.1.0",
