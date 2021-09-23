@@ -8,7 +8,7 @@ export default class Cell {
    * @param {Object} position - position of the cell
    * @constructor
    * @property {Object|Instance} figure - if the cell is empty(no figure) the value is null, otherwise instance of figure
-   * @property {String} isAvailableFor - shows that cell is available for(move, check, kill, promotion)
+   * @property {String} isAvailableFor - shows that cell is available for(move, check, kill, promotion, castle, enPassant)
    * @throws Error - if `color` is not String
    * @throws Error - if `color` is not 'white' or 'black'
    * @throws Error - if `position` is not Object with keys: 'x' and 'y'

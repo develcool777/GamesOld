@@ -14,6 +14,7 @@ export default class Pawn extends Figures  {
    * @property {String} name - name of the figure
    * @property {Boolean} firstMove - if pawn have not made move yet, the value is `true` otherwise `false`
    * @property {Boolean} promotion - value will be `true` if pawn is ready for promotion otherwise `false`
+   * @property {Boolean} enPassant - value will be `true` if pawn is ready if pawn is ready to be captured with enPassant move, otherwise `false`
    * @throws Error - if `color` is not String
    * @throws Error - if `color` is not 'white' or 'black'
    * @throws Error - if `position` is Object with keys: 'x' and 'y'
@@ -84,6 +85,7 @@ export default class Pawn extends Figures  {
       move: [],
       kill: [],
       check: [],
+      enPassant: [],
       wayToKing: [],
       cover: [],
       dontAllowKingToMove: []
@@ -187,7 +189,7 @@ export default class Pawn extends Figures  {
         this.enPassant = true;
       }
     }
-    
+
     this.checkPromotion(this);
   }
 
@@ -205,6 +207,20 @@ export default class Pawn extends Figures  {
     }
   }
   
+  /**
+   * @method makeEnPassant
+   * @memberof Chess#Figures#Pawn#
+   * @param {Array} newPosition - pawns new position 
+   * @param {Object} pawnPositon - pawn that will be captured with en Passant move
+   * @param {Array} field - chess board
+   * @description Makes enPassant move
+   * @returns {undefined} undefined
+   * @example
+   * const f = new Field();
+   * const pawn = {x: 3, y: 0}
+   * const newPosition = {x: 2, y: 0}
+   * this.makeEnPassant(newPosition, pawn, f.board)
+   */
   makeEnPassant(newPosition, pawnPositon, field) {
     field[pawnPositon.x][pawnPositon.y].figure = null;
     super.moveFigure(field, this, ...newPosition);

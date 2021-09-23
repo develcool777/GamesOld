@@ -1,0 +1,124 @@
+<template>
+  <div class="material">
+    <div class="material__lines">
+      <div 
+        class="material__line" 
+        v-for="(num, i) in 7" 
+        :key="i"
+        :style="calcLines(num)"
+      ></div>
+    </div>
+
+    <div class="material__mainLineWrap">
+      <div class="material__mainLine" :style="{height: `${height}px`}"></div>
+      <div class="material__ratio">{{ showRatio() }}</div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'MaterialRatio',
+  props: {
+    matirealRatio: Number
+  },
+  watch: {
+    matirealRatio: function(newVal, OldVal) {
+      if (newVal > OldVal) {
+        this.calcMainLine(newVal, OldVal, 0.05);
+      }
+      if (newVal < OldVal) {
+        this.calcMainLine(newVal, OldVal, -0.05);
+      }
+    }
+  },
+  data() {
+    return {
+      height: 0
+    }
+  },
+  created() {
+    this.calcMainLine(0, 0, 0);
+  },
+  methods: {
+    calcLines(i) {
+      return {top: `${i * 78 + 30}px`}
+    },
+
+    calcMainLine(materialRatioNew, materialRatioOld, step) {
+      const middle = 342;
+      if (materialRatioNew === materialRatioOld && step === 0) {
+        this.height = middle;
+        return;
+      }
+
+      if (Math.abs(materialRatioNew) >= 21) {
+        const sign = materialRatioNew > 0 ? 1 : -1;
+        this.height = middle + (sign * 20 * 15.6);
+        return;
+      }
+
+      let oldValue = materialRatioOld
+      const initial = setInterval(() => {
+        if (oldValue <= materialRatioNew && step > 0 || oldValue >= materialRatioNew && step < 0) {
+          this.height = Math.floor(middle + (oldValue * 15.6));
+          oldValue += step;
+        }
+        else {
+          clearInterval(initial);
+        }
+      });
+    },
+
+    showRatio() {
+      return this.matirealRatio < 1 ? this.matirealRatio : `+${this.matirealRatio}`
+    }
+  }
+}
+</script>
+
+<style lang="scss" scopped>
+.material {
+  width: 20px;
+  height: calc(100% + 60px);
+  background: dimgray;
+  &__lines, &__mainLineWrap {
+    position: relative;
+  }
+
+  &__line {
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background: orange;
+    z-index: 5;
+  }
+
+  &__line:nth-child(4) {
+    background: orangered;
+  }
+
+  &__mainLineWrap {
+    height: 100%;
+  }
+
+  &__mainLine {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    z-index: 2;
+    background: whitesmoke;
+  }
+
+  &__ratio {
+    position: absolute;
+    font-size: 20px;
+    color: red;
+    width: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    right: -100%;
+  }
+}
+</style>

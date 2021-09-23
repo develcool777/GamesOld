@@ -25,6 +25,8 @@ export default class Game {
    * @property {Boolean} isCheckmate - value is `true` if there is a checkmate, otherwise `false`
    * @property {Boolean} isStalemate - value is `true` if there is a stalemate, otherwise `false`
    * @property {Boolean} isPawnPromotion - value is `true` if pawn is ready to promote, otherwise `false`
+   * @property {Object} enPassant - value is `null` if there is no pawn to capture on enPassant move, otherwise coordinates{x, y} of pawn
+   * @property {Number} materialRatio - value is `Integer`, shows who have material advantage, if value greater than 0, white have advantage, otherwise black
    */
   constructor() {
     const field = new Field();
@@ -41,6 +43,7 @@ export default class Game {
     let isStalemate = false;
     let isPawnPromotion = false;
     let enPassant = null;
+    let materialRatio = 0;
     Object.defineProperties(this, {
       field: {
         get: () => field
@@ -149,6 +152,15 @@ export default class Game {
           }
           enPassant = value;
         } 
+      },
+      materialRatio: {
+        get: () => materialRatio,
+        set: (value) => {
+          if (!Number.isInteger(value)) {
+            throw Error(`Game.materialRatio.set(value) value must be Integer`);
+          }
+          materialRatio = value;
+        }
       }
     });
   }
@@ -198,6 +210,7 @@ export default class Game {
 
     this.playerBlack.createPositions();
     this.playerBlack.createFigures(this.field.board);
+    this.calcMaterialRatio();
   }
 
   // makeHistory(typeOfMove="", figure, whoMoved) {
@@ -311,6 +324,7 @@ export default class Game {
     this.selectedCell = null;
     this.whoMoves = this.whoMoves === 'white' ? 'black' : 'white';
 
+    this.calcMaterialRatio();
     this.checkPawnPromotion(figure, x, y);
     this.checkForCheck(figure);
     this.checkForStalemate();
@@ -379,7 +393,7 @@ export default class Game {
     field[position.x][position.y].figure = fig;
     field[position.x][position.y].isAvailableFor = '';
     this.checkForCheck(fig);
-
+    this.calcMaterialRatio();
   }
 
   /**
@@ -608,6 +622,16 @@ export default class Game {
     return figureMove;
   }
 
+  /**
+   * @method checkEnPassant
+   * @memberof Chess#Game#
+   * @param {Instance} pawn instance of [`Pawn`]{@link Chess#Figures#Pawn#} 
+   * @description Checks if `pawn` can make enPassant move, if not returns `null` otherwise {x, y}
+   * @returns {Object} Object
+   * @example 
+   * const pawn = new Pawn('white', {x: 6, y: 0})
+   * this.checkEnPassant(pawn)
+   */
   checkEnPassant(pawn) {
     if (pawn.name !== 'Pawn') { return null }
     if (this.enPassant === null) { return null }
@@ -634,5 +658,39 @@ export default class Game {
       }
     }
     return null;
+  }
+
+  /**
+   * @method calcMaterialRatio
+   * @memberof Chess#Game#
+   * @description Counts how many figures each player have(except king) 
+   * and calculates the cost of all player figures  
+   * @returns {undefined} undefined
+   * @example 
+   * this.calcMaterialRatio()
+   */
+  calcMaterialRatio() {
+    const cost = {
+      pawn: 1,
+      bishop: 3,
+      knight: 3,
+      rook: 5,
+      queen: 9
+    };
+    const field = this.field.board;
+    const figuresWhite = this.playerWhite.countFigures(field);
+    const figuresBlack = this.playerBlack.countFigures(field);
+
+    const sumWhite = Object.entries(cost).reduce((acc, pair) => {
+      acc += figuresWhite[pair[0]] * pair[1];
+      return acc;
+    }, 0);
+
+    const sumBlack = Object.entries(cost).reduce((acc, pair) => {
+      acc += figuresBlack[pair[0]] * pair[1];
+      return acc;
+    }, 0);
+
+    this.materialRatio = sumWhite - sumBlack;
   }
 }

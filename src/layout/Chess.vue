@@ -25,7 +25,6 @@
               :cursorStyle="showCursorPointer(cell)"
               :draggable="defineDrag(cell)"
               @dragstart="startDrag($event, cell)"
-
             />  
             <Promotion 
               v-if="cell.isAvailableFor === 'promotion'" 
@@ -49,7 +48,8 @@
         <div class="chess__borderUp" v-if="navigation">
           <div class="chess__letter" v-for="(num, i) in 8" :key="i">{{ String.fromCharCode(64 + num) }}</div>
         </div>
- 
+        
+        <MaterialRatio class="chess__material" :matirealRatio="getMatirealRatio"/>
       </div>
     </div>
     <Instruction class="chess__instruction" />
@@ -69,6 +69,7 @@ import Game from '@/model/chess/game'
 import Instruction from '@/components/Chess/Instruction'
 import ResultChess from '@/components/Chess/Result'
 import Loading from '@/components/Loading'
+import MaterialRatio from '@/components/Chess/MaterialRatio'
 export default {
   name: 'Chess',
   components: {
@@ -76,7 +77,8 @@ export default {
     Promotion,
     Instruction,
     ResultChess,
-    Loading
+    Loading,
+    MaterialRatio
   },
   watch: {
     clearBoard: function(newVal) {
@@ -105,6 +107,9 @@ export default {
   computed: {
     ...mapState(['clearBoard']),
     ...mapGetters(['getGameStatus', 'getFigures']),
+    getMatirealRatio() {
+      return this.GAME.materialRatio;
+    }
   },
   methods: {
     ...mapActions(['CHANGE_GAME_RESULT', 'CHANGE_GAME_STATUS', 'CHANGE_CLEAR_BOARD', 
@@ -176,8 +181,10 @@ export default {
       // dont click after pawn promotion
       if (this.dontClick) {
         this.dontClick = false;
+        this.gameResult();
         return;
       }
+
       if (this.getGameStatus === 'start') {
         this.GAME.clickOnCellForMove(cell, x, y);
         this.gameResult();
@@ -218,16 +225,16 @@ export default {
       if (cell.figure !== null && cell.figure.name === 'King' && cell.figure.color === this.GAME.whoMoves && this.GAME.isCheckmate) {
         return 'checkMate';
       }
-      if (this.GAME.selectedCell !== null && this.GAME.selectedCell.position.x === x && this.GAME.selectedCell.position.y === y) {
+      if (this.GAME?.selectedCell?.position?.x === x && this.GAME?.selectedCell?.position?.y === y) {
         return 'selected';
       }
-      if (cell.isAvailableFor === 'check') {
+      if (cell.isAvailableFor === 'check' && cell.figure.color === this.GAME.whoMoves) {
         return 'check';
       }
-      if (this.GAME.oldPosition !== null && this.GAME.oldPosition.x === x && this.GAME.oldPosition.y === y) {
+      if (this.GAME?.oldPosition?.x === x && this.GAME?.oldPosition?.y === y) {
         return 'lastMoveOldPosition';
       }
-      if (this.GAME.newPosition !== null && this.GAME.newPosition.x === x && this.GAME.newPosition.y === y) {
+      if (this.GAME?.newPosition?.x === x && this.GAME?.newPosition?.y === y) {
         return 'lastMoveNewPosition';
       }
 
@@ -247,6 +254,7 @@ export default {
   @include BasicGrid();
   background: #24272E;
   position: relative;
+  user-select: none;
   &__row {
     @include Flex(center);
   }
@@ -385,6 +393,12 @@ export default {
 
   &__enPassant::after {
     background: lightpink;
+  }
+
+  &__material {
+    position: absolute;
+    top: -30px;
+    right: -50px;
   }
 }
 

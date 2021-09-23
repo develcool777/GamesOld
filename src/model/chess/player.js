@@ -73,13 +73,14 @@ export default class Player {
    * @description Creates players figures and sets them on the chess board by `this.positions` 
    * @param {Array} field chess board
    * @returns {undefined} undefined
+   * @throws Error - if positions is empty array
    * @example 
    * const f = new Field()
    * this.createFigures(f.board)
    */
   createFigures(field) {
     if (this.positions.length === 0) {
-      throw Error(``)
+      throw Error(`Player.createFigures(field) positions is empty array`);
     }
     field[this.positions[0].x][this.positions[0].y].figure = new Rook(this.side, this.positions[0]);
     field[this.positions[1].x][this.positions[1].y].figure = new Knight(this.side, this.positions[1]);
@@ -151,11 +152,11 @@ export default class Player {
         quantity: 0,
         figures: []
       },
-      pawns: 0,
+      pawn: 0,
       queen: 0,
-      bishops: 0,
-      knights: 0,
-      rooks: 0,
+      bishop: 0,
+      knight: 0,
+      rook: 0,
     }
 
     for (let i = 0; i < 8; i++) {
@@ -164,19 +165,19 @@ export default class Player {
         if (cell.figure !== null) {
           const figure = cell.figure;
           if (figure.name === 'Pawn' && figure.color === this.side) {
-            obj.pawns++;
+            obj.pawn++;
           }
           if (figure.name === 'Queen' && figure.color === this.side) {
             obj.queen++;
           }
           if (figure.name === 'Rook' && figure.color === this.side) {
-            obj.rooks++;
+            obj.rook++;
           }
           if (figure.name === 'Knight' && figure.color === this.side) {
-            obj.knights++;
+            obj.knight++;
           }
           if (figure.name === 'Bishop' && figure.color === this.side) {
-            obj.bishops++;
+            obj.bishop++;
           }
           if (figure.color === this.side && figure.name !== 'King') {
             obj.all.quantity++;
