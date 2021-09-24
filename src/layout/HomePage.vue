@@ -5,10 +5,20 @@
       v-on:searchResult="showSearchedGames($event)"
       v-on:showAll="showAll()"
     />
+
     <div class="homePage__searchResultEmpty" v-if="result">
       <p class="homePage__text">{{ message }}</p>
     </div>
-    <div class="homePage__games">
+
+    <div class="homePage__games" v-if="isSkeleton">
+      <GameBlockSkeleton 
+        class="homePage__game"
+        v-for="num in 5"
+        :key="num"
+      />
+    </div>
+
+    <div class="homePage__games" v-else>
       <GameBlock 
         class="homePage__game" 
         v-for="(game, i) in games" 
@@ -20,6 +30,7 @@
         @mouseleave="hoveredBlock = null"
       />
     </div>
+
   </section>
 </template>
 
@@ -27,12 +38,14 @@
 import { createNamespacedHelpers } from 'vuex'
 const { mapGetters, mapActions } = createNamespacedHelpers('games');
 import GameBlock from '@/components/HomePage/GameBlock';
+import GameBlockSkeleton from '@/components/HomePage/GameBlockSkeleton';
 import SearchGame from '@/components/HomePage/SearchGame';
 export default {
   name: 'HomePage',
   components: {
     GameBlock,
-    SearchGame
+    SearchGame,
+    GameBlockSkeleton
   },
   data() {
     return {
@@ -40,7 +53,8 @@ export default {
       parsedData: [],
       result: false,
       message: '',
-      hoveredBlock: null
+      hoveredBlock: null,
+      isSkeleton: true
     }
   },
   created() {
@@ -56,6 +70,7 @@ export default {
         await this.INIT();
       }
       this.games = this.getData;
+      this.isSkeleton = false;
       this.parsedData = this.getParsedData;
     },
     showSearchedGames(obj) {
@@ -88,17 +103,20 @@ export default {
 .homePage {
   flex: 1;
   margin: 0 rem(20);
+  
   &__text {
     font-size: rem(30);
     margin: rem(20) 0;
     text-align: left;
   }
+
   &__games {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     margin: rem(40) 0;
   }
+
   &__game {
     margin: rem(15);
   }
