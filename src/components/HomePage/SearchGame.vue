@@ -58,25 +58,14 @@ export default {
     searchGame() {
       if (this.lockSearch) { return }
       this.samePart(this.showVariants(this.field), this.field);
-      // const obj = {};
-      // obj.arrayOfIds = this.showVariants(this.field);
-      // obj.field = this.field;
-      // obj.found = false;
-      // this.$emit('searchResult', obj);
-      // this.hideVariants();
     },
+
     foundGameInVariants(variant) {
       if (this.lockSearch) { return }
       this.lockSearch = true;
       this.samePart([variant.id], this.field, true);
-      // const obj = {};
-      // obj.arrayOfIds = [variant.id];
-      // obj.field = this.field;
-      // obj.founded = true;
-
-      // this.$emit('searchResult', obj);
-      // this.hideVariants();
     },
+
     samePart(array, field, found=false) {
       const obj = {}
       obj.arrayOfIds = array;
@@ -85,31 +74,31 @@ export default {
       this.$emit('searchResult', obj);
       this.hideVariants();
     },
+
     showVariants(field) {
       if (field === '') { 
         this.displayVariants = false;
         return;
       }
       const fieldLow = field.toLowerCase();
-      const result = this.data.reduce((acc, item) => {
+      this.variants = this.data.reduce((acc, item) => {
         const name = item.name.toLowerCase();
         if (name.substring(0, fieldLow.length) === fieldLow) {
           acc.push(item);
         }
         return acc;
-      }, [])
+      }, []);
 
-      if (result.length > 0) {
-        this.variants = result;
-        this.displayVariants = true;  
-      }
+      this.displayVariants = this.variants.length > 0;  
       this.lockSearch = false;
-      return result.map(i => i.id);
+      return this.variants.map(i => i.id);
     },
+
     showAll() { 
       this.hideVariants();
       this.$emit('showAll');
     },
+
     hideVariants() {
       this.field = '';
       this.variants = [];

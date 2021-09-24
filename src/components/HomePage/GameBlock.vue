@@ -7,7 +7,6 @@
           ref="video" 
           :src="block.videoUrl"
           :poster="block.imgUrl"
-          preload="none"
           muted="muted"  
           loop
         />
@@ -36,7 +35,6 @@ export default {
       } else {
         this.$refs.video.pause();
         this.$refs.video.currentTime = 0;
-        this.$refs.video.load()
       }
     }
   }
