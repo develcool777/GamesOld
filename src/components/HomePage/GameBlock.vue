@@ -35,6 +35,11 @@ export default {
       } else {
         this.$refs.video.pause();
         this.$refs.video.currentTime = 0;
+        // setTimeout(() => this.$refs.video.load(), 1000); // ?????? 
+        // update
+        // const src = this.$refs.video.currentSrc;
+        // this.$refs.video.src = ''
+        // this.$refs.video.src = src
       }
     }
   }
