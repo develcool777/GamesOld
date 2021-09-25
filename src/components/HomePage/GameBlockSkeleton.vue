@@ -30,70 +30,56 @@ export default {
   &__block {
     @include FlexColumn(space-between, center);
     @include boxShadow(0.3);
-    width: rem(300);
-    height: rem(360);
-    padding: rem(10);
-    border-radius: rem(10);
+    width: 300px;
+    height: 360px;
+    padding: 10px;
+    border-radius: 10px;
     border: 1px solid $black;
   }
 
   &__img {
-    width: rem(280);
-    height: rem(135);
+    width: 280px;
+    height: 135px;
     background: gray;
   }
 
   &__title {
     width: 100%;
     height: 30px;
-    margin: rem(20) 0;
     background: gray;
     border-radius: 10px;
   }
 
   &__text {
     width: 100%;
+    height: 100px;
     display: flex;
     flex-direction: column;
+    justify-content: space-around;
   }
 
   &__line {
     width: 100%;
-    height: 10px;
-    margin: 5px 0;
+    height: 18px;
     background: gray;
     border-radius: 10px;
   }
 
   &__line:last-child {
-    margin-bottom: 0;
     width: 80%;
   }
 
   &__flex {
-    margin-top: rem(50);
     width: 100%;
     @include Flex(space-between);
   }
 
   &__created, &__played {
     width: 40%;
-    height: 10px;
+    height: 16px;
     background: gray;
     border-radius: 10px;
   }
-}
-
-.skeleton-text {
-  width: 100%;
-  height: .5rem;
-  margin-bottom: .25rem;
-  border-radius: .125rem;
-}
-
-.skeleton-text:last-child {
-  margin-bottom: 0;
-  width: 80%;
 }
 
 @keyframes skeleton-loading {
@@ -102,6 +88,127 @@ export default {
   }
   100% {
     background-color: hsl(200, 20%, 95%);
+  }
+}
+
+// adaptivness
+@media only screen and (max-width: 1050px) {
+  .skeleton {
+    &__block {
+      width: 280px;
+      height: 340px;
+    }
+
+    &__img {
+      width: 260px;
+      height: 130px;
+    }
+
+    &__title {
+      height: 28px;
+    }
+
+    &__text {
+      height: 80px;
+    }
+
+    &__line {
+      height: 16px;
+    }
+
+    &__created, &__played {
+      height: 14px;
+    }
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .skeleton {
+    &__block {
+      width: 270px;
+      height: 320px;
+    }
+
+    &__img {
+      width: 250px;
+      height: 120px;
+    }
+
+    &__title {
+      height: 25px;
+    }
+
+    &__text {
+      height: 75px;
+    }
+
+    &__line {
+      height: 15px;
+    }
+
+    &__created, &__played {
+      height: 13px;
+    }
+  }
+}
+
+@media only screen and (max-width: 669px) {
+  .skeleton {
+    &__block {
+      width: 260px;
+      height: 300px;
+    }
+
+    &__img {
+      width: 240px;
+      height: 115px;
+    }
+
+    &__title {
+      height: 23px;
+    }
+
+    &__text {
+      height: 65px;
+    }
+
+    &__line {
+      height: 14px;
+    }
+
+    &__created, &__played {
+      height: 12px;
+    }
+  }
+}
+
+@media only screen and (max-width: 399px) {
+  .skeleton {
+    &__block {
+      width: 250px;
+      height: 270px;
+    }
+
+    &__img {
+      width: 230px;
+      height: 110px;
+    }
+
+    &__title {
+      height: 20px;
+    }
+
+    &__text {
+      height: 50px;
+    }
+
+    &__line {
+      height: 12px;
+    }
+
+    &__created, &__played {
+      height: 10px;
+    }
   }
 }
 </style>

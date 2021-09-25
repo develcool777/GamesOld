@@ -3,13 +3,19 @@
     <div class="gBlock__block">
       <div class="gBlock__container">
         <video 
+          v-show="hovered"
           class="gBlock__video"
           ref="video" 
           :src="block.videoUrl"
-          :poster="block.imgUrl"
           muted="muted"  
           loop
         />
+        <img
+          v-show="!hovered" 
+          class="gBlock__poster" 
+          :src="block.imgUrl" 
+          :alt="block.imgName"
+        >
       </div>
       <div class="gBlock__title">{{ block.name }}</div>
       <div class="gBlock__text">{{ block.text }}</div>
@@ -35,11 +41,8 @@ export default {
       } else {
         this.$refs.video.pause();
         this.$refs.video.currentTime = 0;
-        // setTimeout(() => this.$refs.video.load(), 1000); // ?????? 
         // update
-        // const src = this.$refs.video.currentSrc;
-        // this.$refs.video.src = ''
-        // this.$refs.video.src = src
+        // this.$refs.video.load() makes Error
       }
     }
   }
@@ -49,50 +52,159 @@ export default {
 <style lang="scss" scoped>
 .gBlock {
   text-decoration: none;
+
   &__block {
     @include FlexColumn(space-between, center);
     @include boxShadow(0.3);
-    width: rem(300);
-    padding: rem(10);
-    border-radius: rem(10);
+    width: 300px;
+    height: 360px;
+    padding: 10px;
+    border-radius: 10px;
     border: 1px solid $black;
     transition-duration: .5s;
   }
+
   &__block:hover {
     background: $color-primary-1;
     transform: scale(1.01);
     @include boxShadow(0.7);
   }
+
   &__container {
-    width: rem(280);
-    height: rem(135);
+    width: 280px;
+    height: 135px;
     background: gray;
   }
-  &__video {
+
+  &__video, &__poster {
     width: 100%;
     height: 100%;
   }
+
   &__title, &__text {
-    font-size: rem(20);
+    font-size: 20px;
     color: $black
   }
+
   &__title {
-    font-size: rem(30);
-    margin: rem(20) 0;
+    font-size: 30px;
   }
+
   &__text {
-    height: rem(100);
+    height: 100px;
     color: $black;
     opacity: 0.7;
   }
+
   &__flex {
-    margin-top: rem(10);
     width: 100%;
     @include Flex(space-between);
     color: darkmagenta;
   }
+
   &__created, &__played {
-    font-size: rem(16);
+    font-size: 16px;
+  }
+}
+
+// adaptivness
+@media only screen and (max-width: 1050px) {
+  .gBlock {
+    &__block {
+      width: 280px;
+      height: 340px;
+    }
+
+    &__container {
+      width: 260px;
+      height: 130px;
+    }
+
+    &__title {
+      font-size: 25px;
+    }
+
+    &__text {
+      font-size: 18px;
+      height: 80px;
+    }
+
+    &__created, &__played {
+      font-size: 14px;
+    }
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .gBlock {
+    &__block {
+      width: 270px;
+      height: 320px;
+    }
+
+    &__container {
+      width: 250px;
+      height: 120px;
+    }
+
+    &__title {
+      font-size: 24px;
+    }
+
+    &__text {
+      font-size: 17px;
+      height: 75px;
+    }
+  }
+}
+
+@media only screen and (max-width: 669px) {
+  .gBlock {
+    &__block {
+      width: 260px;
+      height: 300px;
+    }
+
+    &__container {
+      width: 240px;
+      height: 115px;
+    }
+
+    &__title {
+      font-size: 23px;
+    }
+
+    &__text {
+      font-size: 16px;
+      height: 70px;
+    }
+  }
+}
+
+@media only screen and (max-width: 399px) {
+  .gBlock {
+    &__block {
+      width: 250px;
+      height: 270px;
+    }
+
+    &__container {
+      width: 230px;
+      height: 110px;
+    }
+
+    &__title {
+      font-size: 20px;
+    }
+
+    &__text {
+      font-size: 14px;
+      height: 50px;
+    }
+
+    &__created, &__played {
+      font-size: 12px;
+    }
   }
 }
 </style>

@@ -1,49 +1,36 @@
 <template>
-  <header class="head">
-    <router-link tag="div" class="head__logo" to="/">
-      <img class="head__img" src="@/assets/header/videogame.png" alt="logo">
-      Games
-    </router-link>
-    <!-- <nav class="head__menu" >
-      <router-link tag="div" class="head__link" v-for="(item, i) in menu" :key="i" :to="item.to">{{item.name}}</router-link>
-    </nav> -->
+  <header>
+    <div class="head">
+      <router-link tag="div" class="head__logo" to="/">
+        <img class="head__img" src="@/assets/header/videogame.png" alt="logo">
+        Games
+      </router-link>
+    </div>
   </header>
 </template>
 
 <script>
 export default {
-  name: 'Header',
-  // data() {
-  //   return {
-  //     menu: [
-  //       {id: 0, name: 'Maze', to: '/maze'},
-  //       {id: 1, name: 'Memoji', to: '/memoji'},
-  //       {id: 2, name: 'Rock Paper Scissors', to: '/rock-paper-scissors'},
-  //       {id: 3, name: 'Tic Tac Toe', to: '/tic-tac-toe'},
-  //       {id: 4, name: 'Chess', to: '/chess'}
-  //     ]
-  //   }
-  // }
+  name: 'Header'
 }
 </script>
 
 <style lang="scss" scopped>
 .head {
   @include Flex(center);
-  padding: rem(10) 0;
-  // height: 55px;  ??????? doesnt work, shit
+  width: 100%;
+  height: 55px;
   background: $black;
   color: white;
 
   &__img {
-    width: rem(35);
-    height: rem(30);
+    width: 35px;
+    height: 30px;
     transition-duration: .5s;
   }
 
   &__logo, &__link {
-    font-size: rem(30);
-    // height: rem(0);
+    font-size: 30px;
     text-decoration: none;
     color: $white;
   }
@@ -51,12 +38,9 @@ export default {
   &__logo {
     display: flex;
   }
-  // &__menu {
-  //   flex: 1;
-  //   @include Flex(space-between);
-  // }
+
   &__link {
-    font-size: rem(20);
+    font-size: 20px;
   }
 }
 

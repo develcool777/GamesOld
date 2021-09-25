@@ -102,11 +102,11 @@ export default {
 <style lang="scss" scoped>
 .homePage {
   flex: 1;
-  margin: 0 rem(20);
-  
+  margin: 0 20px;
+
   &__text {
-    font-size: rem(30);
-    margin: rem(20) 0;
+    font-size: 30px;
+    margin: 20px 0;
     text-align: left;
   }
 
@@ -114,11 +114,17 @@ export default {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    margin: rem(40) 0;
+    margin: 40px 0;
   }
 
   &__game {
-    margin: rem(15);
+    margin: 15px;
+  }
+}
+// adaptivness
+@media only screen and (max-width: 767px) {
+  .homePage {
+    margin: 0 10px;
   }
 }
 </style>
