@@ -6,9 +6,7 @@
       v-on:showAll="showAll()"
     />
 
-    <div class="homePage__searchResultEmpty" v-if="result">
-      <p class="homePage__text">{{ message }}</p>
-    </div>
+    <div class="homePage__text" v-if="result">{{ message }}</div>
 
     <div class="homePage__games" v-if="isSkeleton">
       <GameBlockSkeleton 
@@ -65,32 +63,32 @@ export default {
   },
   methods: {
     ...mapActions(['INIT', 'UPDATE_PLAYED']),
+
     async init() {
-      if (this.getIsDataLoaded === false) {
-        await this.INIT();
-      }
+      !this.getIsDataLoaded && await this.INIT();
       this.games = this.getData;
-      this.isSkeleton = false;
       this.parsedData = this.getParsedData;
+      this.isSkeleton = false;
     },
+
     showSearchedGames(obj) {
       this.result = true;
-      if (obj.founded) {
-        this.result = false;
-      }
+      if (obj.founded) { this.result = false }
+
       const len = obj.arrayOfIds.length;
-      if (len === 0) {
-        this.message = `There is no game at '${obj.field}'`;
-      } else {
-        this.message = `Found ${len} ${len === 1 ? 'game' : 'games'} at '${obj.field}'`;
-      }
+      this.message = len === 0 
+        ? `There is no game at '${obj.field}'`
+        : `Found ${len} ${len === 1 ? 'game' : 'games'} at '${obj.field}'`;
+
       this.games = this.getData.filter(game => obj.arrayOfIds.includes(game.id));
     },
+
     showAll() {
       this.result = false;
       this.message = '';
       this.games = this.getData;
     },
+
     async updatePlayed(docId) {
       await this.UPDATE_PLAYED(docId);
       await this.INIT();
@@ -106,7 +104,7 @@ export default {
 
   &__text {
     font-size: 30px;
-    margin: 20px 0;
+    margin-top: 20px;
     text-align: left;
   }
 
@@ -125,6 +123,19 @@ export default {
 @media only screen and (max-width: 767px) {
   .homePage {
     margin: 0 10px;
+
+    &__text {
+      font-size: 25px;
+    }
+  }
+}
+
+@media only screen and (max-width: 469px) {
+  .homePage {
+    &__text {
+      font-size: 20px;
+      text-align: center;
+    }
   }
 }
 </style>
