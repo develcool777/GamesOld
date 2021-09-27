@@ -7,7 +7,7 @@
 				<div class="resultChess__title">{{ getGameResult.title }}</div>
 				<div class="resultChess__description">{{ getGameResult.description }}</div>
 				<div class="resultChess__btns">
-					<!-- <div class="resultChess__btn">Analyze Game</div> -->
+					<div class="resultChess__btn" @click="analyze()">Analyze Game</div>
 					<div class="resultChess__btn" @click="newGame()">New Game</div>
 				</div>
 			</div>
@@ -24,7 +24,11 @@ export default {
 		...mapGetters(['getGameResult', 'getGameStatus', 'getShowModal'])
 	},
   methods: {
-    ...mapActions(['CHANGE_GAME_RESULT', 'CHANGE_GAME_STATUS', 'CHANGE_CLEAR_BOARD', 'CHANGE_SHOW_MODAL']),
+    ...mapActions([
+			'CHANGE_GAME_RESULT', 'CHANGE_GAME_STATUS', 
+			'CHANGE_CLEAR_BOARD', 'CHANGE_SHOW_MODAL',
+			'CHANGE_ANALYZE'
+		]),
 
     close() {
       const obj = {title: '', description: ''};
@@ -36,6 +40,11 @@ export default {
 			this.close();
 			this.CHANGE_GAME_STATUS('start');
 			this.CHANGE_CLEAR_BOARD(true);
+		},
+
+		analyze() {
+			this.close();
+			this.CHANGE_ANALYZE(true);
 		}
   }
 }
@@ -47,7 +56,7 @@ export default {
     font-size: rem(25);
   }
 	&__btns {
-		justify-content: center;
+		justify-content: space-around;
 	}
 }
 </style>

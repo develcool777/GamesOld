@@ -210,19 +210,44 @@ export default class Game {
 
     this.playerBlack.createPositions();
     this.playerBlack.createFigures(this.field.board);
-    this.calcMaterialRatio();
+    this.calcMaterialRatio(this.field.board);
   }
 
-  // makeHistory(typeOfMove="", figure, whoMoved) {
-  //   const obj = {
-  //     figure: figure,
-  //     oldPosition: this.oldPosition,
-  //     newPosition: this.newPosition,
-  //     typeOfMove: typeOfMove,
-  //     whoMoved: whoMoved
-  //   }
-  //   this.historyOfMoves.push(obj);
-  // }
+  /**
+   * @method makeHistory
+   * @memberof Chess#Game#
+   * @description Makes history by pushing `obj` to `historyOfMoves`
+   * @returns {undefined} undefined
+   * @example this.makeHistory()
+   */
+  makeHistory(figure, whoMoved) {
+    const obj = {
+      field: this.field.fieldForHistory(),
+      figure: figure,
+      oldPosition: this.oldPosition,
+      newPosition: this.newPosition,
+      whoMoved: whoMoved,
+      isCheck: this.isCheck,
+      isCheckmate: this.isCheckmate,
+      isStalemate: this.isStalemate,
+    }
+    this.historyOfMoves.push(obj);
+  }
+
+  /**
+   * @method historyRender
+   * @memberof Chess#Game#
+   * @returns {undefined} undefined
+   * @example this.historyRender()
+   */
+  historyRender(historyOfMoves) {
+    this.isCheckmate = historyOfMoves.isCheckmate;
+    this.isCheck = historyOfMoves.isCheck;
+    this.isStalemate = historyOfMoves.isStalemate
+    this.oldPosition = historyOfMoves.oldPosition;
+    this.newPosition = historyOfMoves.newPosition;
+    this.calcMaterialRatio(historyOfMoves.field);
+  }
 
   /**
    * @method clickOnFigure
@@ -320,15 +345,18 @@ export default class Game {
     }
 
     this.newPosition = Object.assign({}, figure.position);
-    // this.makeHistory(cell.isAvailableFor, figure, this.whoMoves);
     this.selectedCell = null;
+    const whoMovesOld = this.whoMoves;
     this.whoMoves = this.whoMoves === 'white' ? 'black' : 'white';
 
-    this.calcMaterialRatio();
-    this.checkPawnPromotion(figure, x, y);
+    const isPromotion = this.checkPawnPromotion(figure, x, y);
+    if (isPromotion) { return } // return to make promotion move
+
+    this.calcMaterialRatio(this.field.board);
     this.checkForCheck(figure);
     this.checkForStalemate();
     this.clearAvailableMove();
+    this.makeHistory(figure, whoMovesOld);
   }
 
   /**
@@ -354,21 +382,20 @@ export default class Game {
    * @param {Instance} figure instance of figure
    * @param {Number} x `x` coordinate of a position
    * @param {Number} y `y` coordinate of a position
-   * @description Checks is pawn ready to promote
-   * @returns {undefined} undefined
+   * @description Checks is pawn ready to promote, returns `true` if ready, otherwise `false`
+   * @returns {Boolean} Boolean
    * @example 
    * const pawn = new Pawn('white' {x: 7, y: 0})
    * this.checkPawnPromotion(pawn, 7, 0) // pawn is ready to promote
    */
   checkPawnPromotion(figure, x, y) {
-    if (figure.name !== 'Pawn') {
-      return;
+    if (figure.name !== 'Pawn' || !figure.promotion) {
+      return false;
     }
 
-    if (figure.promotion) {
-      this.isPawnPromotion = true;
-      this.field.board[x][y].isAvailableFor = 'promotion';
-    }
+    this.isPawnPromotion = true;
+    this.field.board[x][y].isAvailableFor = 'promotion';
+    return true;
   }
 
   /**
@@ -392,8 +419,12 @@ export default class Game {
     this.isPawnPromotion = false;
     field[position.x][position.y].figure = fig;
     field[position.x][position.y].isAvailableFor = '';
+
+    this.calcMaterialRatio(field);
     this.checkForCheck(fig);
-    this.calcMaterialRatio();
+    this.checkForStalemate();
+    this.clearAvailableMove();
+    this.makeHistory(fig, color);
   }
 
   /**
@@ -669,7 +700,7 @@ export default class Game {
    * @example 
    * this.calcMaterialRatio()
    */
-  calcMaterialRatio() {
+  calcMaterialRatio(field) {
     const cost = {
       pawn: 1,
       bishop: 3,
@@ -677,7 +708,6 @@ export default class Game {
       rook: 5,
       queen: 9
     };
-    const field = this.field.board;
     const figuresWhite = this.playerWhite.countFigures(field);
     const figuresBlack = this.playerBlack.countFigures(field);
 

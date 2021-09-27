@@ -58,4 +58,24 @@ export default class Field {
       })
     });
   }
+
+  /**
+   * @method fieldForHistory
+   * @memberof Chess#Field#
+   * @description Returns board for history
+   * @returns {Array} Array
+   * @throws Error - if `this.board` is Empty
+   * @example const historyBoard = this.fieldForHistory()
+   */
+  fieldForHistory() {
+    if (this.board.length === 0) {
+      throw Error(`Field.fieldForHistory() board is empty`);
+    }
+    return this.board.map(arr => arr.map(cell => {
+      const newCell = new Cell(cell.color, cell.position);
+      newCell.figure = cell.figure;
+      newCell.isAvailableFor = cell.isAvailableFor;
+      return newCell;
+    }));
+  }
 }

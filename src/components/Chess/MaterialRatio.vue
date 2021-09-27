@@ -34,7 +34,8 @@ export default {
   },
   data() {
     return {
-      height: 0
+      height: 0,
+      interval: null
     }
   },
   created() {
@@ -52,20 +53,16 @@ export default {
         return;
       }
 
-      if (Math.abs(materialRatioNew) >= 21) {
-        const sign = materialRatioNew > 0 ? 1 : -1;
-        this.height = middle + (sign * 20 * 15.6);
-        return;
-      }
-
-      let oldValue = materialRatioOld
-      const initial = setInterval(() => {
+      clearInterval(this.interval);
+      let oldValue = materialRatioOld;
+      this.interval = setInterval(() => {
         if (oldValue <= materialRatioNew && step > 0 || oldValue >= materialRatioNew && step < 0) {
-          this.height = Math.floor(middle + (oldValue * 15.6));
+          const calculation = Math.floor(middle + (oldValue * 15.6));
+          this.height = calculation > 654 ? 654 : calculation < 30 ? 30 : calculation;
           oldValue += step;
         }
         else {
-          clearInterval(initial);
+          clearInterval(this.interval);
         }
       });
     },

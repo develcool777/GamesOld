@@ -12,7 +12,8 @@ export default {
     figures: {},
     showModal: false,
     returnMove: false,
-    clearBoard: false
+    clearBoard: false,
+    analyze: false,
   },
   getters: {
     getGameStatus: state => state.gameStatus,
@@ -21,6 +22,7 @@ export default {
     getShowModal: state => state.showModal,
     getReturnMove: state => state.returnMove,
     getClearField: state => state.clearBoard,
+    getAnalyze: state => state.analyze,
   },
   mutations: {
     changeGameStatus(state, status="") {
@@ -61,6 +63,13 @@ export default {
       state.clearBoard = bool;
     },
 
+    changeAnalyze(state, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`chess.mutations.changeAnalyze(state, bool) bool must be Boolean`);
+      }
+      state.analyze = bool;
+    },
+
     setFigures(state, array) {
       if (!Array.isArray(array)) {
         throw Error(`chess.mutations.setFigures(state, array) array must be Array`);
@@ -90,6 +99,10 @@ export default {
 
     CHANGE_CLEAR_BOARD({commit}, bool) {
       commit('changeClearBoard', bool);
+    },
+
+    CHANGE_ANALYZE({commit}, bool) {
+      commit('changeAnalyze', bool);
     },
     
     async SET_FIGURES({commit}) {

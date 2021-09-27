@@ -52,7 +52,7 @@
         <MaterialRatio class="chess__material" v-if="navigation" :matirealRatio="getMatirealRatio"/>
       </div>
     </div>
-    <Instruction class="chess__instruction" />
+    <Instruction class="chess__instruction" v-on:changePosition="changePosition($event)"/>
   </div>
   <ResultChess/>
   <transition name="fade">
@@ -86,6 +86,11 @@ export default {
         this.GAME.clearField();
         this.CHANGE_CLEAR_BOARD(false);
       }
+    },
+
+    analyze: function(newVal) {
+      newVal && this.historyRender(this.GAME.historyOfMoves[0]);
+      !newVal && this.draw();
     }
   },
   data() {
@@ -94,7 +99,8 @@ export default {
       board: [],
       dontClick: false,
       loading: true,
-      navigation: false
+      navigation: false,
+      index: 0
     }
   },
   async created() {
@@ -105,8 +111,10 @@ export default {
     this.CHANGE_GAME_STATUS('');
   },
   computed: {
-    ...mapState(['clearBoard']),
+    ...mapState(['clearBoard', 'analyze']),
+
     ...mapGetters(['getGameStatus', 'getFigures']),
+
     getMatirealRatio() {
       return this.GAME.materialRatio;
     }
@@ -127,6 +135,11 @@ export default {
 
     draw() {
       this.board = this.GAME.field.board;
+    },
+
+    historyRender(historyOfMoves) {
+      this.board = historyOfMoves.field;
+      this.GAME.historyRender(historyOfMoves);
     },
 
     createFigure(cell) {
@@ -219,6 +232,25 @@ export default {
     pawnPromotion(figureName, x, y) {
       this.GAME.pawnPromotion(this.board, figureName, {x, y});
       this.dontClick = true
+    },
+
+    changePosition(direction) {
+      if (direction === 'start') {
+        this.index = 0;
+        this.historyRender(this.GAME.historyOfMoves[this.index]);
+      }
+      if (direction === 'prev') {
+        this.index -= this.index === 0 ? 0 : 1;
+        this.historyRender(this.GAME.historyOfMoves[this.index]);
+      }
+      if (direction === 'next') {
+        this.index += this.index === this.GAME.historyOfMoves.length - 1 ? 0 : 1;
+        this.historyRender(this.GAME.historyOfMoves[this.index]);
+      }
+      if (direction === 'end') {
+        this.index = this.GAME.historyOfMoves.length - 1;
+        this.historyRender(this.GAME.historyOfMoves[this.index]);
+      }
     },
 
     chooseCellColor(cell, x, y) {
