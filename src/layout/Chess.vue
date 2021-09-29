@@ -30,6 +30,7 @@
               v-if="cell.isAvailableFor === 'promotion'" 
               v-on:promotion="pawnPromotion($event, i, j)"
               :index="cell.figure.color === 'white' ? 0 : 1"
+              :boardFlipped="getIsBoardFlipped"
             />
           </div>
         </div>
@@ -37,26 +38,39 @@
         <div v-if="GAME.isPawnPromotion" class="chess__mask"></div>
 
         <div class="chess__borderLeft" v-if="navigation">
-          <div class="chess__number" v-for="(num, i) in 8" :key="i">{{ 9 - num  }}</div>
+          <div class="chess__number" v-for="(num, i) in 8" :key="i">{{ getIsBoardFlipped ? num : 9 - num }}</div>
         </div>
         <div class="chess__borderDown" v-if="navigation">
-          <div class="chess__letter" v-for="(num, i) in 8" :key="i">{{ String.fromCharCode(64 + num) }}</div>
+          <div class="chess__letter" v-for="(num, i) in 8" :key="i">{{ String.fromCharCode( getIsBoardFlipped ? 73 - num : 64 + num) }}</div>
         </div>
         <div class="chess__borderRight" v-if="navigation">
-          <div class="chess__number" v-for="(num, i) in 8" :key="i">{{ 9 - num }}</div>
+          <div class="chess__number" v-for="(num, i) in 8" :key="i">{{ getIsBoardFlipped ? num : 9 - num }}</div>
         </div>
         <div class="chess__borderUp" v-if="navigation">
-          <div class="chess__letter" v-for="(num, i) in 8" :key="i">{{ String.fromCharCode(64 + num) }}</div>
+          <div class="chess__letter" v-for="(num, i) in 8" :key="i">{{ String.fromCharCode( getIsBoardFlipped ? 73 - num : 64 + num) }}</div>
         </div>
         
-        <MaterialRatio class="chess__material" v-if="navigation" :matirealRatio="getMatirealRatio"/>
+        <MaterialRatio 
+          class="chess__material" 
+          v-if="navigation" 
+          :matirealRatio="getMatirealRatio"
+          :boardFlipped="getIsBoardFlipped"
+        />
       </div>
     </div>
-    <Instruction class="chess__instruction" v-on:changePosition="changePosition($event)"/>
+    <Instruction 
+      class="chess__instruction" 
+      v-on:changePosition="changePosition($event)"
+      v-on:flipBoard="flipBoard()"
+    />
   </div>
   <ResultChess/>
   <transition name="fade">
-    <Loading v-if="loading" class="LOADING" :step="0.3"/>
+    <Loading 
+      v-if="loading" 
+      class="LOADING" 
+      :step="0.3"  
+    />
   </transition>  
 </template>
 
@@ -117,6 +131,10 @@ export default {
 
     getMatirealRatio() {
       return this.GAME.materialRatio;
+    },
+
+    getIsBoardFlipped() {
+      return this.GAME.isBoardFlipped;
     }
   },
   methods: {
@@ -251,6 +269,11 @@ export default {
         this.index = this.GAME.historyOfMoves.length - 1;
         this.historyRender(this.GAME.historyOfMoves[this.index]);
       }
+    },
+
+    flipBoard() {
+      this.GAME.flipBoard();
+      this.draw();
     },
 
     chooseCellColor(cell, x, y) {

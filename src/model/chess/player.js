@@ -18,18 +18,36 @@ export default class Player {
    * @property {String} side - this `side`
    * @property {Array} positions - array of figures positions which set at the beginning of the game
    */
-  constructor(side) {
+  constructor(side, color) {
     if (typeof side !== 'string') {
-      throw Error(`Cell.constructor side must be String`);
+      throw Error(`Player.constructor side must be String`);
     }
-    if (!['black', 'white'].includes(side)) {
-      throw Error(`Cell.constructor side must be white or black`);
+    if (!['up', 'down'].includes(side)) {
+      throw Error(`Player.constructor side must be up or down`);
+    }
+    if (typeof color !== 'string') {
+      throw Error(`Player.constructor color must be String`);
+    }
+    if (!['black', 'white'].includes(color)) {
+      throw Error(`Player.constructor color must be white or black`);
     }
 
     let positions = [];
     Object.defineProperties(this, {
       side: {
-        get: () => side 
+        get: () => side,
+        set: (value) => {
+          if (typeof value !== 'string') {
+            throw Error(`Player.side.set(value) value be String`);
+          }
+          if (!['up', 'down'].includes(value)) {
+            throw Error(`Player.side.set(value) value must be 'up' or 'down'`);
+          }
+          side = value;
+        } 
+      },
+      color: {
+        get: () => color 
       },
       positions: {
         get: () => positions, 
@@ -55,12 +73,12 @@ export default class Player {
 
     for (let i = 0; i < 16; i++) {
       if (i < 8) {
-        const decide = this.side === 'white' ? 7 : 0;
-        result.push({x: decide, y: i});
+        const decideX = this.side === 'down' ? 7 : 0;
+        result.push({x: decideX, y: i});
       }
       else {
-        const decide = this.side === 'white' ? 6 : 1;
-        result.push({x: decide, y: i - 8});
+        const decideX = this.side === 'down' ? 6 : 1;
+        result.push({x: decideX, y: i - 8});
       }
     }
 
@@ -82,17 +100,17 @@ export default class Player {
     if (this.positions.length === 0) {
       throw Error(`Player.createFigures(field) positions is empty array`);
     }
-    field[this.positions[0].x][this.positions[0].y].figure = new Rook(this.side, this.positions[0]);
-    field[this.positions[1].x][this.positions[1].y].figure = new Knight(this.side, this.positions[1]);
-    field[this.positions[2].x][this.positions[2].y].figure = new Bishop(this.side, this.positions[2]);
-    field[this.positions[3].x][this.positions[3].y].figure = new Queen(this.side, this.positions[3]);
-    field[this.positions[4].x][this.positions[4].y].figure = new King(this.side, this.positions[4]);
-    field[this.positions[5].x][this.positions[5].y].figure = new Bishop(this.side, this.positions[5]);
-    field[this.positions[6].x][this.positions[6].y].figure = new Knight(this.side, this.positions[6]);
-    field[this.positions[7].x][this.positions[7].y].figure = new Rook(this.side, this.positions[7]);
+    field[this.positions[0].x][this.positions[0].y].figure = new Rook(this.color, this.positions[0], this.side);
+    field[this.positions[1].x][this.positions[1].y].figure = new Knight(this.color, this.positions[1], this.side);
+    field[this.positions[2].x][this.positions[2].y].figure = new Bishop(this.color, this.positions[2], this.side);
+    field[this.positions[3].x][this.positions[3].y].figure = new Queen(this.color, this.positions[3], this.side);
+    field[this.positions[4].x][this.positions[4].y].figure = new King(this.color, this.positions[4], this.side);
+    field[this.positions[5].x][this.positions[5].y].figure = new Bishop(this.color, this.positions[5], this.side);
+    field[this.positions[6].x][this.positions[6].y].figure = new Knight(this.color, this.positions[6], this.side);
+    field[this.positions[7].x][this.positions[7].y].figure = new Rook(this.color, this.positions[7], this.side);
 
     for (let i = 8; i < 16; i++) {
-      field[this.positions[i].x][this.positions[i].y].figure = new Pawn(this.side, this.positions[i]);
+      field[this.positions[i].x][this.positions[i].y].figure = new Pawn(this.color, this.positions[i], this.side);
     }
   }
 
@@ -110,11 +128,8 @@ export default class Player {
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
         const cell = field[i][j];
-        if (cell.figure !== null) {
-          const figure = cell.figure;
-          if (figure.name === 'King' && figure.color === this.side) {
-            return figure;
-          }
+        if (cell?.figure?.name === 'King' && cell?.figure?.side === this.side) {
+          return cell.figure;
         }
       }
     }
@@ -162,27 +177,25 @@ export default class Player {
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
         const cell = field[i][j];
-        if (cell.figure !== null) {
-          const figure = cell.figure;
-          if (figure.name === 'Pawn' && figure.color === this.side) {
-            obj.pawn++;
-          }
-          if (figure.name === 'Queen' && figure.color === this.side) {
-            obj.queen++;
-          }
-          if (figure.name === 'Rook' && figure.color === this.side) {
-            obj.rook++;
-          }
-          if (figure.name === 'Knight' && figure.color === this.side) {
-            obj.knight++;
-          }
-          if (figure.name === 'Bishop' && figure.color === this.side) {
-            obj.bishop++;
-          }
-          if (figure.color === this.side && figure.name !== 'King') {
-            obj.all.quantity++;
-            obj.all.figures.push(figure);
-          }
+        const figure = cell.figure;
+        if (figure?.name === 'Pawn' && figure?.side === this.side) {
+          obj.pawn++;
+        }
+        if (figure?.name === 'Queen' && figure?.side === this.side) {
+          obj.queen++;
+        }
+        if (figure?.name === 'Rook' && figure?.side === this.side) {
+          obj.rook++;
+        }
+        if (figure?.name === 'Knight' && figure?.side === this.side) {
+          obj.knight++;
+        }
+        if (figure?.name === 'Bishop' && figure?.side === this.side) {
+          obj.bishop++;
+        }
+        if (figure?.side === this.side && figure?.name !== 'King') {
+          obj.all.quantity++;
+          obj.all.figures.push(figure);
         }
       }
     }
@@ -197,16 +210,22 @@ export default class Player {
    * @param {Boolean} xray if value `true` enables xray vision, otherwise not
    * @description Returns array of available figures moves
    * @returns {Array} Array
+   * @throws Error - if `whatType` is not String
+   * @throws Error - if `whatType` is not 'all' or 'check' or 'kill' or 'move' or 'moveAndKill' or 'cover' or 'pawn'
+   * @throws Error - if `xray` is not Boolean
    * @example 
    * const f = new Field()
    * const allMoves = this.allAvailableMoves(f.board, 'move')
    */
   allAvailableMoves(field, whatType='', xray=false) {
     if (typeof whatType !== 'string') {
-      throw Error(`Player.allAvailableMoves(field, whatType) whatType must be String`)
+      throw Error(`Player.allAvailableMoves(field, whatType, xray) whatType must be String`)
     }
     if (!['all', 'check', 'kill', 'move', 'moveAndKill', 'cover', 'pawn'].includes(whatType)) {
-      throw Error(`Player.allAvailableMoves(field, whatType) whatType must be 'all' or 'check' or 'kill' or 'move' or 'moveAndKill' or 'cover' or 'pawn'`)
+      throw Error(`Player.allAvailableMoves(field, whatType, xray) whatType must be 'all' or 'check' or 'kill' or 'move' or 'moveAndKill' or 'cover' or 'pawn'`);
+    }
+    if (typeof xray !== 'boolean') {
+      throw Error(`Player.allAvailableMoves(field, whatType, xray) xray must be Boolean`);
     }
     const allFigures = this.countFigures(field);
     const figures = allFigures.all.figures;

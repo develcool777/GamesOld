@@ -27,11 +27,12 @@ export default class Game {
    * @property {Boolean} isPawnPromotion - value is `true` if pawn is ready to promote, otherwise `false`
    * @property {Object} enPassant - value is `null` if there is no pawn to capture on enPassant move, otherwise coordinates{x, y} of pawn
    * @property {Number} materialRatio - value is `Integer`, shows who have material advantage, if value greater than 0, white have advantage, otherwise black
+   * @property {Boolean} isBoardFlipped - value is `false` if black side is `up` and white is `down`, otherwise true
    */
   constructor() {
     const field = new Field();
-    const playerWhite = new Player('white');
-    const playerBlack = new Player('black');
+    const playerBlack = new Player('up', 'black');
+    const playerWhite = new Player('down', 'white');
     let defendMoves = [];
     let historyOfMoves = [];
     let whoMoves = 'white';
@@ -44,6 +45,7 @@ export default class Game {
     let isPawnPromotion = false;
     let enPassant = null;
     let materialRatio = 0;
+    let isBoardFlipped = false;
     Object.defineProperties(this, {
       field: {
         get: () => field
@@ -160,6 +162,15 @@ export default class Game {
             throw Error(`Game.materialRatio.set(value) value must be Integer`);
           }
           materialRatio = value;
+        }
+      },
+      isBoardFlipped: {
+        get: () => isBoardFlipped,
+        set: (value) => {
+          if (typeof value !== 'boolean') {
+            throw Error(`Game.isBoardFlipped.set(value) value must be Boolean`);
+          }
+          isBoardFlipped = value;
         }
       }
     });
@@ -413,9 +424,10 @@ export default class Game {
    */
   async pawnPromotion(field, figureName, position) {
     const color = figureName.substring(0, 5);
+    const player = color === this.playerWhite.color ? this.playerWhite : this.playerBlack;
     const name = figureName.substring(5).toLowerCase();
     let {default: figure} = await import(`@/model/chess/figures/${name}`)
-    const fig = new figure(color, position);
+    const fig = new figure(color, position, player.side); 
     this.isPawnPromotion = false;
     field[position.x][position.y].figure = fig;
     field[position.x][position.y].isAvailableFor = '';
@@ -439,8 +451,8 @@ export default class Game {
    */
   checkForCheck(figure) {
     // determine player who make check
-    const playerAttack = figure.color === this.playerWhite.side ? this.playerWhite : this.playerBlack;
-    const playerDefend = playerAttack.side === 'white' ? this.playerBlack : this.playerWhite;
+    const playerAttack = figure.color === this.playerWhite.color ? this.playerWhite : this.playerBlack;
+    const playerDefend = playerAttack.color === 'white' ? this.playerBlack : this.playerWhite;
 
     const allAvailableChecks = playerAttack.allAvailableMoves(this.field.board, 'check');
     const KingPosition = playerDefend.getKing(this.field.board).position;
@@ -463,7 +475,7 @@ export default class Game {
    */
   checkDefense() {
     const playerDefend = this.whoMoves === 'white' ? this.playerWhite : this.playerBlack;
-    const playerAttack = playerDefend.side === 'white' ? this.playerBlack : this.playerWhite;
+    const playerAttack = playerDefend.color === 'white' ? this.playerBlack : this.playerWhite;
     const attackFigures = playerAttack.getAttackFigures(this.field.board);
     // if there are 2 attack figures, so in this case king must move, figures can't defend king
     if (attackFigures.length > 1) {
@@ -524,8 +536,8 @@ export default class Game {
   kingMoves(king) {
     if (king.name !== "King") { return }
 
-    const playerDefend = king.color === this.playerWhite.side ? this.playerWhite : this.playerBlack;
-    const playerAttack = playerDefend.side === 'white' ? this.playerBlack : this.playerWhite;  
+    const playerDefend = king.color === this.playerWhite.color ? this.playerWhite : this.playerBlack;
+    const playerAttack = playerDefend.color === 'white' ? this.playerBlack : this.playerWhite;  
     const attackMoves = playerAttack.allAvailableMoves(this.field.board, 'move');
     const attackCovers = playerAttack.allAvailableMoves(this.field.board, 'cover');
     const AllKingMoves = playerDefend.kingMoves(this.field.board);
@@ -611,8 +623,8 @@ export default class Game {
       figureMove.enPassant.push(enPassant);
     }
 
-    const playerDefend = figure.color === this.playerWhite.side ? this.playerWhite : this.playerBlack;
-    const playerAttack = playerDefend.side === 'white' ? this.playerBlack : this.playerWhite;
+    const playerDefend = figure.color === this.playerWhite.color ? this.playerWhite : this.playerBlack;
+    const playerAttack = playerDefend.color === 'white' ? this.playerBlack : this.playerWhite;
 
     // if figure defend king: no move or kill the attack figure
     const attackFigures = playerAttack.getAttackFigures(this.field.board, true);
@@ -667,15 +679,15 @@ export default class Game {
     if (pawn.name !== 'Pawn') { return null }
     if (this.enPassant === null) { return null }
     const pos = pawn.position;
-    if (pawn.color === 'white' && pos.x !== 3) { return null }
-    if (pawn.color === 'black' && pos.x !== 4) { return null }
+    if (pawn.side === 'up' && pos.x !== 4) { return null }
+    if (pawn.side === 'down' && pos.x !== 3) { return null }
 
     // left
     const leftFigure = this.field.board[pos.x][pos.y - 1]?.figure || null;
     const lpos = leftFigure?.position.x === this.enPassant.x && leftFigure?.position.y === this.enPassant.y;
     if (leftFigure?.name === 'Pawn' && leftFigure?.color !== pawn.color && lpos) {
       return {
-        x: pos.x + (pawn.color === 'white' ? -1 : 1),
+        x: pos.x + (pawn.side === 'down' ? -1 : 1),
         y: pos.y - 1
       }
     } 
@@ -684,7 +696,7 @@ export default class Game {
     const rpos = rightFigure?.position.x === this.enPassant.x && rightFigure?.position.y === this.enPassant.y;
     if (rightFigure?.name === 'Pawn' && leftFigure?.color !== pawn.color && rpos) {
       return  {
-        x: pos.x + (pawn.color === 'white' ? -1 : 1),
+        x: pos.x + (pawn.side === 'down' ? -1 : 1),
         y: pos.y + 1
       }
     }
@@ -722,5 +734,61 @@ export default class Game {
     }, 0);
 
     this.materialRatio = sumWhite - sumBlack;
+  }
+
+
+  /**
+   * @method flipBoard
+   * @memberof Chess#Game#
+   * @description Flips board   
+   * @returns {undefined} undefined
+   * @example this.flipBoard()
+   */
+  flipBoard() {
+    const transpose = matrix => {
+      for (let row = 0; row < matrix.length; row++) {
+        for (let column = 0; column < row; column++) {
+          let temp = matrix[row][column];
+          matrix[row][column] = matrix[column][row];
+          matrix[column][row] = temp;
+        }
+      }
+      return matrix;
+    }
+    const reverse = matrix => matrix.map(row => row.reverse());
+
+    reverse(transpose(reverse(transpose(this.field.board))));
+    this.playerWhite.side = this.playerWhite.side === 'up' ? 'down' : 'up';
+    this.playerBlack.side = this.playerWhite.side === 'up' ? 'down' : 'up';
+    let oldChanged = false;
+    let newChanged = false;
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        const field = this.field.board[i][j];
+        // change position of figure
+        if (field.figure !== null) {
+          const color = field.figure.color;
+          field.figure.side = color === this.playerWhite.color ? this.playerWhite.side : this.playerBlack.side;
+          field.figure.position.x = i;
+          field.figure.position.y = j;
+        }
+        // change position of oldPosition
+        if (field.position.x === this.oldPosition?.x && field.position.y === this.oldPosition?.y && !oldChanged) {
+          this.oldPosition.x = i;
+          this.oldPosition.y = j;
+          oldChanged = true;
+        }
+        // change position of newPosition
+        if (field.position.x === this.newPosition?.x && field.position.y === this.newPosition?.y && !newChanged) {
+          this.newPosition.x = i;
+          this.newPosition.y = j;
+          newChanged = true;
+        }
+        // cell
+        field.position.x = i; 
+        field.position.y = j;
+      }
+    }
+    this.isBoardFlipped = !this.isBoardFlipped;
   }
 }

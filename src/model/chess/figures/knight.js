@@ -9,15 +9,20 @@ export default class Knight extends Figures {
    * @classdesc This class represents the logic of Knight figure
    * @param {String} color - color of the figure
    * @param {Object} position - position of the figure 
+   * @param {String} side - side of the figure 
    * @constructor
    * @property {String} color - this `color`
    * @property {Object} position - this `position`
+   * @property {Object} side - this `side`
    * @property {String} name - name of the figure
    * @throws Error - if `color` is not String
    * @throws Error - if `color` is not 'white' or 'black'
-   * @throws Error - if `position` is Object with keys: 'x' and 'y'
+   * @throws Error - if `position` is not Object
+   * @throws Error - if `position` is not Object with keys: 'x' and 'y'
+   * @throws Error - if `side` is not String
+   * @throws Error - if `side` is not 'up' or 'down'
    */
-  constructor(color, position) {
+  constructor(color, position, side) {
     super();
 
     if (typeof color !== 'string') {
@@ -26,13 +31,34 @@ export default class Knight extends Figures {
     if (!['white', 'black'].includes(color)) {
       throw Error(`Knight.constructor color must be 'white' or 'black'`);
     }
-    if (Object.keys(position).join('') !== 'xy') {
+    if (typeof position !== 'object' || position === null || Array.isArray(position)) {
+      throw Error(`Knight.constructor position must be Object`);
+    }
+    if (['x', 'y'].every(prop => !Object.prototype.hasOwnProperty.call(position, prop))) {
       throw Error(`Knight.constructor position must be Object with keys x and y`);
+    }
+    if (typeof side !== 'string') {
+      throw Error(`Knight.constructor side must be String`);
+    }
+    if (!['up', 'down'].includes(side)) {
+      throw Error(`Knight.constructor side must be 'up' or 'down'`);
     }
     const name = 'Knight';
     Object.defineProperties(this, {
       color: {
         get: () => color
+      },
+      side: {
+        get: () => side,
+        set: (value) => {
+          if (typeof value !== 'string') {
+            throw Error(`Knight.side.set(value) value be String`);
+          }
+          if (!['up', 'down'].includes(value)) {
+            throw Error(`Knight.side.set(value) value must be 'up' or 'down'`);
+          }
+          side = value;
+        }
       },
       position: {
         get: () => position

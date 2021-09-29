@@ -10,7 +10,7 @@
     </div>
 
     <div class="material__mainLineWrap">
-      <div class="material__mainLine" :style="{height: `${height}px`}"></div>
+      <div class="material__mainLine" :style="styleLine"></div>
       <div class="material__ratio">{{ showRatio() }}</div>
     </div>
   </div>
@@ -20,7 +20,8 @@
 export default {
   name: 'MaterialRatio',
   props: {
-    matirealRatio: Number
+    matirealRatio: Number,
+    boardFlipped: Boolean
   },
   watch: {
     matirealRatio: function(newVal, OldVal) {
@@ -40,6 +41,11 @@ export default {
   },
   created() {
     this.calcMainLine(0, 0, 0);
+  },
+  computed: {
+    styleLine() {
+      return this.boardFlipped ? {height: `${this.height}px`, top: 0} : {height: `${this.height}px`, bottom: 0}
+    }
   },
   methods: {
     calcLines(i) {
@@ -79,6 +85,7 @@ export default {
   width: 20px;
   height: calc(100% + 60px);
   background: dimgray;
+  
   &__lines, &__mainLineWrap {
     position: relative;
   }
@@ -101,7 +108,6 @@ export default {
 
   &__mainLine {
     position: absolute;
-    bottom: 0;
     width: 100%;
     z-index: 2;
     background: whitesmoke;

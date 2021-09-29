@@ -3,7 +3,7 @@
     <div class="instChess__mainBtns">
       <div class="instChess__mainBtn" @click="changeBtnName('start')">{{ showBtnName() }}</div>
       <div class="instChess__mainBtn" @click="clear()">Clear Board</div>
-      <!-- <div class="instChess__mainBtn" @click="returnMove()">Return move</div> -->
+      <div class="instChess__mainBtn" @click="flipBoard()">Flip board</div>
       <div class="instChess__analyze" v-if="getAnalyze">
         <div class="instChess__title">Controls</div>
         <div class="instChess__analyzeBtns">
@@ -60,6 +60,10 @@ export default {
 
     changePosition(direction) {
       this.$emit('changePosition', direction);
+    },
+
+    flipBoard() {
+      this.$emit('flipBoard');
     }
   }
 }

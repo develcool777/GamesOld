@@ -8,18 +8,23 @@ export default class Pawn extends Figures  {
    * @classdesc This class represents the logic of Pawn figure
    * @param {String} color - color of the figure
    * @param {Object} position - position of the figure 
+   * @param {String} side - side of the figure 
    * @constructor
    * @property {String} color - this `color`
    * @property {Object} position - this `position`
+   * @property {Object} side - this `side`
    * @property {String} name - name of the figure
    * @property {Boolean} firstMove - if pawn have not made move yet, the value is `true` otherwise `false`
    * @property {Boolean} promotion - value will be `true` if pawn is ready for promotion otherwise `false`
    * @property {Boolean} enPassant - value will be `true` if pawn is ready if pawn is ready to be captured with enPassant move, otherwise `false`
    * @throws Error - if `color` is not String
    * @throws Error - if `color` is not 'white' or 'black'
-   * @throws Error - if `position` is Object with keys: 'x' and 'y'
+   * @throws Error - if `position` is not Object
+   * @throws Error - if `position` is not Object with keys: 'x' and 'y'
+   * @throws Error - if `side` is not String
+   * @throws Error - if `side` is not 'up' or 'down'
    */
-  constructor(color, position) {
+  constructor(color, position, side) {
     super();
 
     if (typeof color !== 'string') {
@@ -28,8 +33,17 @@ export default class Pawn extends Figures  {
     if (!['white', 'black'].includes(color)) {
       throw Error(`Pawn.constructor color must be 'white' or 'black'`);
     }
-    if (Object.keys(position).join('') !== 'xy') {
+    if (typeof position !== 'object' || position === null || Array.isArray(position)) {
+      throw Error(`Pawn.constructor position must be Object`);
+    }
+    if (['x', 'y'].every(prop => !Object.prototype.hasOwnProperty.call(position, prop))) {
       throw Error(`Pawn.constructor position must be Object with keys x and y`);
+    }
+    if (typeof side !== 'string') {
+      throw Error(`Pawn.constructor side must be String`);
+    }
+    if (!['up', 'down'].includes(side)) {
+      throw Error(`Pawn.constructor side must be 'up' or 'down'`);
     }
     const name = 'Pawn';
     let firstMove = true;
@@ -38,6 +52,18 @@ export default class Pawn extends Figures  {
     Object.defineProperties(this, {
       color: {
         get: () => color
+      },
+      side: {
+        get: () => side,
+        set: (value) => {
+          if (typeof value !== 'string') {
+            throw Error(`Pawn.side.set(value) value be String`);
+          }
+          if (!['up', 'down'].includes(value)) {
+            throw Error(`Pawn.side.set(value) value must be 'up' or 'down'`);
+          }
+          side = value;
+        }
       },
       position: {
         get: () => position
@@ -104,7 +130,7 @@ export default class Pawn extends Figures  {
       cover: [],
       dontAllowKingToMove: [],
     }
-    let move = this.color === 'white' ? -1 : 1;
+    let move = this.side === 'down' ? -1 : 1;
 
     const condition = x => {
       if (this.position.x + x === field.length || this.position.x + x < 0) {
@@ -142,17 +168,15 @@ export default class Pawn extends Figures  {
         y: this.position.y + item
       }
 
-      if (condition2(move, item) !== null) {
-        if (condition2(move, item).color !== this.color) {
-          if (condition2(move, item).name === 'King') {
-            available.check.push(obj);
-            return acc;
-          }
-          acc.push(obj)
-        } 
-        else {
-          available.cover.push(obj);
+      if (condition2(move, item)?.color !== this.color) {
+        if (condition2(move, item).name === 'King') {
+          available.check.push(obj);
+          return acc;
         }
+        acc.push(obj)
+      } 
+      else {
+        available.cover.push(obj);
       }
 
       if (obj.y !== -1 && obj.y !== 8) {
@@ -182,10 +206,10 @@ export default class Pawn extends Figures  {
 
     if (this.firstMove) {
       this.firstMove = false;
-      if (this.color === 'white' && this.position.x === 4) {
+      if (this.side === 'down' && this.position.x === 4) {
         this.enPassant = true;
       }
-      if (this.color === 'black' && this.position.x === 3) {
+      if (this.side === 'up' && this.position.x === 3) {
         this.enPassant = true;
       }
     }

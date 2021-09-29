@@ -53,7 +53,7 @@ export default {
 .resultChess {
   @include Result();
   &__description {
-    font-size: rem(25);
+    font-size: 25px;
   }
 	&__btns {
 		justify-content: space-around;
