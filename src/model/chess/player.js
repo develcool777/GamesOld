@@ -178,22 +178,22 @@ export default class Player {
       for (let j = 0; j < 8; j++) {
         const cell = field[i][j];
         const figure = cell.figure;
-        if (figure?.name === 'Pawn' && figure?.side === this.side) {
+        if (figure?.name === 'Pawn' && figure?.color === this.color) {
           obj.pawn++;
         }
-        if (figure?.name === 'Queen' && figure?.side === this.side) {
+        if (figure?.name === 'Queen' && figure?.color === this.color) {
           obj.queen++;
         }
-        if (figure?.name === 'Rook' && figure?.side === this.side) {
+        if (figure?.name === 'Rook' && figure?.color === this.color) {
           obj.rook++;
         }
-        if (figure?.name === 'Knight' && figure?.side === this.side) {
+        if (figure?.name === 'Knight' && figure?.color === this.color) {
           obj.knight++;
         }
-        if (figure?.name === 'Bishop' && figure?.side === this.side) {
+        if (figure?.name === 'Bishop' && figure?.color === this.color) {
           obj.bishop++;
         }
-        if (figure?.side === this.side && figure?.name !== 'King') {
+        if (figure?.color === this.color && figure?.name !== 'King') {
           obj.all.quantity++;
           obj.all.figures.push(figure);
         }

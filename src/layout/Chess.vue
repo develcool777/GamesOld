@@ -4,10 +4,10 @@
       <div class="chess__field">
         <div class="chess__row" v-for="(row, i) in board" :key="i">
           <div 
-            :class="[chooseCellColor(cell, i, j), 'chess__cell']"  
+            :class="[chooseCellColor(cell), 'chess__cell']"  
             v-for="(cell, j) in row" 
             :key="j"
-            @click="clickOnCell(cell, i, j)"
+            @click="clickOnCell(cell)"
             @drop="onDrop($event, cell)"
             @dragenter="dragEnter($event, cell)"
             @dragleave="dragLeave($event)"
@@ -59,12 +59,21 @@
       </div>
     </div>
     <Instruction 
-      class="chess__instruction" 
-      v-on:changePosition="changePosition($event)"
+      class="chess__instruction"
+      :gameStatus="getGameStatus"
+      :historyLen="getHistoryLength"
+      v-on:startGame="startGame()" 
+      v-on:changePosition="showHistory($event)"
       v-on:flipBoard="flipBoard()"
+      v-on:returnMove="returnMove()"
+      v-on:clearBoard="clearBoard()"
     />
   </div>
-  <ResultChess/>
+  <ResultChess 
+    :gameStatus="getGameStatus"
+    v-on:clearBoard="clearBoard()"
+    v-on:newGame="newGame()"
+  />
   <transition name="fade">
     <Loading 
       v-if="loading" 
@@ -95,16 +104,8 @@ export default {
     MaterialRatio
   },
   watch: {
-    clearBoard: function(newVal) {
-      if (newVal) {
-        this.GAME.clearField();
-        this.CHANGE_CLEAR_BOARD(false);
-      }
-    },
-
     analyze: function(newVal) {
-      newVal && this.historyRender(this.GAME.historyOfMoves[0]);
-      !newVal && this.draw();
+      newVal && this.showHistory('start');
     }
   },
   data() {
@@ -114,33 +115,35 @@ export default {
       dontClick: false,
       loading: true,
       navigation: false,
-      index: 0
     }
   },
   async created() {
     setTimeout(() => {this.loading = false}, 2000);
     await this.init();
   },
-  beforeUnmount() {
-    this.CHANGE_GAME_STATUS('');
-  },
   computed: {
-    ...mapState(['clearBoard', 'analyze']),
+    ...mapState(['analyze']),
 
-    ...mapGetters(['getGameStatus', 'getFigures']),
+    ...mapGetters(['getFigures', 'getAnalyze']),
 
     getMatirealRatio() {
       return this.GAME.materialRatio;
     },
 
     getIsBoardFlipped() {
-      return this.GAME.isBoardFlipped;
+      return this.GAME.field.isBoardFlipped;
+    },
+
+    getGameStatus() {
+      return this.GAME.gameStatus;
+    },
+
+    getHistoryLength() {
+      return this.GAME.field.historyOfMoves.length;
     }
   },
   methods: {
-    ...mapActions(['CHANGE_GAME_RESULT', 'CHANGE_GAME_STATUS', 'CHANGE_CLEAR_BOARD', 
-      'CHANGE_SHOW_MODAL', 'SET_FIGURES'
-    ]),
+    ...mapActions(['CHANGE_GAME_RESULT', 'CHANGE_SHOW_MODAL', 'SET_FIGURES']),
 
     async init() {
       this.GAME = new Game();
@@ -151,13 +154,26 @@ export default {
       this.navigation = true;
     },
 
-    draw() {
-      this.board = this.GAME.field.board;
+    startGame() {
+      this.GAME.startGame();
     },
 
-    historyRender(historyOfMoves) {
-      this.board = historyOfMoves.field;
-      this.GAME.historyRender(historyOfMoves);
+    finishGame() {
+      this.GAME.finishGame();
+    },
+
+    clearBoard() {
+      this.GAME.clearField();
+      this.draw();
+    },
+
+    newGame() {
+      this.clearBoard();
+      this.startGame();
+    },
+
+    draw() {
+      this.board = this.GAME.field.board;
     },
 
     createFigure(cell) {
@@ -172,14 +188,14 @@ export default {
     },
 
     startDrag(event, cell) {
-      if (this.getGameStatus !== 'start' || this.GAME.whoMoves !== cell.figure.color) { return }
+      if (this.GAME.gameStatus !== 'start' || this.GAME.whoMoves !== cell.figure.color) { return }
       this.clickOnCell(cell, cell.position.x, cell.position.y);
       event.dataTransfer.dropEffect = 'move';
       event.dataTransfer.effectAllowed = 'move';
     },
 
     onDrop(event, cell) {
-      if (this.getGameStatus !== 'start') { return }  
+      if (this.GAME.gameStatus !== 'start') { return }  
       this.clickOnCell(cell, cell.position.x, cell.position.y);
       event.target.style.background = ''
     },
@@ -204,11 +220,11 @@ export default {
     },
 
     defineDrag(cell) {
-      if (cell.figure === null || this.getGameStatus !== 'start') { return false }
+      if (cell.figure === null || this.GAME.gameStatus !== 'start') { return false }
       return cell.figure.color === this.GAME.whoMoves;
     },
 
-    clickOnCell(cell, x, y) {
+    clickOnCell(cell) {
       // dont click after pawn promotion
       if (this.dontClick) {
         this.dontClick = false;
@@ -216,8 +232,8 @@ export default {
         return;
       }
 
-      if (this.getGameStatus === 'start') {
-        this.GAME.clickOnCellForMove(cell, x, y);
+      if (this.GAME.gameStatus === 'start') {
+        this.GAME.clickOnCellForMove(cell);
         this.gameResult();
         this.draw();
       }
@@ -225,7 +241,7 @@ export default {
     
     gameResult() {
       if (this.GAME.isCheckmate || this.GAME.isStalemate) {
-        this.CHANGE_GAME_STATUS('finish');
+        this.GAME.finishGame();
       }
       if (this.GAME.isCheckmate) {
         const winnerColor = this.GAME.whoMoves === 'white' ? 'black' : 'white';
@@ -242,54 +258,46 @@ export default {
         }
         this.CHANGE_GAME_RESULT(obj);
       }
-      if (this.getGameStatus === 'finish') {
+
+      if (this.GAME.gameStatus === 'finish') {
         this.CHANGE_SHOW_MODAL(true);
       }
     },
 
-    pawnPromotion(figureName, x, y) {
-      this.GAME.pawnPromotion(this.board, figureName, {x, y});
+    async pawnPromotion(figureName, x, y) {
+      await this.GAME.pawnPromotion(this.board, figureName, {x, y});
       this.dontClick = true
     },
 
-    changePosition(direction) {
-      if (direction === 'start') {
-        this.index = 0;
-        this.historyRender(this.GAME.historyOfMoves[this.index]);
-      }
-      if (direction === 'prev') {
-        this.index -= this.index === 0 ? 0 : 1;
-        this.historyRender(this.GAME.historyOfMoves[this.index]);
-      }
-      if (direction === 'next') {
-        this.index += this.index === this.GAME.historyOfMoves.length - 1 ? 0 : 1;
-        this.historyRender(this.GAME.historyOfMoves[this.index]);
-      }
-      if (direction === 'end') {
-        this.index = this.GAME.historyOfMoves.length - 1;
-        this.historyRender(this.GAME.historyOfMoves[this.index]);
-      }
-    },
-
-    flipBoard() {
-      this.GAME.flipBoard();
+    async showHistory(direction) {
+      await this.GAME.showHistory(direction);
       this.draw();
     },
 
-    chooseCellColor(cell, x, y) {
+    async returnMove() {
+      await this.GAME.returnMove();
+      this.draw();
+    },
+
+    flipBoard() {
+      this.GAME.flipBoard(this.getAnalyze);
+      this.draw();
+    },
+
+    chooseCellColor(cell) {
       if (cell.figure !== null && cell.figure.name === 'King' && cell.figure.color === this.GAME.whoMoves && this.GAME.isCheckmate) {
         return 'checkMate';
       }
-      if (this.GAME?.selectedCell?.position?.x === x && this.GAME?.selectedCell?.position?.y === y) {
+      if (cell.isSelected) {
         return 'selected';
       }
       if (cell.isAvailableFor === 'check' && cell.figure.color === this.GAME.whoMoves) {
         return 'check';
       }
-      if (this.GAME?.oldPosition?.x === x && this.GAME?.oldPosition?.y === y) {
+      if (cell.showsPosition === 'oldPosition') {
         return 'lastMoveOldPosition';
       }
-      if (this.GAME?.newPosition?.x === x && this.GAME?.newPosition?.y === y) {
+      if (cell.showsPosition === 'newPosition') {
         return 'lastMoveNewPosition';
       }
 
@@ -297,7 +305,7 @@ export default {
     },
 
     showCursorPointer(cell) {
-      if (cell.figure === null || this.getGameStatus !== 'start') { return 'default' }
+      if (cell.figure === null || this.GAME.gameStatus !== 'start') { return 'default' }
       return cell.figure.color === this.GAME.whoMoves ? 'pointer' : 'default';
     }
   }
@@ -310,6 +318,7 @@ export default {
   background: #24272E;
   position: relative;
   user-select: none;
+
   &__row {
     @include Flex(center);
   }
@@ -363,15 +372,15 @@ export default {
     justify-content: center;
     align-items: center;
     color: white;
-    font-size: rem(20);
+    font-size: 20px;
   }
 
   &__letter {
-    width: rem(78);
+    width: 78px;
   }
 
   &__number {
-    height: rem(78);
+    height: 78px;
   }
 
   &__mask {

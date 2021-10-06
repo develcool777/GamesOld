@@ -1,6 +1,6 @@
 <template>
 	<transition name="fade">
-		<div class="modal" v-if="getGameStatus === 'finish' && getShowModal">
+		<div class="modal" v-if="gameStatus === 'finish' && getShowModal">
 			<div class="mask"/>
 			<div class="resultChess center">
 				<div class="resultChess__close" @click="close()"></div>
@@ -20,14 +20,15 @@ const { mapGetters, mapActions } = createNamespacedHelpers('chess');
 
 export default {
 	name: "ResultChess",
+	props: {
+		gameStatus: String
+	},
 	computed: {
-		...mapGetters(['getGameResult', 'getGameStatus', 'getShowModal'])
+		...mapGetters(['getGameResult', 'getShowModal'])
 	},
   methods: {
     ...mapActions([
-			'CHANGE_GAME_RESULT', 'CHANGE_GAME_STATUS', 
-			'CHANGE_CLEAR_BOARD', 'CHANGE_SHOW_MODAL',
-			'CHANGE_ANALYZE'
+			'CHANGE_GAME_RESULT', 'CHANGE_SHOW_MODAL', 'CHANGE_ANALYZE'
 		]),
 
     close() {
@@ -38,8 +39,7 @@ export default {
 
 		newGame() {
 			this.close();
-			this.CHANGE_GAME_STATUS('start');
-			this.CHANGE_CLEAR_BOARD(true);
+			this.$emit('newGame');
 		},
 
 		analyze() {

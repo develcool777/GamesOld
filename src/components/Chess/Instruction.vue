@@ -1,10 +1,13 @@
 <template>
   <section class="instChess">
     <div class="instChess__mainBtns">
-      <div class="instChess__mainBtn" @click="changeBtnName('start')">{{ showBtnName() }}</div>
+      <div class="instChess__mainBtn" @click="startGame('start')">{{ showBtnName() }}</div>
       <div class="instChess__mainBtn" @click="clear()">Clear Board</div>
-      <div class="instChess__mainBtn" @click="flipBoard()">Flip board</div>
+      <div class="instChess__mainBtn" v-if="['start', 'finish'].includes(gameStatus)" @click="flipBoard()">Flip Board</div>
+      <div class="instChess__mainBtn" v-if="historyLen > 1" @click="returnMove()">Return Move</div>
+      <History/>
       <div class="instChess__analyze" v-if="getAnalyze">
+
         <div class="instChess__title">Controls</div>
         <div class="instChess__analyzeBtns">
           <div class="instChess__start" title="To start position" @click="changePosition('start')"></div>
@@ -20,43 +23,47 @@
 <script>
 import { createNamespacedHelpers } from 'vuex'
 const { mapGetters, mapActions } = createNamespacedHelpers('chess');
+import History from '@/components/Chess/History';
 export default {
   name: 'Instruction',
+  components: {
+    History
+  },
+  props: {
+    gameStatus: String,
+    historyLen: Number
+  },
   computed: {
-    ...mapGetters(['getGameStatus', 'getAnalyze']) 
+    ...mapGetters(['getAnalyze']) 
   },
   methods: {
-    ...mapActions([
-      'CHANGE_GAME_STATUS', 'CHANGE_RETURN_MOVE', 
-      'CHANGE_CLEAR_BOARD', 'CHANGE_ANALYZE'
-    ]),
+    ...mapActions(['CHANGE_ANALYZE']),
 
     showBtnName() {
-      if (this.getGameStatus === 'start') {
+      if (this.gameStatus === 'start') {
         return 'Game Started';
       }
-      if (this.getGameStatus === '') {
+      if (this.gameStatus === '') {
         return 'Start Game';
       }
-      if (this.getGameStatus === 'finish') {
+      if (this.gameStatus === 'finish') {
         return 'Game Finished';
       }
     },
     
-    changeBtnName(name) {
-      if (this.getGameStatus === 'finish') { return }
-      this.CHANGE_GAME_STATUS(name);
+    startGame() {
+      if (this.gameStatus === 'finish' || this.gameStatus === 'start') { return }
+      this.$emit('startGame');
     },
 
     clear() {
-      this.CHANGE_CLEAR_BOARD(true);
-      this.CHANGE_GAME_STATUS('');
+      this.$emit('clearBoard');
       this.CHANGE_ANALYZE(false);
     },
 
-    // returnMove() {
-    //   this.CHANGE_RETURN_MOVE(true);
-    // },
+    returnMove() {
+      this.$emit('returnMove');
+    },
 
     changePosition(direction) {
       this.$emit('changePosition', direction);

@@ -106,7 +106,7 @@ export default class King extends Figures {
     };
     
     const check = (x=0, y=0) => {
-      if (field[x] === undefined || field[x][y] === undefined) { return }
+      if (field[x]?.[y] === undefined) { return }
       if (field[x][y].figure !== null) {
         if (field[x][y].figure.color !== this.color) { available.kill.push({x, y}) }
         available.cover.push({x, y});
@@ -142,14 +142,16 @@ export default class King extends Figures {
    * const castle = this.availableCastle(f.board)
    */
   availableCastle(field) {
-    const result = []
-    const movesShort = [1, 2];
-    const movesLong = [-1, -2, -3];
+    const result = [];
+    const condition = this.color === 'white' && this.side === 'down' || this.color === 'black' && this.side === 'up'; 
+    const movesShort = condition ? [1, 2] : [-1, -2];
+    const movesLong = condition ? [-1, -2, -3] : [1, 2, 3];
+
     if (this.checkCastle(field, movesShort, movesShort.length)) {
-      result.push({x: this.position.x, y: 6});
+      result.push({x: this.position.x, y: condition ? 6 : 1});
     }
     if (this.checkCastle(field, movesLong, movesLong.length)) {
-      result.push({x: this.position.x, y: 2}); 
+      result.push({x: this.position.x, y: condition ? 2 : 5}); 
     }
     return result;
   }
@@ -180,13 +182,10 @@ export default class King extends Figures {
     }
 
     const figure = field[this.position.x][this.position.y + moves[0] * (countEmpty + 1)].figure
-    if (figure?.name !== 'Rook') {
+    if (figure?.name !== 'Rook' || !figure.firstMove) {
       return false;
     }
 
-    if (!figure.firstMove) {
-      return false;
-    }
     return true;
   }
 
@@ -211,9 +210,14 @@ export default class King extends Figures {
     if (!isCastleAvailable) { return }
 
     // determine where is rook
-    const sign = cordinates[1] > this.position.y ? 1 : -2;
-    const rook = field[cordinates[0]][cordinates[1] + sign].figure;
-    const newRookPosition = sign < 0 ? [cordinates[0], 3] : [cordinates[0], 5];
+    let y = cordinates[1] > this.position.y ? 7 : 0;
+    const rook = field[cordinates[0]][y].figure;
+    let newRookPosition = y === 0 ? [cordinates[0], 3] : [cordinates[0], 5];
+    const condition = this.color === 'white' && this.side === 'down' || this.color === 'black' && this.side === 'up'; 
+    if (!condition) {
+      newRookPosition = y === 0 ? [cordinates[0], 2] : [cordinates[0], 4]
+    } 
+ 
 
     super.moveFigure(field, rook, ...newRookPosition);
     super.moveFigure(field, this, ...cordinates);

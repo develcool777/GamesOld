@@ -132,11 +132,11 @@ export default class Pawn extends Figures  {
     }
     let move = this.side === 'down' ? -1 : 1;
 
-    const condition = x => {
-      if (this.position.x + x === field.length || this.position.x + x < 0) {
+    const condition = (x, y=0) => {
+      if (field[this.position.x + x]?.[this.position.y + y] === undefined) {
         return undefined;
       }
-      return field[this.position.x + x][this.position.y].figure;
+      return field[this.position.x + x][this.position.y + y].figure;
     }
 
     // moves
@@ -152,24 +152,14 @@ export default class Pawn extends Figures  {
     }, [])
 
     // kills
-    const condition2 = (x, y) => {
-      if (this.position.x + x === field.length || this.position.x + x < 0) {
-        return null;
-      }
-      if (this.position.y + y === field.length || this.position.y + y < 0) {
-        return null;
-      } 
-      return field[this.position.x + x][this.position.y + y].figure;
-    }
-
     available.kill = [1, -1].reduce((acc, item) => {
       const obj = {
         x: this.position.x + move,
         y: this.position.y + item
       }
-
-      if (condition2(move, item)?.color !== this.color) {
-        if (condition2(move, item).name === 'King') {
+      const figure = condition(move, item) || null;
+      if (figure !== null && figure.color !== this.color) {
+        if (figure.name === 'King') {
           available.check.push(obj);
           return acc;
         }
