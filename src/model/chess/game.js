@@ -25,6 +25,7 @@ export default class Game {
    * @property {Object} enPassant - value is `null` if there is no pawn to capture on enPassant move, otherwise coordinates{x, y} of pawn
    * @property {Number} materialRatio - value is `Integer`, shows who have material advantage, if value greater than 0, white have advantage, otherwise black
    * @property {String} gameStatus - shows game status
+   * @property {String} gameResult - shows game result
    */
   constructor() {
     const field = new Field();
@@ -40,6 +41,7 @@ export default class Game {
     let enPassant = null;
     let materialRatio = 0;
     let gameStatus = '';
+    let gameResult = '';
     Object.defineProperties(this, {
       field: {
         get: () => field
@@ -151,6 +153,16 @@ export default class Game {
           }
           gameStatus = value;
         }
+      },
+
+      gameResult: {
+        get: () => gameResult,
+        set: (value) => {
+          if (typeof value !== 'string') {
+            throw Error(`Game.gameResult.set(value) value must be String`);
+          }
+          gameResult = value;
+        }
       }
     });
   }
@@ -185,6 +197,7 @@ export default class Game {
     this.isStalemate = false;
     this.isCheck = false;
     this.gameStatus = '';
+    this.gameResult = '';
     this.createField();
     this.createFigures();
   }
@@ -211,12 +224,13 @@ export default class Game {
    * @memberof Chess#Game#
    * @description Makes history by pushing `obj` to `historyOfMoves`
    * @param {String} whoMoved - shows who moved 'white' or 'black' or ''(at the begining of game);
+   * @param {Object} historyNotation
    * @returns {undefined} undefined
    * @throws Error - if `whoMoved` is not String
    * @throws Error - if `whoMoved` is not 'white' or 'black' or ''
    * @example await this.makeHistory()
    */
-  async makeHistory(whoMoved) {
+  async makeHistory(whoMoved, historyNotation) {
     if (typeof whoMoved !== 'string') {
       throw Error(`Game.makeHistory(whoMoved) whoMoved must be String`);
     }
@@ -230,7 +244,9 @@ export default class Game {
       isStalemate: this.isStalemate,
       enPassant: this.enPassant === null ? null : Object.assign({}, this.enPassant),
       playerWhiteSide: this.playerWhite.side,
-      playerBlackSide: this.playerBlack.side
+      playerBlackSide: this.playerBlack.side,
+      notation: historyNotation,
+      materialRatio: this.materialRatio
     }
     await this.field.makeHistory(obj); 
   }
@@ -239,25 +255,25 @@ export default class Game {
    * @async
    * @method showHistory
    * @memberof Chess#Game#
-   * @description Shows history 
-   * @param {String} direction - shows how to move in history
+   * @description Shows move in history by index 
+   * @param {Number} index - history index
    * @returns {undefined} undefined
-   * @throws Error - if `direction` is not String
-   * @throws Error - if `direction` is not 'start', 'prev', 'next', 'end'
-   * @example await this.showHistory()
+   * @throws Error - if `index` is not Integer
+   * @example await this.showHistory(0)
    */
-  async showHistory(direction) {
-    if (typeof direction !== 'string') {
-      throw Error(`Game.showHistory(direction) direction must be String`);
+  async showHistory(index) {
+    if (!Number.isInteger(index)) {
+      throw Error(`Game.showHistory(index) index must be Integer`);
     }
-    if (!['start', 'prev', 'next', 'end'].includes(direction)) {
-      throw Error(`Game.showHistory(direction) direction must be 'start', 'prev', 'next', 'end'`);
-    }
-    [
-      this.isCheckmate, this.isCheck, this.isStalemate,
-      this.playerWhite.side, this.playerBlack.side
-    ] = await this.field.showHistory(direction);
-    this.calcMaterialRatio(this.field.board);
+
+    const history = await this.field.showHistory(index);
+    this.isCheckmate = history.isCheckmate;
+    this.isCheck = history.isCheck;
+    this.isStalemate = history.isStalemate;
+    this.playerWhite.side = history.playerWhiteSide;
+    this.playerBlack.side = history.playerBlackSide;
+    this.materialRatio = history.materialRatio;
+    // this.calcMaterialRatio(this.field.board);
   }
 
   /**
@@ -333,7 +349,8 @@ export default class Game {
       return;
     }
 
-    const figure = this.selectedCell.figure
+    const figure = this.selectedCell.figure;
+    const copyData = this.copyDataForNotation(cell, figure);
     const oldPosition = Object.assign({}, figure.position);
 
     if (cell.isAvailableFor === 'castle') {
@@ -372,13 +389,17 @@ export default class Game {
     this.whoMoves = this.whoMoves === 'white' ? 'black' : 'white';
 
     this.checkPawnPromotion(figure);
-    if (this.isPawnPromotion) { return } // return to make promotion move
+    if (this.isPawnPromotion) { 
+      this.dataForPromotionNotation = [...copyData];
+      return; // return to make promotion move
+    } 
 
     this.calcMaterialRatio(this.field.board);
     this.checkForCheck(figure);
     this.checkForStalemate();
     this.clearAvailableMove();
-    this.makeHistory(whoMovesOld);
+    const notation = this.historyNotation(...copyData);
+    this.makeHistory(whoMovesOld, notation);
   }
 
   /**
@@ -446,7 +467,9 @@ export default class Game {
     this.checkForCheck(fig);
     this.checkForStalemate();
     this.clearAvailableMove();
-    this.makeHistory(color);
+    const notation = this.historyNotation(...this.dataForPromotionNotation, fig);
+    delete this.dataForPromotionNotation;
+    this.makeHistory(color, notation);
   }
 
   /**
@@ -513,6 +536,7 @@ export default class Game {
     const condition = this.defendMoves.length === 0 && kingMoves.move.length === 0 && kingMoves.kill.length === 0;
 
     this.isCheckmate = condition;
+    if (this.isCheckmate) { this.isCheck = false }
   }
 
   /**
@@ -536,7 +560,7 @@ export default class Game {
   /**
    * @method kingMoves
    * @memberof Chess#Game#
-   * @param {Instance} figure instance of figure
+   * @param {Instance} king instance of King
    * @description Returns all available king moves
    * @returns {Object} Object
    * @example 
@@ -586,22 +610,27 @@ export default class Game {
         }
       })
     }
+
     // no available castling
     if (kingMovesWhenCastling.length === 0) {
       return AllKingMoves;
     }
+
+    const preventCastlingMoves = [...attackMoves, ...attackCovers, ...AllOtherKingMoves.move];
+
     // one available castling
     if (kingMovesWhenCastling.length === 2) {
-      const dontAllowCastle = kingMovesWhenCastling.some(move => attackMoves.some(amove => amove.x === move.x && amove.y === move.y));
+      const dontAllowCastle = kingMovesWhenCastling.some(move => preventCastlingMoves.some(amove => amove.x === move.x && amove.y === move.y));
       if (dontAllowCastle) {
         AllKingMoves.castle = [];
       }
     }
+
     // two available castling
     if (kingMovesWhenCastling.length === 4) {
       const splitInParts = [kingMovesWhenCastling.slice(0, 2), kingMovesWhenCastling.slice(2)];
       const dontAllowCastle = splitInParts.map(part => {
-        return part.some(move => attackMoves.some(amove => amove.x === move.x && amove.y === move.y));
+        return part.some(move => preventCastlingMoves.some(amove => amove.x === move.x && amove.y === move.y));
       })
       AllKingMoves.castle = dontAllowCastle.reduce((acc, bool, i) => {
         if (bool === false) {
@@ -751,18 +780,11 @@ export default class Game {
    * @method flipBoard
    * @memberof Chess#Game#
    * @description Flips board   
-   * @param {Boolean} isAnalyze - if value is `true` call [`checkDefense`]{@link Chess#Game#checkDefense}, otherwise no
    * @returns {undefined} undefined
-   * @throws Error - if `isAnalyze` is not Boolean
    * @example this.flipBoard()
    */
-  flipBoard(isAnalyze=false) {
-    if (typeof isAnalyze !== 'boolean') {
-      throw Error(`Game.flipBoard(isAnalyze) isAnalyze must be Boolean`);
-    }
-    if (!['start', 'finish'].includes(this.gameStatus)) {
-      return;
-    }
+  flipBoard() {
+    const isAnalyze = this.gameStatus === 'finish'
 
     this.playerWhite.side = this.playerWhite.side === 'up' ? 'down' : 'up';
     this.playerBlack.side = this.playerWhite.side === 'up' ? 'down' : 'up';
@@ -818,5 +840,126 @@ export default class Game {
     this.playerBlack.side = prevMove.playerBlackSide
 
     this.calcMaterialRatio(this.field.board);
+  }
+
+  /**
+   * @method copyDataForNotation
+   * @memberof Chess#Game#
+   * @param {Instance} cell - instance of [`Cell`]{@link Chess#Cell} 
+   * @param {Instance} figure - instance of Figure
+   * @returns {Array} Array
+   * @example 
+   * const cell = new Cell('white', {x:0, y:0});
+   * const rook = new Rook('white', {x:0, y:0}, 'up');
+   * const copyData = this.copyDataForNotation(cell, rook);
+   */
+  copyDataForNotation(cell, figure) {
+    const copyCell = {};
+    copyCell.isAvailableFor = cell.isAvailableFor;
+    copyCell.position = Object.assign({}, cell.position);
+
+    const copyFigure = {};
+    copyFigure.name = figure.name;
+    copyFigure.color = figure.color;
+    copyFigure.position = Object.assign({}, figure.position);
+
+    return [copyCell, copyFigure];
+  }
+
+  /**
+   * @method historyNotation
+   * @memberof Chess#Game#
+   * @description Makes history notation 
+   * @param {Object} cell 
+   * @param {Object} figure 
+   * @param {Instance|null} promotionFigure 
+   * @returns {Object} Object
+   */
+  historyNotation(cell, figure, promotionFigure=null) {
+    const isFlipped = this.field.isBoardFlipped;
+    const x = cell.position.x;
+    const y = cell.position.y;
+    const letter = String.fromCharCode(isFlipped ? 104 - y : 97 + y); // 104(h) 97(a)
+    const number = isFlipped ? x + 1 : 8 - x;
+
+    const figureName = figure.name.toLowerCase();
+    const newPosition = `${letter}${number}`;
+
+    let notation = {};
+    notation.showFigure = true;
+    notation.color = figure.color;
+    notation.figure = `chess-${figureName}`;
+
+    if (figureName === 'pawn') {
+      const vertical = String.fromCharCode(isFlipped ? 104 - figure.position.y : 97 + figure.position.y);
+      notation.move = ['kill', 'enPassant'].includes(cell.isAvailableFor) ? `${vertical}x${newPosition}` : `${newPosition}`;
+      notation.showFigure = false;
+    }
+    else if (figureName === 'king' && cell.isAvailableFor === 'castle') {
+      notation.move = [2, 5].includes(y) ? 'O-O-O' : `O-O`;
+      notation.showFigure = false;
+    }
+    else {
+      notation.move =  cell.isAvailableFor === 'kill' ? `x${newPosition}` : `${newPosition}`
+    }
+
+    if (promotionFigure !== null) {
+      notation.move += `=`;
+      notation.promotionFigure = `chess-${promotionFigure.name.toLowerCase()}`;
+    }
+
+    notation.isCheck = this.isCheck;
+    notation.isCheckmate = this.isCheckmate;
+    notation.isStalemate = this.isStalemate;
+
+    return notation;
+  }
+
+  /**
+   * @method getAllHistoryNotation
+   * @memberof Chess#Game#
+   * @description Returns array of notations [[whiteMove, blackMove], [whiteMove]]
+   * @returns {Array} Array
+   * @example const notations = this.getAllHistoryNotation()
+   */
+  getAllHistoryNotation() {
+    if (this.field.historyOfMoves === 1) { return } 
+    const historyNotation = this.field.historyOfMoves.slice(1).reduce((acc, obj) => {
+      const object = {...obj.notation};
+      object.index = obj.index;
+      object.materialRatio = obj.materialRatio;
+      acc.push(object);
+      return acc;
+    }, []);
+
+    const chunks = function(array, size) {
+      const result = [];
+      while (array.length) {
+        result.push(array.splice(0, size));
+      }
+      return result;
+    };
+
+    return chunks(historyNotation, 2);
+  }
+
+  /**
+   * @method isGameFinished
+   * @memberof Chess#Game#
+   * @description Decides if game finished or not
+   * @returns {undefined} undefined
+   * @example this.isGameFinished()
+   */
+  isGameFinished() {
+    if (this.isCheckmate || this.isStalemate) {
+      this.finishGame();
+    }
+    if (this.isCheckmate) {
+      const winnerColor = this.whoMoves === 'white' ? 'black' : 'white';
+      this.gameResult = `Player with ${winnerColor} figures won`;
+    }
+    if (this.isStalemate) {
+      this.gameResult = `It's a draw`;
+    }
   }
 } 

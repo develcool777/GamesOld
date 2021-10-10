@@ -4,42 +4,14 @@ import "firebase/firestore";
 export default {
   namespaced: true,
   state: {
-    gameResult: {
-      title: "",
-      description: ""
-    },
     figures: {},
-    showModal: false,
-    analyze: false,
+    emitIndex: 0
   },
   getters: {
-    getGameResult: state => state.gameResult,
     getFigures: state => state.figures,
-    getShowModal: state => state.showModal,
-    getAnalyze: state => state.analyze,
+    getEmitIndex: state => state.emitIndex,
   },
   mutations: {
-    changeGameResult(state, result) {
-      if (Object.keys(result).join('|') !== 'title|description') {
-        throw Error(`chess.mutations.changeGameResult(state, result) result must be Object with keys: 'title', 'description'`);
-      }
-      state.gameResult = result;
-    },
-
-    changeShowModal(state, bool) {
-      if (typeof bool !== 'boolean') {
-        throw Error(`chess.mutations.changeShowModal(state, bool) bool must be Boolean`);
-      }
-      state.showModal = bool;
-    },
-
-    changeAnalyze(state, bool) {
-      if (typeof bool !== 'boolean') {
-        throw Error(`chess.mutations.changeAnalyze(state, bool) bool must be Boolean`);
-      }
-      state.analyze = bool;
-    },
-
     setFigures(state, array) {
       if (!Array.isArray(array)) {
         throw Error(`chess.mutations.setFigures(state, array) array must be Array`);
@@ -48,21 +20,16 @@ export default {
         acc[obj.name] = obj.url;
         return acc;
       }, {});
+    },
+
+    setEmitIndex(state, value) {
+      if (!Number.isInteger(value)) {
+        throw Error(`chess.mutations.setEmitIndex(state, value) array must be Integer`);
+      }
+      state.emitIndex = value;
     }
   },
-  actions: {
-    CHANGE_GAME_RESULT({commit}, result) {
-      commit('changeGameResult', result);
-    },
-
-    CHANGE_SHOW_MODAL({commit}, bool) {
-      commit('changeShowModal', bool);
-    },
-
-    CHANGE_ANALYZE({commit}, bool) {
-      commit('changeAnalyze', bool);
-    },
-    
+  actions: {    
     async SET_FIGURES({commit}) {
       const DATA = [];
       const db = firebase.firestore();
@@ -72,6 +39,10 @@ export default {
         DATA.push(data)
       })
       commit('setFigures', DATA);
+    },
+
+    CHANGE_EMIT_INDEX({commit}, value) {
+      commit('setEmitIndex', value);
     }
   }
 }

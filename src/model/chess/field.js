@@ -250,6 +250,7 @@ export default class Field {
   /**
    * @async
    * @method returnMove
+   * @memberof Chess#Field#
    * @description Returns move, return {field, whoMoved, isCheck, isCheckmate, isStalemate, enPassant, playerWhiteSide, playerBlackSide}
    * @returns {Object} Object
    * @example const prevMove = await this.returnMove()
@@ -260,6 +261,7 @@ export default class Field {
     }
 
     this.historyOfMoves.pop();
+    this.historyIndex--;
     const prev = this.historyOfMoves.at(-1);
     const copyOfHistoryBoard = await this.boardCopy(prev.field); 
     this.isBoardFlipped && this.flipBoard(copyOfHistoryBoard, prev.enPassant, 'up', 'down');
@@ -270,8 +272,13 @@ export default class Field {
   /**
    * @async
    * @method makeHistory
+   * @memberof Chess#Field#
    * @description Makes history
-   * @param {Object} object - object {whoMoved, isCheck, isCheckmate, isStalemate, enPassant, playerWhiteSide, playerBlackSide} 
+   * @param {Object} object - object {
+   *  whoMoved, isCheck, isCheckmate, isStalemate, 
+   *  enPassant, playerWhiteSide, playerBlackSide,
+   *  notation, index, materialRatio
+   * } 
    * @returns {undefined} undefined
    * @example
    * const obj = {
@@ -282,6 +289,9 @@ export default class Field {
    *    enPassant: null,
    *    playerWhiteSide: 'down',
    *    playerBlackSide: 'up'
+   *    notation: {},
+   *    index: 0,
+   *    materialRatio: -1
    * } 
    * await this.makeHistory(obj);
    */
@@ -298,50 +308,38 @@ export default class Field {
       enPassant: object.enPassant,
       playerWhiteSide: object.playerWhiteSide,
       playerBlackSide: object.playerBlackSide,
+      notation: object.notation,
+      index: this.historyIndex += object.whoMoved === '' ? 0 : 1,
+      materialRatio: object.materialRatio
     }
-    
+
     this.historyOfMoves.push(obj);
   }
 
   /**
    * @async
    * @method showHistory
-   * @param {String} direction - shows how to move in history
-   * @description Shows history, returns array [isCheckmate, isCheck, isStalemate, playerWhiteSide, playerBlackSide]
-   * @throws Error - if `direction` is not String
-   * @throws Error - if `direction` is not 'start', 'prev', 'next', 'end'
-   * @returns {Array} Array 
-   * @example await this.showHistory('start');
+   * @memberof Chess#Field#
+   * @param {Number} index - history index
+   * @description Shows move in history by index, returns Object {
+   *  whoMoved, isCheck, isCheckmate, isStalemate, 
+   *  enPassant, playerWhiteSide, playerBlackSide,
+   *  notation, index, materialRatio
+   * }
+   * @throws Error - if `index` is not Integer
+   * @returns {Object} Object
+   * @example await this.showHistory(0);
    */
-  async showHistory(direction='start') {
-    if (typeof direction !== 'string') {
-      throw Error(`Field.showHistory(direction) direction must be String`);
+  async showHistory(index) {
+    if (!Number.isInteger(index)) {
+      throw Error(`Field.showHistory(index) index must be Integer`);
     }
-    if (!['start', 'prev', 'next', 'end'].includes(direction)) {
-      throw Error(`Field.showHistory(direction) direction must be 'start', 'prev', 'next', 'end'`);
-    }
-    if (direction === 'start') {
-      this.historyIndex = 0;
-    }
-    if (direction === 'prev') {
-      this.historyIndex -= this.historyIndex === 0 ? 0 : 1;
-    }
-    if (direction === 'next') {
-      this.historyIndex += this.historyIndex === this.historyOfMoves.length - 1 ? 0 : 1;
-    }
-    if (direction === 'end') {
-      this.historyIndex = this.historyOfMoves.length - 1;
-    }
-    const historyOfMoves = this.historyOfMoves[this.historyIndex];
-    this.board = await this.boardCopy(historyOfMoves.field);
 
-    this.isBoardFlipped && this.flipBoard(this.board, historyOfMoves.enPassant); 
-    return [
-      historyOfMoves.isCheckmate,
-      historyOfMoves.isCheck,
-      historyOfMoves.isStalemate,
-      historyOfMoves.playerWhiteSide,
-      historyOfMoves.playerBlackSide
-    ]
+    this.historyIndex = index;
+    const historyMove = this.historyOfMoves[this.historyIndex];
+    this.board = await this.boardCopy(historyMove.field);
+
+    this.isBoardFlipped && this.flipBoard(this.board, historyMove.enPassant); 
+    return historyMove;
   }
 }

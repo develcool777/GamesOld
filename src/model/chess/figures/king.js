@@ -89,7 +89,7 @@ export default class King extends Figures {
       move: [],
       kill: [],
       check: [],
-      wayToKing: [],
+      kingPosition: {},
       cover: [],
     }
    * @example 
@@ -108,11 +108,12 @@ export default class King extends Figures {
     const check = (x=0, y=0) => {
       if (field[x]?.[y] === undefined) { return }
       if (field[x][y].figure !== null) {
-        if (field[x][y].figure.color !== this.color) { available.kill.push({x, y}) }
-        available.cover.push({x, y});
-        return;
+        if (field[x][y].figure.color !== this.color) { 
+          return available.kill.push({x, y}) 
+        }
+        return available.cover.push({x, y});
       }
-      available.move.push({x, y})
+      return available.move.push({x, y})
     }
 
     const moves = [
@@ -218,7 +219,6 @@ export default class King extends Figures {
       newRookPosition = y === 0 ? [cordinates[0], 2] : [cordinates[0], 4]
     } 
  
-
     super.moveFigure(field, rook, ...newRookPosition);
     super.moveFigure(field, this, ...cordinates);
     this.firstMove = false;

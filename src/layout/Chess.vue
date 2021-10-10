@@ -62,6 +62,9 @@
       class="chess__instruction"
       :gameStatus="getGameStatus"
       :historyLen="getHistoryLength"
+      :boardFlipped="getIsBoardFlipped"
+      :currentIndex="getHistoryIndex"
+      :result="getGameResult"
       v-on:startGame="startGame()" 
       v-on:changePosition="showHistory($event)"
       v-on:flipBoard="flipBoard()"
@@ -69,11 +72,6 @@
       v-on:clearBoard="clearBoard()"
     />
   </div>
-  <ResultChess 
-    :gameStatus="getGameStatus"
-    v-on:clearBoard="clearBoard()"
-    v-on:newGame="newGame()"
-  />
   <transition name="fade">
     <Loading 
       v-if="loading" 
@@ -90,7 +88,6 @@ import Figure from '@/components/Chess/Figure'
 import Promotion from '@/components/Chess/Promotion'
 import Game from '@/model/chess/game'
 import Instruction from '@/components/Chess/Instruction'
-import ResultChess from '@/components/Chess/Result'
 import Loading from '@/components/Loading'
 import MaterialRatio from '@/components/Chess/MaterialRatio'
 export default {
@@ -99,13 +96,32 @@ export default {
     Figure,
     Promotion,
     Instruction,
-    ResultChess,
     Loading,
     MaterialRatio
   },
   watch: {
-    analyze: function(newVal) {
-      newVal && this.showHistory('start');
+    emitIndex: function(newVal) {
+      newVal !== 0 && this.showHistory(newVal);
+    },
+
+    getHistoryLength: function(newVal) {
+      if (newVal >= 0) {
+        this.historyNotation.value.notation = this.GAME.getAllHistoryNotation();
+        this.historyNotation.value.currentIndex = this.getHistoryIndex;
+        this.historyNotation.value.gameStatus = this.getGameStatus;
+      }
+    },
+
+    getHistoryIndex: function(newVal) {
+      if (newVal >= 0) {
+        this.historyNotation.value.currentIndex = newVal;
+      }
+    },
+
+    getGameStatus: function(newVal) {
+      if (newVal) {
+        this.historyNotation.value.gameStatus = newVal;
+      }
     }
   },
   data() {
@@ -115,6 +131,12 @@ export default {
       dontClick: false,
       loading: true,
       navigation: false,
+      historyNotation: { value: {} },
+    }
+  },
+  provide() {
+    return {
+      historyNotation: this.historyNotation
     }
   },
   async created() {
@@ -122,9 +144,8 @@ export default {
     await this.init();
   },
   computed: {
-    ...mapState(['analyze']),
-
-    ...mapGetters(['getFigures', 'getAnalyze']),
+    ...mapState(['emitIndex']),
+    ...mapGetters(['getFigures']), 
 
     getMatirealRatio() {
       return this.GAME.materialRatio;
@@ -139,17 +160,26 @@ export default {
     },
 
     getHistoryLength() {
-      return this.GAME.field.historyOfMoves.length;
+      return this.GAME?.field?.historyOfMoves?.length;
+    },
+
+    getHistoryIndex() {
+      return this.GAME?.field?.historyIndex
+    },
+
+    getGameResult() {
+      return this.GAME.gameResult;
     }
   },
   methods: {
-    ...mapActions(['CHANGE_GAME_RESULT', 'CHANGE_SHOW_MODAL', 'SET_FIGURES']),
+    ...mapActions(['SET_FIGURES', 'CHANGE_EMIT_INDEX']),
 
     async init() {
       this.GAME = new Game();
       this.GAME.createField();
       this.GAME.createFigures();
       await this.SET_FIGURES();
+      this.CHANGE_EMIT_INDEX(0);
       this.draw();
       this.navigation = true;
     },
@@ -163,6 +193,7 @@ export default {
     },
 
     clearBoard() {
+      this.CHANGE_EMIT_INDEX(0);
       this.GAME.clearField();
       this.draw();
     },
@@ -228,49 +259,24 @@ export default {
       // dont click after pawn promotion
       if (this.dontClick) {
         this.dontClick = false;
-        this.gameResult();
+        this.GAME.isGameFinished();
         return;
       }
 
       if (this.GAME.gameStatus === 'start') {
         this.GAME.clickOnCellForMove(cell);
-        this.gameResult();
+        this.GAME.isGameFinished();
         this.draw();
       }
     },
     
-    gameResult() {
-      if (this.GAME.isCheckmate || this.GAME.isStalemate) {
-        this.GAME.finishGame();
-      }
-      if (this.GAME.isCheckmate) {
-        const winnerColor = this.GAME.whoMoves === 'white' ? 'black' : 'white';
-        const obj = {
-          title: `It's a checkmate`,
-          description: `Player with ${winnerColor} figures win`
-        }
-        this.CHANGE_GAME_RESULT(obj);
-      }
-      if (this.GAME.isStalemate) {
-        const obj = {
-          title: `It's a stalemate`,
-          description: `No one won, it's a draw`
-        }
-        this.CHANGE_GAME_RESULT(obj);
-      }
-
-      if (this.GAME.gameStatus === 'finish') {
-        this.CHANGE_SHOW_MODAL(true);
-      }
-    },
-
     async pawnPromotion(figureName, x, y) {
       await this.GAME.pawnPromotion(this.board, figureName, {x, y});
       this.dontClick = true
     },
 
-    async showHistory(direction) {
-      await this.GAME.showHistory(direction);
+    async showHistory(index) {
+      await this.GAME.showHistory(index);
       this.draw();
     },
 
@@ -280,18 +286,18 @@ export default {
     },
 
     flipBoard() {
-      this.GAME.flipBoard(this.getAnalyze);
+      this.GAME.flipBoard();
       this.draw();
     },
 
     chooseCellColor(cell) {
-      if (cell.figure !== null && cell.figure.name === 'King' && cell.figure.color === this.GAME.whoMoves && this.GAME.isCheckmate) {
+      if (cell.figure?.name === 'King' && cell.figure?.color === this.GAME.whoMoves && this.GAME.isCheckmate) {
         return 'checkMate';
       }
       if (cell.isSelected) {
         return 'selected';
       }
-      if (cell.isAvailableFor === 'check' && cell.figure.color === this.GAME.whoMoves) {
+      if (cell.isAvailableFor === 'check' && cell.figure?.color === this.GAME.whoMoves) {
         return 'check';
       }
       if (cell.showsPosition === 'oldPosition') {
@@ -314,10 +320,24 @@ export default {
 
 <style lang="scss" scopped>
 .chess {
-  @include BasicGrid();
   background: #24272E;
   position: relative;
   user-select: none;
+	display: flex;
+  align-items: center;
+  flex: 1;
+
+  &__game {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+  }
+
+  &__instruction {
+    flex-basis: 300px;
+    margin-right: 10px;
+  }
 
   &__row {
     @include Flex(center);
