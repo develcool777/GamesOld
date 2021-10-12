@@ -8,7 +8,7 @@
       </section>
 
       <section class="result">
-        <div class="between" v-if="getResultOfMove">
+        <div class="between" v-if="display.show">
           <div class="block left">
             <p>UserMove</p>
             <p class="move" :style="user">{{ display.userMove }}</p>
@@ -18,7 +18,7 @@
             <p class="move" :style="comp">{{ display.compMove }}</p>
           </div>
         </div>
-        <p v-if="getResultOfMove">{{ display.result }}</p>
+        <p v-if="display.show">{{ display.result }}</p>
         <p v-else>User VS Computer. Who will win?</p>
       </section>
 
@@ -72,7 +72,10 @@
       </section>
     </div>  
 
-    <Instruction class="rps__instruction"/>
+    <Instruction 
+      class="rps__instruction"
+      v-on:clear="clearField()"
+    />
   </div>
   <transition name="fade">
     <Loading v-if="loading" class="LOADING" :step="0.6"/>
@@ -81,7 +84,7 @@
 
 <script>
 import { createNamespacedHelpers } from 'vuex'
-const { mapGetters, mapState, mapActions } = createNamespacedHelpers('rockPaperScissors');
+const { mapGetters, mapActions } = createNamespacedHelpers('rockPaperScissors');
 import Game from '@/model/RockPaperScissors/game';
 import Instruction from '@/components/RockPaperScissors/Instruction';
 import Loading from '@/components/Loading' 
@@ -128,68 +131,68 @@ export default {
     }
   },
   watch: {
-    clear: function(newVal) {
-      if (newVal) {
-        this.clearField();
-      }
-    }
+
   },
   async created() {
     setTimeout(() => {this.loading = false}, 1000);
     await this.init();
   },
   computed: {
-    ...mapState(['clear', 'showHistory', 'showAnalitics']),
     ...mapGetters([
-      'getImpossible', 'getEasy', 'getWithoutDraw', 
-      'getResultOfMove', 'getShowHistory', 'getShowAnalitics', 'getChoices'
+      'getShowHistory','getShowAnalitics', 
+      'getChoices', 'getMode'
     ]), 
+
     userScore() {
       return this.game.userScore;
     },
+
     compScore() {
       return this.game.computerScore;
     },
+
     user() {
       return this.display.res === 'user' ? {color: 'green'} : {color: 'red'};
     },
+
     comp() {
       return this.display.res === 'comp' ? {color: 'green'} : {color: 'red'};
     },
+
     checkAnalitics() {
       return this.game.history.length > 0
     }
   },
   methods: {
-    ...mapActions(['CHANGE_CLEAR', 'CHANGE_SHOW_HISTORY', 'CHANGE_RESULT_OF_MOVE', 'SET_CHOICES']),
+    ...mapActions(['CHANGE_SHOW_HISTORY', 'CHANGE_RESULT_OF_MOVE', 'SET_CHOICES']), 
+
     async init() {
       await this.SET_CHOICES()
       this.setImages();
       this.game = new Game();
     },
+
     play(move) {
       let moves;
-      if (this.getImpossible) {
+      if (this.getMode === 'impossible') {
         moves = this.game.impossibleMode(move);
       }
-      else if (this.getEasy) {
+      else if (this.getMode === 'easy') {
         moves = this.game.easyMode(move);
       }
-      else if (this.getWithoutDraw) {
+      else if (this.getMode === 'withoutDraw') {
         moves = this.game.withoutDrawMode(move);
       } else {
         moves = this.game.normalGame(move);
       }
       this.game.play(moves.user, moves.comp);
-      this.displayResult();
-      this.CHANGE_RESULT_OF_MOVE(true);
+      this.calcResult();
       this.setAnaliticsData();
       this.setHistoryData();
     },
 
     clearField() {
       this.game.clean();
-      this.CHANGE_CLEAR(false);
       this.display = {};
       this.historyData = [];
       this.analiticsData = [];
@@ -211,13 +214,14 @@ export default {
       }
     },
 
-    displayResult() {
+    calcResult() {
       const history = this.game.history;
       const info = history[history.length - 1];
       this.display.userMove = this.convertMove(info.userMove);
       this.display.compMove = this.convertMove(info.compMove);
       this.display.result = this.convertResult(info.result);
       this.display.res = info.result;
+      this.display.show = true
     },
 
     setHistoryData() {
@@ -273,12 +277,12 @@ export default {
   @include BasicGrid(flex-start);
   background: #24272E;
   &__caption {
-    font-size: rem(40);
+    font-size: 40px;
   }
   &__nodata {
     color: $white;
-    font-size: rem(20);
-    margin: rem(20) 0;
+    font-size: 20px;
+    margin: 20px 0;
   }
 }
 
@@ -286,7 +290,7 @@ export default {
   position: relative;
   width: 200px;
   padding: 10px 0;
-  margin-top: rem(20);
+  margin-top: 20px;
   border: 3px solid $white;
   border-radius: 5px;
   color: $white;
@@ -358,7 +362,7 @@ export default {
   flex-direction: column;
   align-items: center;
   width: 800px;
-  margin: rem(50) 0 rem(75);
+  margin: 50px 0 75px;
   font-size: 40px;
   color: $white;
 }
@@ -374,7 +378,7 @@ export default {
 }
 
 .left {
-  padding-left: rem(80);
+  padding-left: 80px;
 }
 
 table {

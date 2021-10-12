@@ -4,54 +4,18 @@ import "firebase/firestore";
 export default {
   namespaced: true,
   state: {
-    impossible: false,
-    easy: false,
-    withoutDraw: false,
-    clear: false,
     showHistory: false,
     showAnalitics: false,
-    resultOfMove: false,
-    choices: {}
+    choices: {},
+    mode: ''
   },
   getters: {
-    getImpossible: state => state.impossible,
-    getEasy: state => state.easy,
-    getWithoutDraw: state => state.withoutDraw,
-    getClear: state => state.clear,
     getShowHistory: state => state.showHistory,
     getShowAnalitics: state => state.showAnalitics,
-    getResultOfMove: state => state.resultOfMove,
-    getChoices: state => state.choices
+    getChoices: state => state.choices,
+    getMode: state => state.mode
   },
   mutations: {
-    changeImpossible(state, bool) {
-      if (typeof bool !== 'boolean') {
-        throw Error(`rockPaperScissors.mutation.changeImpossible bool must Boolean`);
-      }
-      state.impossible = bool;
-    },
-
-    changeEasy(state, bool) {
-      if (typeof bool !== 'boolean') {
-        throw Error(`rockPaperScissors.mutation.changeEasy bool must Boolean`);
-      }
-      state.easy = bool;
-    },
-
-    changeWithoutDraw(state, bool) {
-      if (typeof bool !== 'boolean') {
-        throw Error(`rockPaperScissors.mutation.changeWithoutDraw bool must Boolean`);
-      }
-      state.withoutDraw = bool;
-    },
-
-    changeClear(state, bool) {
-      if (typeof bool !== 'boolean') {
-        throw Error(`rockPaperScissors.mutation.changeClear bool must Boolean`);
-      }
-      state.clear = bool;
-    },
-
     changeShowHistory(state, bool) {
       if (typeof bool !== 'boolean') {
         throw Error(`rockPaperScissors.mutation.changeShowHistory bool must Boolean`);
@@ -65,13 +29,6 @@ export default {
       }
       state.showAnalitics = bool;
     },
-
-    changeResultOfMove(state, bool) {
-      if (typeof bool !== 'boolean') {
-        throw Error(`rockPaperScissors.mutation.changeResultOfMove bool must Boolean`);
-      }
-      state.resultOfMove = bool;
-    },
     
     setChoices(state, array) {
       if (!Array.isArray(array)) {
@@ -81,37 +38,22 @@ export default {
         acc[obj.name] = obj.url;
         return acc;
       }, {});
-    }
+    },
+
+    setMode(state, mode) {
+      if (typeof mode !== 'string') {
+        throw Error(`rockPaperScissors.mutations.setMode(state, mode) mode must be String`);
+      }
+      if (!['easy', 'impossible', 'withoutDraw', ''].includes(mode)) {
+        throw Error(`rockPaperScissors.mutations.setMode(state, mode) mode must be 'easy', 'impossible', 'withoutDraw', '`);
+      }
+      state.mode = mode;
+    },
   },
   actions: {
-    INIT_STATE({commit, dispatch}) {
-      dispatch('RESET_MODE');
-      commit('changeClear', false);
+    INIT_STATE({commit}) {
       commit('changeShowHistory', false);
-      commit('changeResultOfMove', false);
       commit('changeShowAnalitics', false);
-    },
-
-    RESET_MODE({commit}) {
-      commit('changeImpossible', false);
-      commit('changeEasy', false);
-      commit('changeWithoutDraw', false); 
-    },
-
-    CHANGE_IMPOSSIBLE({commit}, boolean) {
-      commit('changeImpossible', boolean);     
-    },
-
-    CHANGE_EASY({commit}, boolean) {
-      commit('changeEasy', boolean);     
-    },
-
-    CHANGE_WITHOUT_DRAW({commit}, boolean) {
-      commit('changeWithoutDraw', boolean);     
-    },
-
-    CHANGE_CLEAR({commit}, boolean) {
-      commit('changeClear', boolean);     
     },
 
     CHANGE_SHOW_HISTORY({commit}, boolean) {
@@ -120,10 +62,6 @@ export default {
 
     CHANGE_SHOW_ANALITICS({commit}, boolean) {
       commit('changeShowAnalitics', boolean);     
-    },
-
-    CHANGE_RESULT_OF_MOVE({commit}, boolean) {
-      commit('changeResultOfMove', boolean);     
     },
 
     async SET_CHOICES({commit}) {
@@ -135,6 +73,10 @@ export default {
         DATA.push(data)
       })
       commit('setChoices', DATA);
+    },
+
+    SET_MODE({commit}, mode) {
+      commit('setMode', mode);
     }
   }
 }

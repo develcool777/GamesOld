@@ -8,9 +8,9 @@
         class="instRPS__mainBtn"
         v-for="(mode, i) in modes"
         :key="i"
-        :class="activeClass(mode.id)" 
-        @click="clickMode(mode.id)" 
-      >{{ mode.name }}{{ onOff(mode.id) }}</div>
+        :class="activeClass(mode.mode)" 
+        @click="clickMode(mode.mode)" 
+      >{{ mode.name }}{{ onOff(mode.mode) }}</div>
     </div>
     <div class="instRPS__block">
       <div class="instRPS__title">Settings</div>
@@ -30,76 +30,62 @@ export default {
   name: 'Instruction',
   data() {
     return {
-      activeMode: null,
       modes: [
-        { id: 1, name: 'Impossible:' },
-        { id: 2, name: 'Easy:' },
-        { id: 3, name: 'Without draw:' },
+        { name: 'Impossible:', mode: 'impossible' },
+        { name: 'Easy:', mode: 'easy' },
+        { name: 'Without draw:', mode: 'withoutDraw' },
       ]
     }
   },
   computed: {
-    ...mapGetters(['getShowHistory', 'getShowAnalitics']),
+    ...mapGetters(['getShowHistory', 'getShowAnalitics', 'getMode']),
+
     history() {
       return this.getShowHistory ? 'Hide history' : 'Show history';
     },
+
     historyActive() {
       return this.getShowHistory ? 'active' : '';
     },
+
     analitics() {
       return this.getShowAnalitics ? 'Hide analitics' : 'Show analitics';
     },
+
     analiticsActive() {
       return this.getShowAnalitics ? 'active' : '';
     }
   },
   methods: {
     ...mapActions([
-      'RESET_MODE', 'CHANGE_IMPOSSIBLE', 'CHANGE_EASY', 
-      'CHANGE_WITHOUT_DRAW', 'CHANGE_CLEAR', 'CHANGE_SHOW_HISTORY',
-      'CHANGE_RESULT_OF_MOVE', 'CHANGE_SHOW_ANALITICS'
+      'CHANGE_SHOW_HISTORY', 'CHANGE_SHOW_ANALITICS', 'SET_MODE'
     ]),
-    clickMode(modeIndex) {
-      if (this.activeMode === modeIndex) {
-        this.activeMode = null;
-        this.RESET_MODE();
-        return;
-      }
-      this.activeMode = modeIndex;
-      this.RESET_MODE();
-      if (this.activeMode === 1) {
-        this.CHANGE_IMPOSSIBLE(true);
-        return;
-      }
-      if (this.activeMode === 2) {
-        this.CHANGE_EASY(true);
-        return;
-      } 
-      if (this.activeMode === 3) {
-        this.CHANGE_WITHOUT_DRAW(true);
-        return;
-      } 
 
+    clickMode(mode) {
+      mode === this.getMode ? this.SET_MODE('') : this.SET_MODE(mode);
     },
+
     clear() {
-      this.activeMode = null;
-      this.RESET_MODE();
-      this.CHANGE_CLEAR(true);
+      this.SET_MODE('');
       this.CHANGE_SHOW_HISTORY(false);
-      this.CHANGE_RESULT_OF_MOVE(false);
       this.CHANGE_SHOW_ANALITICS(false);
+      this.$emit('clear');
     },
+
     showHistory() {
       this.CHANGE_SHOW_HISTORY(!this.getShowHistory);
     },
+
     showAnalitics() {
       this.CHANGE_SHOW_ANALITICS(!this.getShowAnalitics);
     },
-    onOff(modeIndex) {
-      return modeIndex === this.activeMode ? 'On' : 'Off';
+
+    onOff(mode) {
+      return this.getMode  === mode ? 'On' : 'Off';
     },
-    activeClass(current) {
-      return this.activeMode === current ? 'active' : '';
+
+    activeClass(mode) {
+      return this.getMode  === mode ? 'active' : '';
     }
   }
 }
@@ -109,7 +95,7 @@ export default {
 .instRPS {
   @include Instruction();
   &__block {
-    margin: rem(20) 0;
+    margin: 20px 0;
     color: $white;
   }
 }
