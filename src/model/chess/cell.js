@@ -8,7 +8,7 @@ export default class Cell {
    * @param {Object} position - position of the cell
    * @constructor
    * @property {Object|Instance} figure - if the cell is empty(no figure) the value is null, otherwise instance of figure
-   * @property {String} isAvailableFor - shows that cell is available for(move, check, kill, promotion, castle, enPassant)
+   * @property {String} isAvailableFor - shows that cell is available for(move, check, checkMate, kill, promotion, castle, enPassant)
    * @property {Boolean} isSelected - value is `true` if cell is selected, otherwise `false`
    * @property {String} showsPosition - Shows figure position('old', 'new')
    * @throws Error - if `color` is not String
@@ -55,8 +55,8 @@ export default class Cell {
           if (typeof value !== 'string') {
             throw Error(`Cell.isAvailableFor.set(value) value must be String`);
           }
-          if (!['', 'move', 'kill', 'castle', 'promotion', 'check', 'wayToKing', 'enPassant'].includes(value)) {
-            throw Error(`Cell.isAvailableFor.set(value) value must be '' or 'move' or 'kill' or 'castle' or 'promotion' or 'check' or 'wayToKing' or 'enPassant'`);
+          if (!['', 'move', 'kill', 'castle', 'promotion', 'check', 'checkMate', 'wayToKing', 'enPassant'].includes(value)) {
+            throw Error(`Cell.isAvailableFor.set(value) value must be '' or 'move' or 'kill' or 'castle' or 'promotion' or 'check' or 'checkMate' or 'wayToKing' or 'enPassant'`);
           }
           isAvailableFor = value;
         }

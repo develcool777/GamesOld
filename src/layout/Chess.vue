@@ -291,7 +291,7 @@ export default {
     },
 
     chooseCellColor(cell) {
-      if (cell.figure?.name === 'King' && cell.figure?.color === this.GAME.whoMoves && this.GAME.isCheckmate) {
+      if (cell.isAvailableFor === 'checkMate') {
         return 'checkMate';
       }
       if (cell.isSelected) {

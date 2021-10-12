@@ -413,6 +413,7 @@ export default class Game {
     this.field.board.forEach((row, ) => {
       row.forEach((cell, ) => {
         if (this.isCheck && cell.isAvailableFor === 'check') { return }
+        if (this.isCheckmate && cell.isAvailableFor === 'checkMate') { return }
         if (this.isPawnPromotion && cell.isAvailableFor === 'promotion') { return }
         cell.isAvailableFor = '';
         cell.isSelected = false;
@@ -536,7 +537,10 @@ export default class Game {
     const condition = this.defendMoves.length === 0 && kingMoves.move.length === 0 && kingMoves.kill.length === 0;
 
     this.isCheckmate = condition;
-    if (this.isCheckmate) { this.isCheck = false }
+    if (this.isCheckmate) { 
+      this.isCheck = false;
+      this.field.board[king.position.x][king.position.y].isAvailableFor = 'checkMate';
+    }
   }
 
   /**
