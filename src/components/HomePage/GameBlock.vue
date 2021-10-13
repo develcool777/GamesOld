@@ -2,20 +2,29 @@
   <router-link class="gBlock" tag="div" :to="block.to">
     <div class="gBlock__block">
       <div class="gBlock__container">
+
         <video 
-          v-show="hovered"
+          v-show="hovered && isVideoAvailable"
           class="gBlock__video"
           ref="video" 
           :src="block.videoUrl"
           muted="muted"  
           loop
         />
+
         <img
-          v-show="!hovered" 
+          ref="img"
+          v-show="!hovered && imgLoaded || hovered && !isVideoAvailable" 
           class="gBlock__poster" 
           :src="block.imgUrl" 
           :alt="block.imgName"
+          @load="loadedImg()"
         >
+
+        <transition name="noVideo">
+          <div class="gBlock__noVideo" v-if="hovered && !isVideoAvailable">There is no video preview</div>
+        </transition>
+
       </div>
       <div class="gBlock__title">{{ block.name }}</div>
       <div class="gBlock__text">{{ block.text }}</div>
@@ -34,16 +43,36 @@ export default {
     block: Object,
     hovered: Boolean
   },
+  created() {
+    this.videoUrl()
+  },
+  data() {
+    return {
+      imgLoaded: false,
+      isVideoAvailable: false
+    }
+  },
   watch: {
-    hovered: function(newVal) {
+    hovered: async function(newVal) {
+      if (!this.isVideoAvailable) { return }
       if (newVal) {
-        this.$refs.video.play();
+        await this.$refs.video.play();
       } else {
-        this.$refs.video.pause();
+        await this.$refs.video.pause();
         this.$refs.video.currentTime = 0;
         // update
         // this.$refs.video.load() makes Error
       }
+    },
+  },
+  methods: {
+    loadedImg() {
+      this.imgLoaded = this.$refs.img.complete;
+      this.$emit('imgLoaded', true);
+    },
+
+    videoUrl() {
+      this.isVideoAvailable = this.block.videoUrl !== ''
     }
   }
 }
@@ -66,19 +95,31 @@ export default {
 
   &__block:hover {
     background: $color-primary-1;
-    transform: scale(1.01);
     @include boxShadow(0.7);
   }
 
   &__container {
+    position: relative;
     width: 280px;
     height: 135px;
     background: gray;
+    overflow: hidden;
   }
 
   &__video, &__poster {
     width: 100%;
     height: 100%;
+  }
+
+  &__noVideo {
+    position: absolute;
+    width: 100%;
+    height: 20px;
+    background: red;
+    bottom: 0;
+    left: 0;
+    text-align: center;
+    color: white;
   }
 
   &__title, &__text {
@@ -105,6 +146,15 @@ export default {
   &__created, &__played {
     font-size: 16px;
   }
+}
+
+// transition
+.noVideo-enter-active, .noVideo-leave-active {
+  transition: transform .5s
+}
+
+.noVideo-enter-from, .noVideo-leave-to {
+  transform: translateY(20px);
 }
 
 // adaptivness

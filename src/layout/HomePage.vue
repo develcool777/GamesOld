@@ -16,13 +16,14 @@
       />
     </div>
 
-    <div class="homePage__games" v-else>
+    <div class="homePage__games" >
       <GameBlock 
         class="homePage__game" 
         v-for="(game, i) in games" 
         :key="i"
         :block="game"
         :hovered="hoveredBlock === i"
+        v-on:imgLoaded="isImgsLoaded($event)"
         @click="updatePlayed(game.docID)"
         @mouseover="hoveredBlock = i"
         @mouseleave="hoveredBlock = null"
@@ -52,7 +53,8 @@ export default {
       result: false,
       message: '',
       hoveredBlock: null,
-      isSkeleton: true
+      isSkeleton: true,
+      arrayIsLoaded: []
     }
   },
   created() {
@@ -68,7 +70,6 @@ export default {
       !this.getIsDataLoaded && await this.INIT();
       this.games = this.getData;
       this.parsedData = this.getParsedData;
-      this.isSkeleton = false;
     },
 
     showSearchedGames(obj) {
@@ -92,6 +93,13 @@ export default {
     async updatePlayed(docId) {
       await this.UPDATE_PLAYED(docId);
       await this.INIT();
+    },
+
+    isImgsLoaded(isLoaded) {
+      this.arrayIsLoaded.push(isLoaded);
+      if (this.arrayIsLoaded.length === this.games.length) {
+        this.isSkeleton = !this.arrayIsLoaded.every(bool => bool === true);
+      }
     }
   }
 }
