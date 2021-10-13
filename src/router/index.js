@@ -37,6 +37,11 @@ const routes = [
     name: 'Chess',
     component: Home,
     props: {id: 4}
+  },
+  {
+    path: '/:pathMatch(.*)*', 
+    name: 'NotFound',
+    component: () => import(/* webpackChunkName: "group-foo" */ '../views/NotFound.vue')
   }
 ]
 
