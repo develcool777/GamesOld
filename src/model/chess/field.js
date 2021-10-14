@@ -262,7 +262,7 @@ export default class Field {
 
     this.historyOfMoves.pop();
     this.historyIndex--;
-    const prev = this.historyOfMoves.at(-1);
+    const prev = this.historyOfMoves[this.historyOfMoves.length - 1]; // .at(-1) in electron doesnt work
     const copyOfHistoryBoard = await this.boardCopy(prev.field); 
     this.isBoardFlipped && this.flipBoard(copyOfHistoryBoard, prev.enPassant, 'up', 'down');
     this.board = copyOfHistoryBoard;

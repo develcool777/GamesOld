@@ -93,15 +93,15 @@ export default class Timer {
     if (!Number.isInteger(ms) || ms < 0) {
       throw Error(`Timer.formatTime(ms) ms must be Integer and greater than 0`); 
     } 
-    let hours   = Math.floor(ms / 3_600_000);
-    let minutes = Math.floor((ms - (hours * 3_600_000)) / 60_000);
-    let seconds = Math.floor((ms - (hours * 3_600_000) - (minutes * 60_000)) / 1000);
+    let hours   = Math.floor(ms / 3600000); // 3_600_000 doesnt work in electron(making build version)
+    let minutes = Math.floor((ms - (hours * 3600000)) / 60000);
+    let seconds = Math.floor((ms - (hours * 3600000) - (minutes * 60000)) / 1000);
     // let ds = Math.floor((ms - (hours * 3600000) - (minutes * 60000) - (seconds * 1000))/100);
  
     // if (hours   < 10) {hours   = "0"+hours;}
-    if (minutes < 10) {minutes = '0'+minutes;}
-    if (seconds < 10) {seconds = '0'+seconds;}
-    return minutes+':'+seconds;
+    if (minutes < 10) {minutes = '0' + minutes;}
+    if (seconds < 10) {seconds = '0' + seconds;}
+    return minutes + ':' + seconds;
   }
   
   /**

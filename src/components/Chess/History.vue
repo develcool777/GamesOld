@@ -84,6 +84,7 @@ export default {
     },
 
     showMove(index) {
+      if (this.historyNotation.value.gameStatus !== 'finish') { return } 
       this.CHANGE_EMIT_INDEX(index);
     },
 

@@ -18,7 +18,7 @@
     "show:coverage": "open tests/coverage/lcov-report/index.html",
     "open:cypress": "node_modules/.bin/cypress open"
   },
-  "main": "background.js",
+  "main": "main.js",
   "dependencies": {
     "core-js": "^3.6.5",
     "express": "^4.17.1",
