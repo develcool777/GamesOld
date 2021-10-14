@@ -28,11 +28,13 @@ npm install
 ```
 
 #### Run electron version 
+In file `package.json` set `main` to `background.js`, if there is no `main`, copy paste this `{"main": "background.js"}`
 ```
 npm run electron:serve
 ```
 
 #### Run vue version 
+In file `package.json` set `main` to `main.js`, if there is no `main`, copy paste this `{"main": "main.js"}`
 ```
 npm run serve 
 ```
