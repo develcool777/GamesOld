@@ -1,10 +1,10 @@
 # Games
 This website contain 5 games:
-1. Maze - aim of game is to make way from start point to end point;
-2. Memoji - aim of the game is to uncover all cards;
-3. Rock Scissors Paper - battle with computer in rock paper scissors game;
-4. Tic Tac Toe - logic game between two opponents on a square field 3 by 3;
-5. Chess - competitive board game played between two players;
+1. `Maze` - aim of game is to make way from start point to end point;
+2. `Memoji` - aim of the game is to uncover all cards;
+3. `Rock Scissors Paper` - battle with computer in rock paper scissors game;
+4. `Tic Tac Toe` - logic game between two opponents on a square field 3 by 3;
+5. `Chess` - competitive board game played between two players;
 
 For this website i use:
 * [`Vue`](https://v3.vuejs.org) - progressive JavaScript Framework 
