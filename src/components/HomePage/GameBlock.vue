@@ -106,7 +106,8 @@ export default {
     overflow: hidden;
   }
 
-  &__video, &__poster {
+  &__video, &__poster  {
+    object-fit: cover;
     width: 100%;
     height: 100%;
   }
