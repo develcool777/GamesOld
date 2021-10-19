@@ -16,6 +16,11 @@ import { faAngleDoubleLeft } from "@fortawesome/free-solid-svg-icons";
 import { faAngleDoubleRight } from "@fortawesome/free-solid-svg-icons";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
+import { faUserCircle } from "@fortawesome/free-solid-svg-icons";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
+import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { faLock } from "@fortawesome/free-solid-svg-icons";
+import { faBackspace } from "@fortawesome/free-solid-svg-icons";
 
 library.add(faChessRook);
 library.add(faChessBishop);
@@ -32,5 +37,10 @@ library.add(faAngleDoubleLeft);
 library.add(faAngleDoubleRight);
 library.add(faAngleLeft);
 library.add(faAngleRight);
+library.add(faUserCircle);
+library.add(faUser);
+library.add(faEnvelope);
+library.add(faLock);
+library.add(faBackspace);
 
 export default FontAwesomeIcon;
