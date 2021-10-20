@@ -11,6 +11,8 @@
       class="maze__instruction" 
       :timer="gameTimeForPrint"
       :gameStatus="gameStatus"
+      :currentLevel="getCurrentLevel"
+      :amountOfLevels="getAmountOfLevels"
       v-on:startGame="startLoop()"
       v-on:stopGame="stopLoop()"
       v-on:restart="restartGame()"
@@ -23,6 +25,8 @@
     :gameResult="gameResult"
     :status="gameStatus"
     :timeInMs="gameResultTime"
+    :currentLevel="getCurrentLevel"
+    :amountOfLevels="getAmountOfLevels"
     v-on:changeLevel="changeLevel($event)"
     v-on:restart="restartGame()"
     v-on:close="cleanField()"
@@ -69,7 +73,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['level', 'showPath', 'showHint']),
+    ...mapState(['showPath', 'showHint']),
     ...mapGetters(['getShowPath', 'getShowHint', 'getData']),
 
     gameTimeForPrint() {
@@ -91,6 +95,14 @@ export default {
     gameResultTime() {
       return this.GAME.resultTime;
     },
+
+    getCurrentLevel() {
+      return this.FIELD.level;
+    },
+
+    getAmountOfLevels() {
+      return this.FIELD.amountOfLevels;
+    }
   },
   async created() {
     setTimeout(() => {this.loading = false}, 1000);
@@ -106,16 +118,34 @@ export default {
     },
 
     createGame() {
-      const obj = {
-        level: this.FIELD.level,
-        amountOfLevels: this.FIELD.amountOfLevels(),
-      }
-      this.INIT_STATE(obj);
+      this.INIT_STATE();
       this.GAME = new Game(...this.FIELD.dataForGame());
       this.render();
     },
 
-    changeLevel(step) {
+    changeLevel(direction) {
+      const level = this.FIELD.level;
+      const amount = this.FIELD.amountOfLevels;
+      let step;
+      switch (direction) {
+        case 'First':
+          step = 1
+          break;
+      
+        case 'Prev':
+          step = level === 1 ? 1 : level - 1;
+          break;
+
+        case 'Next':
+          step = level === amount ? amount : level + 1;
+          break;
+
+        case 'Last':
+          step = amount; 
+          break;
+
+        default: break;
+      }
       this.FIELD.changeLevel(step);
       this.createGame();
     },
@@ -195,7 +225,19 @@ export default {
 
 <style lang="scss" scoped>
 .maze {
-  @include BasicGrid();
+	display: flex;
+  align-items: center;
+  flex: 1;
+  &__game {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+  }
+  &__instruction {
+    flex-basis: rem(300);
+    margin-right: 10px;
+  }
   &__row {
     @include Flex(center);
   }

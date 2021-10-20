@@ -10,27 +10,26 @@
 					<div class="resultMaze__text" v-else>Try one more time or choose another level</div>
 				</div>
 				<div class="resultMaze__btns" :style="calcWidth">
-					<div class="resultMaze__btn" v-if="showPrev()" @click="changeLevel(-1)">Previous level</div>
+					<div class="resultMaze__btn" v-if="showPrev()" @click="changeLevel('Prev')">Previous level</div>
 					<div class="resultMaze__btn" @click="restart()">Restart</div>
-					<div class="resultMaze__btn" v-if="showNext()" @click="changeLevel(1)">Next level</div>
+					<div class="resultMaze__btn" v-if="showNext()" @click="changeLevel('Next')">Next level</div>
 				</div>
 			</div>
 		</div>
 	</transition>
 </template>
+
 <script>
-import { createNamespacedHelpers } from 'vuex'
-const { mapGetters } = createNamespacedHelpers('maze');
 export default {
 	name: "ResultMaze",
 	props: {	
 		status: String,
 		gameResult: String,
-		timeInMs: Number
+		timeInMs: Number,
+		currentLevel: Number,
+		amountOfLevels: Number
 	},
 	computed: {
-		...mapGetters(['getLevel', 'getAmountOfLevels']),
-
 		time() {
 			const cheak = (time, str) => time > 1 ? `${str}s` : str;   
 			let seconds = parseInt(this.timeInMs / 1000);
@@ -43,7 +42,7 @@ export default {
 		},
 
 		calcWidth() {
-			if (this.getLevel > 1 && this.getLevel < this.getAmountOfLevels) {
+			if (this.currentLevel > 1 && this.currentLevel < this.amountOfLevels) {
 				return {width: '400px'};
 			} 
 			return {width: '300px'}
@@ -58,20 +57,21 @@ export default {
 			this.$emit('close');
 		},
 
-    changeLevel(step) {
-      this.$emit('changeLevel', step);
+    changeLevel(direction) {
+      this.$emit('changeLevel', direction);
     },
 
 		showPrev() {
-			return this.getLevel > 1;
+			return this.currentLevel > 1;
 		},
 
 		showNext() {
-			return this.getLevel < this.getAmountOfLevels;
+			return this.currentLevel < this.amountOfLevels;
 		}
 	}
 }
 </script>
+2e
 <style lang="scss">
 .resultMaze {
 	@include Result();

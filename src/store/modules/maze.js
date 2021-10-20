@@ -4,29 +4,18 @@ import "firebase/firestore";
 export default {
   namespaced: true,
   state: {
-    level: 1,
-    amountOfLevels: 0,
     arrowClicked: 0,
     showPath: false,
     showHint: false,
     data: []
   },
   getters: {
-    getLevel: state => state.level,
-    getAmountOfLevels: state => state.amountOfLevels,
     getArrowClicked: state => state.arrowClicked,
     getShowPath: state => state.showPath,
     getShowHint: state => state.showHint,
     getData: state => state.data
   },
-  mutations: {
-    changeLevel(state, level) {
-      if (!Number.isInteger(level)) {
-        throw Error(`maze.mutation.changeLevel level must Integer`);
-      }
-      state.level = level;
-    },  
-
+  mutations: {  
     changeArrowClicked(state, number) {
       if (!Number.isInteger(number)) {
         throw Error(`maze.mutation.changeArrowClicked number must Integer`);
@@ -48,13 +37,6 @@ export default {
       state.showHint = bool;
     },
 
-    setAmountOfLevels(state, levels) {
-      if (!Number.isInteger(levels)) {
-        throw Error(`maze.mutation.setAmountOfLevels levels must Integer`);
-      }
-      state.amountOfLevels = levels;
-    },
-
     setData(state, arr=[]) {
       if (!Array.isArray(arr)) {
         throw Error(`maze.mutation.setData arr must Array`);
@@ -64,15 +46,9 @@ export default {
   },
 
   actions: {
-    INIT_STATE({commit}, payload) {
-      commit('changeLevel', payload.level);
-      commit('setAmountOfLevels', payload.amountOfLevels);
+    INIT_STATE({commit}) {
       commit('changeArrowClicked', 0);
       commit('changeShowHint', false);
-    },
-
-    CHANGE_LEVEl({commit}, level) {
-      commit('changeLevel', level);
     },
 
     CHANGE_ARROW({commit}, arrow) {

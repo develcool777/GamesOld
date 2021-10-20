@@ -21,7 +21,18 @@ import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { faLock } from "@fortawesome/free-solid-svg-icons";
 import { faBackspace } from "@fortawesome/free-solid-svg-icons";
+import { faWaveSquare } from "@fortawesome/free-solid-svg-icons";
+import { faShoePrints } from "@fortawesome/free-solid-svg-icons";
+import { faFlag } from "@fortawesome/free-solid-svg-icons";
+import { faPlayCircle } from "@fortawesome/free-solid-svg-icons";
+import { faStopCircle } from "@fortawesome/free-solid-svg-icons";
+import { faArrowUp } from "@fortawesome/free-solid-svg-icons";
+import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { faStopwatch } from "@fortawesome/free-solid-svg-icons";
 
+// chess
 library.add(faChessRook);
 library.add(faChessBishop);
 library.add(faChessKnight);
@@ -38,9 +49,21 @@ library.add(faAngleDoubleRight);
 library.add(faAngleLeft);
 library.add(faAngleRight);
 library.add(faUserCircle);
+// user
 library.add(faUser);
 library.add(faEnvelope);
 library.add(faLock);
 library.add(faBackspace);
+// maze
+library.add(faWaveSquare);
+library.add(faShoePrints);
+library.add(faFlag);
+library.add(faPlayCircle);
+library.add(faStopCircle);
+library.add(faArrowUp);
+library.add(faArrowDown);
+library.add(faArrowRight);
+library.add(faArrowLeft);
+library.add(faStopwatch);
 
 export default FontAwesomeIcon;
