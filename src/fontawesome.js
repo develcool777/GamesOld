@@ -31,6 +31,7 @@ import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { faStopwatch } from "@fortawesome/free-solid-svg-icons";
+import { faLightbulb } from "@fortawesome/free-solid-svg-icons";
 
 // chess
 library.add(faChessRook);
@@ -39,17 +40,19 @@ library.add(faChessKnight);
 library.add(faChessKing);
 library.add(faChessQueen);
 library.add(faChessPawn);
+library.add(faChessBoard);
 library.add(faRetweet);
 library.add(faUndo);
 library.add(faPlay);
 library.add(faStop);
-library.add(faChessBoard);
+
 library.add(faAngleDoubleLeft);
 library.add(faAngleDoubleRight);
 library.add(faAngleLeft);
 library.add(faAngleRight);
-library.add(faUserCircle);
+
 // user
+library.add(faUserCircle);
 library.add(faUser);
 library.add(faEnvelope);
 library.add(faLock);
@@ -65,5 +68,7 @@ library.add(faArrowDown);
 library.add(faArrowRight);
 library.add(faArrowLeft);
 library.add(faStopwatch);
+// memoji
+library.add(faLightbulb);
 
 export default FontAwesomeIcon;

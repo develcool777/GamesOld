@@ -71,8 +71,8 @@ export default {
 	}
 }
 </script>
-2e
-<style lang="scss">
+
+<style lang="scss" scoped>
 .resultMaze {
 	@include Result();
 }

@@ -29,6 +29,9 @@
       :timer="gameTimeForPrint"
       :attempts="attemptsForHint"
       :gameStatus="gameStatus"
+      :isHint="isHintActivated"
+      :currentLevel="getCurrentLevel"
+      :amountOfLevels="getAmountOfLevels"
       v-on:startGame="gameStarted()"
       v-on:stopGame="gameStoped()"
       v-on:finishGame="gameFinished()"
@@ -42,6 +45,8 @@
     :gameResult="gameResult"
     :status="gameStatus"
     :timeInMs="gameResultTime"
+    :currentLevel="getCurrentLevel"
+    :amountOfLevels="getAmountOfLevels"
     v-on:changeLevel="changeLevel($event)"
     v-on:restart="restartGame()"
     v-on:close="cleanField()"
@@ -62,13 +67,11 @@ import ResultMemoji from '@/components/Memoji/Result';
 import Loading from '@/components/Loading'
 export default {
   name: 'Memoji',
-
   components: {
     Instruction,
     ResultMemoji,
     Loading
   },
-
   data() {
     return {
       FIELD: {},
@@ -80,7 +83,6 @@ export default {
       isHintActivated: false
     }
   },
-
   watch: {
     gameStatus(newStatus) {
       if (newStatus === 'finish') {
@@ -95,12 +97,10 @@ export default {
       } 
     }
   },
-
   async created() {
     setTimeout(() => {this.loading = false}, 2000);
     await this.init();
   },
-
   computed: {
     ...mapGetters(['getData']),
 
@@ -135,11 +135,18 @@ export default {
         return `${calcWidth(Math.ceil(amountOfCards / 2))}px`
       }
       return `${calcWidth(6)}px`;
+    },
+
+    getCurrentLevel() {
+      return this.FIELD.level;
+    },
+
+    getAmountOfLevels() {
+      return this.FIELD.amountOfLevels;
     }
   },
-
   methods: {
-    ...mapActions(['INIT_STATE', 'GET_DATA']),
+    ...mapActions(['GET_DATA']),
 
     async init() {
       await this.GET_DATA();
@@ -177,11 +184,6 @@ export default {
       this.GAME.setCardData();
       this.attemptsForHint = 3;
       this.draw();
-      const obj = {
-        level: this.FIELD.level,
-        levels: this.FIELD.amountOfLevels()
-      }
-      this.INIT_STATE(obj);
     },
 
     clickedCard(card) {
@@ -213,7 +215,29 @@ export default {
       this.fieldForDraw = this.GAME.cardsData;
     },
 
-    changeLevel(step) {
+    changeLevel(direction) {
+      const level = this.FIELD.level;
+      const amount = this.FIELD.amountOfLevels;
+      let step;
+      switch (direction) {
+        case 'First':
+          step = 1
+          break;
+      
+        case 'Prev':
+          step = level === 1 ? 1 : level - 1;
+          break;
+
+        case 'Next':
+          step = level === amount ? amount : level + 1;
+          break;
+
+        case 'Last':
+          step = amount; 
+          break;
+
+        default: break;
+      }
       this.FIELD.changeLevel(step);
       this.createGame();
     },
@@ -252,7 +276,21 @@ export default {
 
 <style lang="scss" scoped>
 .memoji {
-  @include BasicGrid();
+	display: flex;
+  align-items: center;
+  flex: 1;
+
+  &__game {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+  }
+
+  &__instruction {
+    flex-basis: rem(300);
+    margin-right: 10px;
+  }
   &__field {
     margin: 0 auto;
     display: flex;

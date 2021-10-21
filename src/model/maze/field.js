@@ -255,12 +255,10 @@ export default class Field {
    * @method changeLevel
    * @memberof Maze#Field#
    * @param {Number} value this is step 
-   * @description Changes level if 1 increases level, if -1 decreases level
+   * @description Changes level, returns `true` in case of success, otherwise `false`
    * @throws Error - if `value` is not Integer
    * @returns {undefined} undefined
-   * @example 
-   * this.changeLevel(1) // increases level
-   * this.changeLevel(-1) // decreases level
+   * @example this.changeLevel(1)
    */
   changeLevel(value) {
     if (!Number.isInteger(value)) {
@@ -279,7 +277,7 @@ export default class Field {
    * @memberof Maze#Field#
    * @description Returns amount of levels
    * @returns {Number} Number
-   * @example const levels = this.amountOfLevels()
+   * @example const levels = this.amountOfLevels
    */
   get amountOfLevels() {
     return this.data.length;

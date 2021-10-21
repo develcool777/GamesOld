@@ -161,7 +161,7 @@ export default {
             : {color: 'white', cursor: 'pointer'}
 
         case 'stop':
-          if (this.gameStatus === '') { return {color: 'white', cursor: 'default'} }
+          if (['', 'finish'].includes(this.gameStatus)) { return {color: 'gray', cursor: 'default'} }
           if (this.hovered === 'stop' && this.gameStatus !== 'stop') {
             return {color: 'chocolate', cursor: 'pointer'}
           }
@@ -170,12 +170,12 @@ export default {
             : {color: 'white', cursor: 'pointer'}
 
         case 'finish':
-          if (this.hovered === 'finish') {
+          if (this.hovered === 'finish' && !['', 'finish'].includes(this.gameStatus)) {
             return {color: 'chocolate', cursor: 'pointer'}
           }
           return this.gameStatus !== '' 
-            ? {cursor: 'pointer'} 
-            : {cursor: 'default'}
+            ? {color: 'white', cursor: 'pointer'} 
+            : {color: 'gray', cursor: 'default'}
 
         case 'path':
           if (this.hovered === 'path') {
@@ -229,8 +229,9 @@ export default {
     },
 
     styleLevels(name='') {
-      const condition = this.currentLevel === 1 || ['start', 'finish', 'stop'].includes(this.gameStatus);
-      const condition2 = this.currentLevel === this.amountOfLevels || ['start', 'finish', 'stop'].includes(this.gameStatus);
+      const status = ['start', 'finish', 'stop'].includes(this.gameStatus);
+      const condition = this.currentLevel === 1 || status;
+      const condition2 = this.currentLevel === this.amountOfLevels || status;
       const whatToReturn = cond => cond 
         ? {color: 'gray', cursor: 'default'} 
         : {color: 'white', cursor: 'pointer'}

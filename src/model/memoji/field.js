@@ -88,24 +88,18 @@ export default class Field {
    * @method changeLevel
    * @memberof Memoji#Field#
    * @param {Number} value this is step 
-   * @description Changes level if 1 increases level, if -1 decreases level, returns `true` in case of success, otherwise `false`
+   * @description Changes level, returns `true` in case of success, otherwise `false`
    * @throws Error - if `value` is not Integer
-   * @throws Error - if `value` is not 1 or -1
-   * @returns {Boolean} Boolean
-   * @example 
-   * this.changeLevel(1) // increases level
-   * this.changeLevel(-1) // decreases level
+   * @returns {undefined} undefined
+   * @example this.changeLevel(1)
    */
-  changeLevel(value) {
+   changeLevel(value) {
     if (!Number.isInteger(value)) {
       throw Error(`Field.changeLevel(value) value must be Integer`);
     }
-    if (Math.abs(value) !== 1) {
-      throw Error(`Field.changeLevel(value) value must be 1 or -1`);
-    }
     const levels = this.data.map(obj => obj.level);
-    if (levels.includes(this.level + value)) {
-      this.level += value;
+    if (levels.includes(value)) {
+      this.level = value;
       return true;
     }
     return false;
@@ -116,9 +110,9 @@ export default class Field {
    * @memberof Memoji#Field#
    * @description Returns amount of levels
    * @returns {Number} Number
-   * @example const levels = this.amountOfLevels()
+   * @example const levels = this.amountOfLevels
    */
-  amountOfLevels() {
+  get amountOfLevels() {
     return this.data.length;
   }
 }

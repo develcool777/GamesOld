@@ -228,38 +228,47 @@ export default {
 	display: flex;
   align-items: center;
   flex: 1;
+
   &__game {
     flex-grow: 1;
     display: flex;
     justify-content: center;
     align-items: center; 
   }
+
   &__instruction {
     flex-basis: rem(300);
     margin-right: 10px;
   }
+
   &__row {
     @include Flex(center);
   }
 }
+
 .empty {
   @include Size();
 }
+
 .block {
   @include Size();
   background: $black;
 }
+
 .startPosition {
   @include Size();
   background: plum;
 }
+
 .endPosition {
   @include Size();
   background: $win;
 }
+
 .player {
   position: relative;
 }
+
 .player::after {
   position: absolute;
   content: "";
@@ -271,12 +280,15 @@ export default {
   border-radius: rem(5);
   background: darkgreen;
 }
+
 .path {
   position: relative;
 }
+
 .hint {
   position: relative;
 }
+
 .path::after, .hint::after {
   position: absolute;
   content: "";
