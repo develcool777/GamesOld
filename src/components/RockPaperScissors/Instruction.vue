@@ -93,12 +93,48 @@ export default {
 
 <style lang="scss" scoped>
 .instRPS {
-  @include Instruction();
+  padding: 0 rem(10);
+
+  &__mainBtns  {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__title {
+    margin-bottom: rem(10);
+    font-size: rem(30);
+    text-align: center;
+  }
+
+  &__mainBtn:nth-child(n+2) {
+    margin-top: rem(15);
+  }
+
+  &__mainBtn {
+    font-size: rem(25);
+    width: rem(200);
+    padding: rem(10) 0;
+    text-align: center;
+    background: $gradient-primary;
+    color: $white;
+    cursor: pointer;
+    border-radius: rem(10);
+    transition-duration: .2s;
+    user-select: none;
+  }
+
+  &__mainBtn:hover {
+    transform: scale(0.98);
+  }
+
   &__block {
     margin: 20px 0;
     color: $white;
   }
 }
+
 .active {
   background: green;
 }

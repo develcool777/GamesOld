@@ -274,8 +274,23 @@ export default {
 
 <style lang="scss" scoped>
 .rps {
-  @include BasicGrid(flex-start);
+	display: flex;
+  flex: 1;
   background: #24272E;
+
+  &__game {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center; 
+  }
+
+  &__instruction {
+    flex-basis: rem(265);
+    border-left: 5px solid $black;
+  }
+
   &__caption {
     font-size: 40px;
   }
