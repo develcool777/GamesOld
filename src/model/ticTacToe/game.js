@@ -204,21 +204,16 @@ export default class Game {
    * @method returnMove
    * @memberof TicTacToe#Game#
    * @description If `moves` is empty or there is a winner or there is no cell for move: return from function, 
-   * otherwise define `amountOfMoves` that need to be returned then erase those moves from `moves`. Also returns `true` if function runs correctly otherwise `false`
+   * otherwise define `amountOfMoves` that need to be returned then erase those moves from `moves`. 
+   * Also returns `true` if function runs correctly otherwise `false`
    * @returns {Boolean} Boolean
    * @example this.returnMove()
    */
   returnMove() {
     const withComp = this.comp.playWithComputer
     const compFirstMove = this.comp.compSide === 'x';
-    if (this.moves.length === 0 || this.winner !== '') { return false }
-    let amountOfMoves = 1;
-    if (withComp) {
-      amountOfMoves = 2; 
-    } 
-    if (compFirstMove && this.moves.length <= 2) {
-      amountOfMoves = 0;    
-    }
+    if (this.moves.length === 0 || this.winner !== '' || compFirstMove && this.moves.length <= 2) { return false }
+    let amountOfMoves = withComp ? 2 : 1;
     const lastMoves = this.moves.splice(this.moves.length - amountOfMoves).reverse()
     lastMoves.forEach(move => {
       this.currentPlayer = move.player;
@@ -354,9 +349,6 @@ export default class Game {
    */
   startGame() {
     this.gameStatus = 'start';
-    if (this.comp.playWithComputer && this.comp.compSide === 'x') {
-      this.playWithComputer();
-    }
   }
 
   /**

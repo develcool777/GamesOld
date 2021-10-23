@@ -41,14 +41,16 @@ export default {
 
 <style lang="scss" scoped>
 .cell {
-  width: rem(150);
-  height: rem(150);
-  background: $white;
+  width: 150px;
+  height: 150px;
+  background: lightyellow; // $white
+
   &__moveO, &__moveX {
     position: relative;
     width: inherit;
     height: inherit;
   }
+
   &__smallCircle, &__bigCircle {
     position: absolute;
     content: "";
@@ -58,29 +60,34 @@ export default {
     background: blue;
     border-radius: 50%;
   }
+
   &__bigCircle {
-    width: rem(140);
-    height: rem(140);
+    width: 140px;
+    height: 140px;
   }
-  &__smallCircle{
-    width: rem(125);
-    height: rem(125);
-    background: $white;
+
+  &__smallCircle {
+    width: 125px;
+    height: 125px;
+    background: lightyellow;
     z-index: 2;
   }
+
   &__line1, &__line2 {
     position: absolute;
     content: "";
     top: 50%;
     left: 50%;
-    width: rem(150);
-    height: rem(10);
+    width: 150px;
+    height: 10px;
     background: red;
-    border-radius: rem(10);
+    border-radius: 10px;
   }
+
   &__line1  {
     transform: translate(-50%, -50%) rotate(45deg);
   }
+  
   &__line2 {
     transform: translate(-50%, -50%) rotate(-45deg);
   }

@@ -32,6 +32,8 @@ import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { faStopwatch } from "@fortawesome/free-solid-svg-icons";
 import { faLightbulb } from "@fortawesome/free-solid-svg-icons";
+import { faRobot } from "@fortawesome/free-solid-svg-icons";
+import { faEraser } from "@fortawesome/free-solid-svg-icons";
 
 // chess
 library.add(faChessRook);
@@ -70,5 +72,9 @@ library.add(faArrowLeft);
 library.add(faStopwatch);
 // memoji
 library.add(faLightbulb);
+// tic tac toe
+library.add(faRobot);
+library.add(faEraser);
+
 
 export default FontAwesomeIcon;

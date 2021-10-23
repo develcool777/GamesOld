@@ -1,34 +1,21 @@
 <template>
   <section class="info">
-    <div class="info__title" v-if="settings.playWithComputer">
-      <div>
-        User:
-        <span :style="userColor">{{ userSide }}</span> 
+    <div class="info__players">
+      <div class="info__player" :class="active(player1)">
+        <fontAwesome icon="user"/>
+        <p class="info__side" :style="styleSide">{{ player1 }}</p>
       </div>
-      <div >
-        <span :style="{color: 'red'}">V</span>
-        <span :style="{color: 'blue'}">S</span>
-      </div>
-      <div>
-        Comp: 
-        <span :style="compColor">{{ compSide }}</span> 
+      <p class="info__vs">VS</p>
+      <div class="info__player" :class="active(player2)">
+        <fontAwesome :icon="settings.playWithComputer ? 'robot' : 'user'"/>
+        <p class="info__side" :style="styleSide">{{ player2 }}</p>
       </div>
     </div>
-    <div class="info__title" v-else>
-      <div>
-        User1: 
-        <span :style="{color: 'red'}">X</span> 
-      </div>
-      <div>
-        <span :style="{color: 'red'}">V</span>
-        <span :style="{color: 'blue'}">S</span>
-      </div>
-      <div>
-        User2: 
-        <span :style="{color: 'blue'}">O</span> 
-      </div>
+    <div class="info__resWrap">
+      <transition name="result">
+        <div class="info__result" v-if="winner !== ''" >{{ resultOfBattle }}</div>
+      </transition>
     </div>
-    <div class="info__result">{{ result }}</div>
   </section>
 </template>
 
@@ -37,46 +24,54 @@ export default {
   name: 'Info',
   props: {
     settings: Object,
-    winner: String
+    winner: String,
+    currentPlayer: String,
+    gameStatus: String
   },
   data() {
     return {
       result: ''
     }
   },
-  watch: {
-    winner: function(newVal) {
-      this.result = newVal !== '' ? this.resultOfBattle() : '';
-    }
-  },
   computed: {
-    compSide() {
-      return this.settings.compSide.toUpperCase();
+    player1() {
+      return this.settings.playWithComputer ? this.settings.userSide : 'x';
     },
 
-    userSide() {
-      return this.settings.userSide.toUpperCase();
+    player2() {
+      return this.settings.playWithComputer ? this.settings.compSide : 'o';
     },
 
-    compColor() {
-      return this.settings.compSide === 'o' ? {color: 'blue'} : {color: 'red'};
-    },
-    
-    userColor() {
-      return this.settings.userSide === 'o' ? {color: 'blue'} : {color: 'red'};
-    },
-
-  },
-  methods: {
     resultOfBattle() {
       if (this.winner === 'draw') {
         return`It's a draw`;
       }
       if (this.settings.playWithComputer) {
         const compSide = this.settings.compSide;
-        return this.winner === compSide ? 'Comp win' : 'User win';
+        return this.winner === compSide ? 'Computer won' : 'User won';
       }
-      return this.winner === 'o' ? 'User2 win' : 'User1 win';
+      return this.winner === 'o' ? 'User with O won' : 'User with X won';
+    },
+
+    styleSide() {
+      return this.gameStatus === 'finish'
+        ? {color: 'inherit'}
+        : {color: 'khaki'}
+    }
+  },
+  methods: {
+    active(player) {
+      if (this.gameStatus === '') { return }
+      if (this.gameStatus === 'finish') {
+        return this.winner === 'draw' 
+          ? 'draw'
+          : this.winner === player 
+            ? 'winner'
+            : 'loser'
+      }
+      return this.currentPlayer === player 
+        ? 'active'
+        : ''
     }
   }
 }
@@ -84,18 +79,96 @@ export default {
 
 <style lang="scss" scoped> 
 .info {
-  &__title {
-    color: $white;
-    font-size: rem(50);
-    width: rem(600);
+  height: 80px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+
+  &__players {
     @include Flex(space-between);
+    width: 500px;
+    height: 50px;
+    background: #302e2c;
+    border-radius: 0 0 40px 40px;
+    border-bottom: 1px solid gray;
   }
+
+  &__player {
+    @include Flex(center);
+    color: white;
+    font-size: 35px;
+    width: 30%;
+    height: inherit;
+    transition-duration: .5s;
+  }
+
+  &__player:first-child {
+    border-radius: 0 0 0 40px;
+  }
+
+  &__player:last-child {
+    border-radius: 0 0 40px 0;
+  }
+
+  &__side {
+    margin-left: 20px;
+    font-size: 30px;
+    text-transform: uppercase;
+  }
+
+  &__vs {
+    color: white;
+    font-size: 40px;
+  }
+
+  &__resWrap {
+    position: relative;
+    width: inherit;
+    height: 30px;
+    overflow: hidden;
+  }
+
   &__result {
-    height: rem(50);
-    width: rem(600);
-    color: $white;
-    font-size: rem(30);
-    text-align: center;
+    position: absolute;
+    @include Flex(center);
+    top: 0;
+    left: 40px;
+    width: 420px;
+    height: 30px;
+    background: dimgray;
+    border-bottom: 1px solid gray;
+    border-radius: 0 0 40px 40px;
+    color: white;
+    font-size: 30px;
   }
+}
+
+.active {
+  background: lightslategray;
+  color: lawngreen;
+}
+
+.winner {
+  background: lightgreen;
+  color: black;
+}
+
+.loser {
+  background: lightcoral;
+  color: black;
+}
+
+.draw {
+  background: lightgrey;
+  color: black;
+}
+
+.result-enter-active,
+.result-leave-active {
+  transition: transform .5s;
+}
+.result-enter-from,
+.result-leave-to {
+  transform: translateY(-30px);
 }
 </style>

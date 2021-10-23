@@ -4,6 +4,8 @@
       <Info
         :settings="GAME.comp"
         :winner="GAME.winner"
+        :currentPlayer="getCurrentPlayer"
+        :gameStatus="GAME.gameStatus"
       />
       <div class="tictactoe__field">
         <Cell 
@@ -27,8 +29,9 @@
     </section>
     <Instruction 
       class="tictactoe__instruction"
-      :status="GAME.gameStatus"
+      :gameStatus="GAME.gameStatus"
       :settings="GAME.comp"
+      :isReturnMove="isReturnMoveAvailable"
       v-on:start="gameStarted()"
       v-on:finish="gameFinished()"
       v-on:returnMove="returnMove()"
@@ -65,6 +68,17 @@ export default {
       allowMove: true
     }
   },
+  computed: {
+    isReturnMoveAvailable() {
+      const condition1 = this.GAME.moves.length === 0 || this.GAME.winner !== '';
+      const condition2 = this.GAME.comp.compSide === 'x' && this.GAME.moves.length <= 2;
+      return !(condition1 || condition2)
+    },
+
+    getCurrentPlayer() {
+      return this.GAME.currentPlayer;
+    }
+  },
   created() {
     setTimeout(() => {this.loading = false}, 1000);
     this.init();
@@ -91,14 +105,25 @@ export default {
           this.draw();
           this.allowMove = true;
         }, 250);
-
       }
     },
 
     gameStarted() {
       this.GAME.startGame();
-      if (this.GAME.comp.playWithComputer && this.GAME.comp.compSide === 'x') {
-        this.draw();
+      const isComp = this.GAME.comp.playWithComputer;
+      const compSide = this.GAME.comp.compSide === 'x';
+      const diff = this.GAME.comp.difficulty;
+
+      if (isComp && compSide && diff === 'easy') {
+        this.GAME.playWithComputer();
+        return this.draw();
+      } 
+
+      if (isComp && compSide && diff === 'hard') {
+        setTimeout(() => {
+          this.GAME.playWithComputer();
+          this.draw();
+        }, 500) // because of recursion there
       }
     },
 
@@ -108,9 +133,9 @@ export default {
       this.draw();
     },
 
-    changeSide(bool) {
-      if (bool) { return }
-      [this.GAME.comp.userSide, this.GAME.comp.compSide] = [this.GAME.comp.compSide, this.GAME.comp.userSide];
+    changeSide(side) {
+      if (this.GAME.comp.userSide === side) { return }
+      [this.GAME.comp.compSide, this.GAME.comp.userSide] = [this.GAME.comp.userSide, side];
       this.gameFinished();
     },
 
@@ -145,42 +170,65 @@ export default {
 
 <style lang="scss" scoped>
 .tictactoe {
-  @include BasicGrid();
-  background: #41B3A3;
+	display: flex;
+  align-items: center;
+  flex: 1;
+  background: darkslategray; // #41B3A3
+
+  &__game {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; 
+  }
+
+  &__instruction {
+    flex-basis: 300px;
+    margin-right: 10px;
+  }
+
   &__field {
     position: relative;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    width: rem(470);
+    width: 470px;
     margin: 0 auto;
   }
+
   &__cell:nth-child(n+4):nth-child(-n+6) {
-    margin: rem(10) 0;
+    margin: 10px 0;
   }
+
   &__lineVertical1, &__lineVertical2, &__lineHorizontal1, &__lineHorizontal2  { 
     position: absolute;
     display: block;
     background: $black;
-    border-radius: rem(5);
+    border-radius: 5px;
   }
+
   &__lineVertical1, &__lineVertical2 {
     width: 100%;
-    height: rem(10);
-    top: rem(150);
+    height: 10px;
+    top: 150px;
   }
+
   &__lineVertical2 {
-    top: rem(310);
+    top: 310px;
   }
+  
   &__lineHorizontal1, &__lineHorizontal2 {
-    width: rem(10);
+    width: 10px;
     height: 100%;
-    left: rem(150);
+    left: 150px;
   }
+
   &__lineHorizontal2 {
-    left: rem(310);   
+    left: 310px;   
   }
 }
+
 .win {
   background: lightgreen;
 }
