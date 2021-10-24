@@ -1,5 +1,5 @@
-import firebase from 'firebase/app';
-import "firebase/firestore";
+import { fireStore } from "@/firebase"
+import { collection, getDocs, getDoc, doc, updateDoc } from "firebase/firestore";
 
 export default {
   namespaced: true,
@@ -27,23 +27,21 @@ export default {
   actions: {
     async INIT({commit, dispatch}) {
       const DATA = [];
-      const getData = async () => {
-        const db = firebase.firestore();
-        const collection = await db.collection('Games').get();
-        collection.docs.forEach(doc => {
-          const data = doc.data();
-          data.docID = doc.id;
-          DATA.push(data)
-        })
-      }
+      const reference = collection(fireStore, 'Games');
+      const games = await getDocs(reference);
+      games.docs.forEach(doc => {
+        const data = doc.data();
+        data.docID = doc.id;
+        DATA.push(data);
+      })
 
-      await getData();
       DATA.sort((a, b) => a.id - b.id);
 
       commit('setData', DATA);
       dispatch('PARSE_DATA');
       commit('changeIsDataLoaded', true);
     },
+
     PARSE_DATA({commit, state}) {
       const DATA = state.data;
       const parsedData = DATA.map(data => {
@@ -55,16 +53,14 @@ export default {
 
       commit('setParsedData', parsedData)
     },
+
     async UPDATE_PLAYED({ commit }, docId) {
-      const update = async () => {
-        const db = firebase.firestore();
-        const doc = await db.collection('Games').doc(docId);
-        const docData = await doc.get();
-        await doc.update({
-          played: docData.data().played + 1
-        })
-      }
-      await update();
+      const reference = doc(fireStore, 'Games', docId);
+      const document = await getDoc(reference);
+      await updateDoc(reference, {
+        played: document.data().played + 1
+      })
+      
       commit('changeIsDataLoaded', true);
     }
   }

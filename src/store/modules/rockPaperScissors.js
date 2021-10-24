@@ -1,5 +1,5 @@
-import firebase from 'firebase/app';
-import "firebase/firestore";
+import { fireStore } from "@/firebase"
+import { collection, getDocs } from "firebase/firestore";
 
 export default {
   namespaced: true,
@@ -66,9 +66,9 @@ export default {
 
     async SET_CHOICES({commit}) {
       const DATA = [];
-      const db = firebase.firestore();
-      const collection = await db.collection('rockPaperScissors').get();
-      collection.docs.forEach(doc => {
+      const reference = collection(fireStore, 'rockPaperScissors');
+      const rps = await getDocs(reference);
+      rps.docs.forEach(doc => {
         const data = doc.data();
         DATA.push(data)
       })

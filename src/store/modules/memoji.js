@@ -1,5 +1,5 @@
-import firebase from 'firebase/app';
-import "firebase/firestore";
+import { fireStore } from "@/firebase"
+import { collection, getDocs } from "firebase/firestore";
 
 export default {
   namespaced: true,
@@ -20,9 +20,9 @@ export default {
   actions: {
     async GET_DATA({commit}) {
       const DATA = [];
-      const db = firebase.firestore();
-      const collection = await db.collection('Memoji_levels').get();
-      collection.docs.forEach(doc => {
+      const reference = collection(fireStore, 'Memoji_levels');
+      const levels = await getDocs(reference);
+      levels.docs.forEach(doc => {
         const data = doc.data();
         data.level = +doc.id;
         DATA.push(data)

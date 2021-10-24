@@ -1,5 +1,5 @@
-import firebase from 'firebase/app';
-import "firebase/firestore";
+import { fireStore } from "@/firebase"
+import { collection, getDocs } from "firebase/firestore";
 
 export default {
   namespaced: true,
@@ -65,9 +65,9 @@ export default {
 
     async SET_DATA({commit}) {
       const DATA = [];
-      const db = firebase.firestore();
-      const collection = await db.collection('Maze_levels').get();
-      collection.docs.forEach(doc => {
+      const reference = collection(fireStore, 'Maze_levels');
+      const levels = await getDocs(reference);
+      levels.docs.forEach(doc => {
         const data = doc.data();
         data.field = data.field.map(obj => Object.values(obj).pop());
         data.level = +doc.id
