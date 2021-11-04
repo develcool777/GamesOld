@@ -5,9 +5,9 @@
         <img class="head__img" src="@/assets/header/videogame.png" alt="logo">
         Games
       </router-link>
-      <div class="head__wrapperDiv" @click="showHideUser()">
+      <!-- <div class="head__wrapperDiv" @click="showHideUser()">
         <fontAwesome icon="user-circle" />
-      </div>
+      </div> -->
     </div>
   </header>
 </template>
