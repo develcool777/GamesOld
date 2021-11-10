@@ -42,7 +42,12 @@ const routes = [
     path: '/:pathMatch(.*)*', 
     name: 'NotFound',
     component: () => import(/* webpackChunkName: "group-foo" */ '../views/NotFound.vue')
-  }
+  },
+  // {
+  //   path: '/email_confirmation', 
+  //   name: 'ConfirmEmail',
+  //   component: () => import(/* webpackChunkName: "group-foo" */ '../views/ConfirmEmail.vue')
+  // }
 ]
 
 const router = createRouter({

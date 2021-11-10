@@ -34,6 +34,11 @@ import { faStopwatch } from "@fortawesome/free-solid-svg-icons";
 import { faLightbulb } from "@fortawesome/free-solid-svg-icons";
 import { faRobot } from "@fortawesome/free-solid-svg-icons";
 import { faEraser } from "@fortawesome/free-solid-svg-icons";
+import { faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { faEye } from "@fortawesome/free-solid-svg-icons";
+import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+import { faKey } from "@fortawesome/free-solid-svg-icons";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
 // chess
 library.add(faChessRook);
@@ -59,6 +64,9 @@ library.add(faUser);
 library.add(faEnvelope);
 library.add(faLock);
 library.add(faBackspace);
+library.add(faEyeSlash);
+library.add(faEye);
+
 // maze
 library.add(faWaveSquare);
 library.add(faShoePrints);
@@ -75,6 +83,10 @@ library.add(faLightbulb);
 // tic tac toe
 library.add(faRobot);
 library.add(faEraser);
+// password
+library.add(faCheckCircle);
+library.add(faKey);
+library.add(faInfoCircle);
 
 
 export default FontAwesomeIcon;

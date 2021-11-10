@@ -108,10 +108,10 @@ export default {
         const condition = this.index === this.matrix[0].length - 1
         if (condition) { 
           clearInterval(this.intervalID); 
-          setTimeout(() => this.hideNumbers = true, 500)
+          setTimeout(() => this.hideNumbers = true, 250);
         }
         this.index += condition ? 0 : 1;
-      }, 500);
+      }, 250);
     },
   },
   beforeUnmount() {

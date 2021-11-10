@@ -1,5 +1,7 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+// import { getDatabase } from "firebase/database";
 
 const config = {
   apiKey: "AIzaSyAN74W4lQ08kNqnVwpu6tWkvF6chy2J09o",
@@ -11,7 +13,13 @@ const config = {
   measurementId: "G-KQ9PVDZSK4"
 }
 
-const firebaseApp = initializeApp(config);
-const fireStore = getFirestore(firebaseApp);
+const apps = getApps();
+let firebaseApp;
+if (!apps.length) { firebaseApp = initializeApp(config) } 
+else { firebaseApp = apps[0] }
 
-export { fireStore }
+const fireStore = getFirestore(firebaseApp);
+const auth = getAuth(firebaseApp);
+// const database = getDatabase(firebaseApp)
+
+export { fireStore, auth }

@@ -43,22 +43,11 @@ export default {
   props: {
     id: Number
   },
-  // created() {
-    // this.dontAllowToScroll();
-  // },
   computed: {
     ...mapGetters(['getShowUser'])
   },
   methods: {
     ...mapActions(['SET_SHOW_USER']),
-
-    // dontAllowToScroll() {
-    //   window.addEventListener('keydown', function(e) {
-    //     if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.key) > -1) {
-    //       e.preventDefault();
-    //     }
-    //   }, false);
-    // },
 
     hideUser() {
       this.SET_SHOW_USER(!this.getShowUser);
@@ -83,7 +72,7 @@ export default {
     position: fixed;
     top: 55px;
     right: 0;
-    width: 300px;
+    width: 400px;
     height: 100%;
     z-index: 15;
   }
@@ -104,6 +93,6 @@ export default {
 }
 
 .user-enter-from, .user-leave-to {
-  transform: translateX(300px);
+  transform: translateX(400px);
 }
 </style>
