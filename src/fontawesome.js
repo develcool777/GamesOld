@@ -39,6 +39,7 @@ import { faEye } from "@fortawesome/free-solid-svg-icons";
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import { faKey } from "@fortawesome/free-solid-svg-icons";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 
 // chess
 library.add(faChessRook);
@@ -66,6 +67,7 @@ library.add(faLock);
 library.add(faBackspace);
 library.add(faEyeSlash);
 library.add(faEye);
+library.add(faSignOutAlt);
 
 // maze
 library.add(faWaveSquare);

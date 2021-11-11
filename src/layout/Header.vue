@@ -6,7 +6,8 @@
         Games
       </router-link>
       <div class="head__wrapperDiv" @click="showHideUser()">
-        <fontAwesome icon="user-circle" />
+        <fontAwesome icon="user-circle" v-if="getUser === null"/>
+        <img :src="getUser.avatar" class="head__avatar" alt="Avatar" v-else>
       </div>
     </div>
   </header>
@@ -18,7 +19,7 @@ const { mapGetters, mapActions } = createNamespacedHelpers('user');
 export default {
   name: 'Header',
   computed: {
-    ...mapGetters(['getShowUser'])
+    ...mapGetters(['getShowUser', 'getUser'])
   },
   methods: {
     ...mapActions(['SET_SHOW_USER']),
@@ -63,11 +64,19 @@ export default {
     position: absolute;
     top: 50%;
     right: 20px;
+    width: 30px;
+    height: 30px;
     transform: translateY(-50%);
     transition-duration: .5s;
     font-size: 30px;
     color: white;
     cursor: pointer;
+  }
+
+  &__avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
   }
 }
 

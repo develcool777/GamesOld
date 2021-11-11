@@ -46,8 +46,11 @@ export default {
   computed: {
     ...mapGetters(['getShowUser'])
   },
+  created() {
+    this.SURVIVE_PAGE_RELOAD();
+  },
   methods: {
-    ...mapActions(['SET_SHOW_USER']),
+    ...mapActions(['SET_SHOW_USER', 'SURVIVE_PAGE_RELOAD']),
 
     hideUser() {
       this.SET_SHOW_USER(!this.getShowUser);

@@ -187,13 +187,13 @@ export default {
       for (let key in this.dataReg) {
         data[key] = this.dataReg[key].value
       }
-
       const isOK = await this.CREATE_ACCOUNT(data);
       this.isSignUpRequest = false;
 
       if (isOK.isCreated) {
         this.isRegistrationComplete = true;
         ['username', 'email', 'password', 'cPassword'].forEach(key => sessionStorage.removeItem(key));
+        return;
       }
 
       if (isOK.errorCode === 'auth/email-already-in-use') {
