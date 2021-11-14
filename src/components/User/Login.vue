@@ -1,7 +1,7 @@
 <template>
   <div class="login">
     <div class="login__title">Login</div>
-    <form class="login__form" @submit="login($event)" novalidate>
+    <form class="login__form" @submit="login($event)" @keypress.enter="login($event)" novalidate autocomplete="on">
       <div class="login__blocks">
         <Block 
           v-for="(value, key, i) in dataLog" 
@@ -75,22 +75,20 @@ export default {
     ...mapActions(['SET_WHAT_TO_SHOW', 'SIGN_IN']),
 
     savedValue() {
-      ['email', 'password'].forEach(key => {
-        const value = sessionStorage.getItem(key);
-        if (value !== null) {
-          this.dataLog[key].value = value;
-        }
-      });
+      const value = sessionStorage.getItem('lEmail');
+      this.dataLog.email.value = value !== null ? value : '';
     },
 
     updateVModel(obj) {
       this.dataLog[obj.key].value = obj.str;
-      sessionStorage.setItem(obj.key, obj.str);
+
       if (obj.key === 'email') {
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const notFound = !this.dataLog.email.wrongData.includes(this.dataLog.email.value);
         this.dataLog.email.isValid = obj.str.match(emailPattern) !== null && notFound;
+        sessionStorage.setItem('lEmail', obj.str);
       }
+
       if (obj.key === 'password') {
         const notFound = !this.dataLog.password.wrongData.includes(this.dataLog.password.value);
         this.dataLog.password.isValid = obj.str !== '' && notFound;
@@ -148,7 +146,7 @@ export default {
       this.isSignInRequest = false;
 
       if (isOK.isLogined) {
-        ['email', 'password'].forEach(key => sessionStorage.removeItem(key));
+        sessionStorage.removeItem('lEmail');
         return this.SET_WHAT_TO_SHOW('account');
       }
 
@@ -166,7 +164,7 @@ export default {
     },
 
     signUp() {
-      ['email', 'password'].forEach(key =>sessionStorage.removeItem(key));
+      sessionStorage.removeItem('lEmail');
       this.SET_WHAT_TO_SHOW('registration');
     },
 

@@ -5,7 +5,7 @@
         <img class="head__img" src="@/assets/header/videogame.png" alt="logo">
         Games
       </router-link>
-      <div class="head__wrapperDiv" @click="showHideUser()">
+      <div class="head__wrapperDiv" @click="showHideUser()" draggable="false" title="Account">
         <fontAwesome icon="user-circle" v-if="getUser === null"/>
         <img :src="getUser.avatar" class="head__avatar" alt="Avatar" v-else>
       </div>
@@ -81,6 +81,6 @@ export default {
 }
 
 .head__logo:hover  .head__img{
-  transform: scale(1.2, 1.2);
+  transform: scale(1.1, 1.1);
 }
 </style>

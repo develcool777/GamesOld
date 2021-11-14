@@ -1,7 +1,7 @@
 <template>
   <div class="registration" v-if="!isRegistrationComplete">
     <div class="registration__title">Create account</div>
-    <form class="registration__form" @submit="register($event)" @keypress.enter="register($event)" novalidate>
+    <form class="registration__form" @submit="register($event)" @keypress.enter="register($event)" novalidate autocomplete="on">
       <div class="registration__blocks" >
         <Block 
           :block="Object.assign(value, {name: key})"
@@ -118,28 +118,28 @@ export default {
     ...mapActions(['SET_WHAT_TO_SHOW', 'CREATE_ACCOUNT']),
 
     savedValue() {
-      ['username', 'email', 'password', 'cPassword'].forEach((key, i) => {
+      ['username', 'email'].forEach(key => {
         const userValue = sessionStorage.getItem(key);
-        if (userValue !== null) {
-          this.dataReg[key].value = userValue;
-        }
+        this.dataReg[key].value = userValue !== null ? userValue : '';
       });
     },
 
     updateVModel(obj) {
       this.dataReg[obj.key].value = obj.str;
-      sessionStorage.setItem(obj.key, obj.str);
+
 
       switch (obj.key) {
         case 'username': 
           const usernamePattern = /^[a-zA-Z0-9]([_-](?![_-])|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$/;
           this.dataReg.username.isValid = obj.str.match(usernamePattern) !== null;
+          sessionStorage.setItem('username', obj.str);
           return;
 
         case 'email':
           const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           const notInUse = !this.dataReg.email.alredyInUse.includes(this.dataReg.email.value);
           this.dataReg.email.isValid = obj.str.match(emailPattern) !== null && notInUse;
+          sessionStorage.setItem('email', obj.str);
           return;
 
         case 'password':                                              
@@ -192,7 +192,7 @@ export default {
 
       if (isOK.isCreated) {
         this.isRegistrationComplete = true;
-        ['username', 'email', 'password', 'cPassword'].forEach(key => sessionStorage.removeItem(key));
+        ['username', 'email'].forEach(key => sessionStorage.removeItem(key));
         return;
       }
 
@@ -231,7 +231,7 @@ export default {
     },
 
     signIn() {
-      ['username', 'email', 'password', 'cPassword'].forEach(key => sessionStorage.removeItem(key));
+      ['username', 'email'].forEach(key => sessionStorage.removeItem(key));
       this.SET_WHAT_TO_SHOW('login');
     },
 

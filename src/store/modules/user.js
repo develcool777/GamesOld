@@ -1,3 +1,4 @@
+import sha256 from 'sha256';
 import { auth, database } from "@/firebase"
 import { ref, set, get, child } from "firebase/database";
 import { 
@@ -57,7 +58,7 @@ export default {
           username: payload.username,
           email: payload.email,
           avatar: avatarURl,
-          password: payload.password,
+          password: sha256(payload.password),
           created: userCredential.user.metadata.creationTime
         });
         return {isCreated: true};
