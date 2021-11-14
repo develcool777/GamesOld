@@ -376,9 +376,18 @@ describe('testing methods', () => {
     expect(g.comp.userSide = 'o').toMatch('o');
     expect(g.field).toEqual([['x', '', ''], ['', '', ''], ['', '','']]);
     expect(g.moves).toHaveLength(1);
+    expect(g.returnMove()).toBeFalsy();
+
+    expect(g.play(0, 1)).toBeTruthy();
+    expect(g.field).toEqual([['x', 'o', ''], ['', '', ''], ['', '','']]);
+    expect(g.moves).toHaveLength(2);
+    expect(g.returnMove()).toBeFalsy();
+
+    expect(g.play(0, 2)).toBeTruthy();
+    expect(g.field).toEqual([['x', 'o', 'x'], ['', '', ''], ['', '','']]);
+    expect(g.moves).toHaveLength(3);
     expect(g.returnMove()).toBeTruthy();
-    expect(g.field).toEqual([['x', '', ''], ['', '', ''], ['', '','']]);
-    expect(g.moves).toHaveLength(1);
+
     expect(g.clear()).toBeTruthy();
 
     // playing with user
@@ -538,15 +547,6 @@ describe('testing methods', () => {
     expect(g.startGame()).toBeUndefined();
     expect(g.gameStatus).toMatch('start');
     expect(g.currentPlayer).toMatch('x');
-    expect(g.clear()).toBeTruthy();
-
-    expect(g.comp.playWithComputer = true).toBeTruthy();
-    expect(g.comp.compSide = 'x').toMatch('x');
-    expect(g.comp.userSide = 'o').toMatch('o');
-    expect(g.startGame()).toBeUndefined();
-    expect(g.gameStatus).toMatch('start');
-    expect(g.moves).toHaveLength(1);
-    expect(g.currentPlayer).toMatch('o');
     expect(g.clear()).toBeTruthy();
   });
 

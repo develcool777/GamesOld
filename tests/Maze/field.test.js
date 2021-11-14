@@ -1,20 +1,18 @@
 import { expect, jest } from '@jest/globals';
 import Field from '../../src/model/maze/field';
-import firebase from "firebase/app";
-import firebaseConfig from '../../firebase.json';
-firebase.initializeApp(firebaseConfig.config);
-import "firebase/firestore";
+import { fireStore } from '../../src/firebase';
+import { collection, getDocs } from "firebase/firestore";
 const DATA = [];
 
 beforeAll(async () => {
-  const db = firebase.firestore();
-  const collection = await db.collection('Maze_levels').get();
-  collection.docs.forEach(doc => {
+  const reference = collection(fireStore, 'Maze_levels');
+  const levels = await getDocs(reference);
+  levels.docs.forEach(doc => {
     const data = doc.data();
     data.field = data.field.map(obj => Object.values(obj).pop());
     data.level = +doc.id
     DATA.push(data)
-  });
+  })
 })
 
 test('Data', async () => {
@@ -156,14 +154,16 @@ describe('testing methods', () => {
   test('changeLevel()', () => {
     expect(f.level).toBe(1);
     expect(() => f.changeLevel('string')).toThrowError(new Error(`Field.changeLevel(value) value must be Integer`));
-    expect(() => f.changeLevel(5)).toThrowError(new Error(`Field.changeLevel(value) value must be 1 or -1`));
     expect(f.changeLevel(-1)).toBeFalsy();
+    expect(f.changeLevel(2)).toBeTruthy();
+    expect(f.changeLevel(3)).toBeTruthy();
+    expect(f.changeLevel(4)).toBeTruthy();
+    expect(f.changeLevel(5)).toBeFalsy();
     expect(f.changeLevel(1)).toBeTruthy();
-    expect(f.changeLevel(-1)).toBeTruthy();
     expect(f.level).toBe(1);
   });
 
   test('amountOfLevels()', () => {
-    expect(f.amountOfLevels()).toBe(4);
+    expect(f.amountOfLevels).toBe(4);
   });
 });

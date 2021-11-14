@@ -1,15 +1,13 @@
 import { expect } from '@jest/globals';
 import Field from '../../src/model/memoji/field';
-import firebase from "firebase/app";
-import firebaseConfig from '../../firebase.json';
-firebase.initializeApp(firebaseConfig.config);
-import "firebase/firestore";
+import { fireStore } from '../../src/firebase';
+import { collection, getDocs } from "firebase/firestore";
 const DATA = [];
 
 test('fetch Data', async () => {
-  const db = firebase.firestore();
-  const collection = await db.collection('Memoji_levels').get();
-  collection.docs.forEach(doc => {
+  const reference = collection(fireStore, 'Memoji_levels');
+  const levels = await getDocs(reference);
+  levels.docs.forEach(doc => {
     const data = doc.data();
     data.level = +doc.id;
     DATA.push(data)
@@ -123,15 +121,18 @@ describe('testing methods', () => {
   test('changeLevel()', () => {
     expect(f.level).toBe(1);
     expect(() => f.changeLevel('string')).toThrowError(new Error(`Field.changeLevel(value) value must be Integer`));
-    expect(() => f.changeLevel(5)).toThrowError(new Error(`Field.changeLevel(value) value must be 1 or -1`));
     expect(f.changeLevel(-1)).toBeFalsy();
+    expect(f.changeLevel(2)).toBeTruthy();
+    expect(f.changeLevel(3)).toBeTruthy();
+    expect(f.changeLevel(4)).toBeTruthy();
+    expect(f.changeLevel(5)).toBeTruthy();
+    expect(f.changeLevel(6)).toBeFalsy();
     expect(f.changeLevel(1)).toBeTruthy();
-    expect(f.changeLevel(-1)).toBeTruthy();
     expect(f.level).toBe(1);
   });
 
   test('amountOfLevels()', () => {
-    expect(f.amountOfLevels()).toBe(5);
+    expect(f.amountOfLevels).toBe(5);
   });
 });
 

@@ -27,6 +27,8 @@ const config = {
     // '<rootDir>/Maze/field.test.js',
     // '<rootDir>/Maze/player.test.js',
     // '<rootDir>/Maze/game.test.js',
+    // '<rootDir>/Chess/cell.test.js',
+    // '<rootDir>/Chess/field.test.js',
   ],
   detectOpenHandles: true
 };

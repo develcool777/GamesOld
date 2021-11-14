@@ -50,21 +50,12 @@ export default class Field {
           if (!Number.isInteger(value)) {
             throw Error(`Field.historyIndex.set(value) value must be Integer`);
           }
-          if (0 > value && value >= historyOfMoves.length) {
-            throw Error(`Field.historyIndex.set(value) value must be in range of historyOfMoves`);
-          }
           historyIndex = value;
         }
       },
 
       historyOfMoves: {
-        get: () => historyOfMoves,
-        set: (value) => {
-          if (!Array.isArray(value)) {
-            throw Error(`Game.historyOfMoves.set(value) value must be Array`);
-          }
-          historyOfMoves = value;
-        }
+        get: () => historyOfMoves
       },
     })
   }
