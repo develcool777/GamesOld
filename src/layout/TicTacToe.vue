@@ -39,6 +39,7 @@
       v-on:changeSide="changeSide($event)"
       v-on:changeDifficulty="changeDifficulty($event)"
     />
+    <CommentButton :path="'/tic-tac-toe/comments'"/>
   </div>
   <transition name="fade">
     <Loading v-if="loading" class="LOADING" :step="0.6"/>
@@ -51,13 +52,15 @@ import Instruction from '@/components/TicTacToe/Instruction';
 import Cell from '@/components/TicTacToe/Cell';
 import Info from '@/components/TicTacToe/Info';
 import Loading from '@/components/Loading' 
+import CommentButton from '@/components/CommentButton'
 export default {
   name: 'TicTacToe',
   components: {
     Instruction,
     Cell,
     Info,
-    Loading
+    Loading,
+    CommentButton
   },
   data() {
     return {
@@ -170,10 +173,11 @@ export default {
 
 <style lang="scss" scoped>
 .tictactoe {
+  position: relative;
 	display: flex;
   align-items: center;
   flex: 1;
-  background: darkslategray; // #41B3A3
+  background: darkslategray; 
 
   &__game {
     flex-grow: 1;

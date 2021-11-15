@@ -2,11 +2,12 @@
   <div class="home">
     <Header class="home__header"/>
     <HomePage v-if="id === null"/>
-    <Maze v-if="id === 0"/>
-    <Memoji v-if="id === 1"/>
-    <RockPaperScissors v-if="id === 2"/>
-    <TicTacToe v-if="id === 3"/>
-    <Chess v-if="id === 4"/>
+    <GameComments v-if="id === 0" :game="game"/>
+    <Maze v-if="id === 1"/>
+    <Memoji v-if="id === 2"/>
+    <RockPaperScissors v-if="id === 3"/>
+    <TicTacToe v-if="id === 4"/>
+    <Chess v-if="id === 5"/>
 
     <transition name="user">
       <User class="home__user" v-if="getShowUser"/>
@@ -28,6 +29,7 @@ import RockPaperScissors from '@/layout/RockPaperScissors.vue'
 import TicTacToe from '@/layout/TicTacToe.vue'
 import Chess from '@/layout/Chess.vue'
 import User from '@/layout/User.vue'
+import GameComments from '@/layout/GameComments.vue'
 export default {
   name: 'Home',
   components: {
@@ -38,10 +40,12 @@ export default {
     RockPaperScissors,
     TicTacToe,
     Chess,
-    User
+    User,
+    GameComments
   },
   props: {
-    id: Number
+    id: Number,
+    game: Object
   },
   computed: {
     ...mapGetters(['getShowUser'])

@@ -1,0 +1,30 @@
+<template>
+  <router-link tag="div" class="cBtn" :to="path">Comments</router-link>
+</template>
+
+<script>
+export default {
+  name: 'CommentButton',
+  props: {
+    path: String
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.cBtn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  font-size: 25px;
+  text-decoration: none;
+  padding: 10px 30px;
+  background: lightcoral;
+  color: white;
+  transition-duration: .5s;
+}
+
+.cBtn:hover {
+  background: darken($color: lightcoral, $amount: 10);
+}
+</style>
