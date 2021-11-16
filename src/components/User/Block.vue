@@ -24,6 +24,7 @@
           @focus="focusInput(true)"
           @blur="focusInput(false)"
           v-model="string"
+          :autocomplete="block.autocomplete"
         >
         <fontAwesome 
           v-if="string !== ''"

@@ -6,42 +6,59 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home,
-    props: {id: null}
+    props: { id: null }
+  },
+  {
+    path: '/:name/comments',
+    name: 'Comments',
+    component: Home,
+    props: (route) => {
+      const name = route.params.name.split('-').map(word => word.slice(0, 1).toUpperCase() + word.slice(1)).join('');
+      return {
+        id: 0, 
+        game: {
+          name,
+          path: '/' + route.params.name
+        }
+      }
+    },
+    beforeEnter: (to, from, next) => {
+      if (router.getRoutes().some(routes => routes.path === '/' + to.params.name)) {
+        next();
+      } else {
+        next({ name: 'NotFound' });
+      }
+    }
   },
   {
     path: '/maze',
     name: 'Maze',
     component: Home,
-    props: {id: 1}
+    props: { id: 1 }
   },
   {
     path: '/memoji',
     name: 'Memoji',
     component: Home,
-    props: {id: 2}
+    props: { id: 2 }
   },
   {
     path: '/rock-paper-scissors',
     name: 'RockPaperScissors',
     component: Home,
-    props: {id: 3}
+    props: { id: 3 }
   },
   {
     path: '/tic-tac-toe',
     name: 'TicTacToe',
     component: Home,
-    props: (route) => {
-      return route.name === 'TicTacToe' 
-        ? { id: 4 }
-        : { id: 0, game: {name: 'TicTacToe', path: '/tic-tac-toe'} }
-    },
-    children: [ { path: 'comments', component: Home, name: 'Commets' } ]
+    props: { id: 4 }
   },
   {
     path: '/chess',
     name: 'Chess',
     component: Home,
-    props: {id: 5}
+    props: { id: 5 }
   },
   {
     path: '/:pathMatch(.*)*', 

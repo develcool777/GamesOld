@@ -39,6 +39,8 @@
       v-on:restart="restartGame()"
       v-on:showHint="hint()"
     />
+
+    <CommentButton :path="{ name: 'Comments', params: { name: 'memoji' }}"/>
   </div>
 
   <ResultMemoji
@@ -65,12 +67,14 @@ import Game from '@/model/memoji/game';
 import Instruction from '@/components/Memoji/Instruction';
 import ResultMemoji from '@/components/Memoji/Result';
 import Loading from '@/components/Loading'
+import CommentButton from '@/components/CommentButton'
 export default {
   name: 'Memoji',
   components: {
     Instruction,
     ResultMemoji,
-    Loading
+    Loading,
+    CommentButton
   },
   data() {
     return {

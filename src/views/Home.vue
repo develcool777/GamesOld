@@ -1,13 +1,13 @@
 <template>
   <div class="home">
     <Header class="home__header"/>
-    <HomePage v-if="id === null"/>
-    <GameComments v-if="id === 0" :game="game"/>
-    <Maze v-if="id === 1"/>
-    <Memoji v-if="id === 2"/>
+    <HomePage          v-if="id === null"/>
+    <GameComments      v-if="id === 0" :game="game"/>
+    <Maze              v-if="id === 1"/>
+    <Memoji            v-if="id === 2"/>
     <RockPaperScissors v-if="id === 3"/>
-    <TicTacToe v-if="id === 4"/>
-    <Chess v-if="id === 5"/>
+    <TicTacToe         v-if="id === 4"/>
+    <Chess             v-if="id === 5"/>
 
     <transition name="user">
       <User class="home__user" v-if="getShowUser"/>
@@ -48,7 +48,7 @@ export default {
     game: Object
   },
   computed: {
-    ...mapGetters(['getShowUser'])
+    ...mapGetters(['getShowUser']),
   },
   created() {
     this.SURVIVE_PAGE_RELOAD();

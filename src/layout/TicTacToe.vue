@@ -39,7 +39,7 @@
       v-on:changeSide="changeSide($event)"
       v-on:changeDifficulty="changeDifficulty($event)"
     />
-    <CommentButton :path="'/tic-tac-toe/comments'"/>
+    <CommentButton :path="{ name: 'Comments', params: { name: 'tic-tac-toe' }}"/>
   </div>
   <transition name="fade">
     <Loading v-if="loading" class="LOADING" :step="0.6"/>

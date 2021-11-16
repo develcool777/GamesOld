@@ -76,6 +76,7 @@
       class="rps__instruction"
       v-on:clear="clearField()"
     />
+    <CommentButton :path="{ name: 'Comments', params: { name: 'rock-paper-scissors' }}"/>
   </div>
   <transition name="fade">
     <Loading v-if="loading" class="LOADING" :step="0.6"/>
@@ -88,11 +89,13 @@ const { mapGetters, mapActions } = createNamespacedHelpers('rockPaperScissors');
 import Game from '@/model/RockPaperScissors/game';
 import Instruction from '@/components/RockPaperScissors/Instruction';
 import Loading from '@/components/Loading' 
+import CommentButton from '@/components/CommentButton'
 export default {
   name: 'RockPaperScissors',
   components: {
     Instruction,
-    Loading
+    Loading,
+    CommentButton
   },
   data() {
     return {
@@ -274,6 +277,7 @@ export default {
 
 <style lang="scss" scoped>
 .rps {
+  position: relative;
 	display: flex;
   flex: 1;
   background: #24272E;

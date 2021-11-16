@@ -79,6 +79,7 @@ export default {
           icon: 'user',
           isValid: false,
           warning: '',
+          autocomplete: 'username'
         },
         email: {
           hint: 'Email',
@@ -87,7 +88,8 @@ export default {
           icon: 'envelope',
           isValid: false,
           warning: '',
-          alredyInUse: []
+          alredyInUse: [],
+          autocomplete: 'email'
         },
         password: {
           hint: 'Password',
@@ -97,7 +99,8 @@ export default {
           isValid: false,
           eye: true,
           generatePassword: true,
-          warning: ''
+          warning: '',
+          autocomplete: 'new-password'
         },
         cPassword: {
           hint: 'Confirm Password',
@@ -106,7 +109,8 @@ export default {
           icon: 'lock',
           isValid: false,
           eye: true,
-          warning: ''
+          warning: '',
+          autocomplete: 'new-password'
         },
       },
     }

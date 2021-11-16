@@ -53,7 +53,8 @@ export default {
           icon: 'envelope',
           isValid: false,
           warning: '',
-          wrongData: []
+          wrongData: [],
+          autocomplete: 'email'
         },
         password: {
           hint: 'Password',
@@ -63,7 +64,8 @@ export default {
           isValid: false,
           eye: true,
           warning: '',
-          wrongData: []
+          wrongData: [],
+          autocomplete: 'current-password'
         },
       }
     }

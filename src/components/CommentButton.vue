@@ -6,7 +6,7 @@
 export default {
   name: 'CommentButton',
   props: {
-    path: String
+    path: Object
   }
 }
 </script>

@@ -15,7 +15,11 @@
     </section>
 
     <section class="info__section">
-      <h2 class="info__title">Comments</h2>
+      <div class="info__flex">
+        <h2 class="info__title">Comments</h2>
+        <fontAwesome icon="comments" class="info__commentsIcon"/>
+        <p title="Amount of comments">{{ amountOfComments }}</p>
+      </div>
       <div class="info__write">
         <div v-if="getUser !== null" class="info__inputWrap" >
           <input 
@@ -23,18 +27,21 @@
             class="info__input" 
             placeholder="Type your comment..."
             v-model="value"
+            @keypress.enter="comment()"
+            lang="en"
           >
           <div class="info__wrapIcon">
             <fontAwesome icon="backspace" class="info__backspace" title="Clear Field" @click="value = ''"/>
           </div>
           <button class="info__post" type="button" @click="comment()">Comment</button>
         </div>
-        <p v-else class="info__signIn">Please sign in to comment</p>
+        <p v-else class="info__alternative">Please sign in to comment</p>
       </div>
 
-      <div class="info__comments">
+      <div v-if="getGameData.comments.length !== 0" class="info__comments" >
         <Comment v-for="(c, i) in getGameData.comments" :key="i" :comment="c"/>
       </div>
+
     </section>
   </div>
 </template>
@@ -42,6 +49,7 @@
 <script>
 import { createNamespacedHelpers } from 'vuex'
 const { mapActions, mapGetters } = createNamespacedHelpers('comments');
+import Filter from 'bad-words';
 import Comment from '@/components/GameComments/Comment'
 export default {
   name: 'GameComments',
@@ -66,18 +74,24 @@ export default {
 
     getUser() {
       return this.$store.getters['user/getUser'];
+    },
+
+    amountOfComments() {
+      return this.getGameData.comments.length;
     }
   },
   methods: {
     ...mapActions(['GET_DATA', 'POST']),
 
     async comment() {
+      if (this.value === '') { return }
       const obj = {}
-      obj.text = this.value;
+      const customFilter = new Filter({ placeHolder: '*'})
+      obj.text = customFilter.clean(this.value);
       obj.avatar = this.getUser.avatar;
       obj.username = this.getUser.username;
-      const payload = Object.assign(obj, {game: this.game.name})
-      await this.POST(payload);
+      obj.game = this.game.name;
+      await this.POST(obj);
       this.value = '';
     }
   }
@@ -113,7 +127,7 @@ export default {
   &__section {
     width: 100%;
     max-width: 960px;
-    margin: 20px auto 0;
+    margin: 20px auto;
     padding: 20px;
     border-radius: 10px;
     @include boxShadow(0.1);
@@ -133,6 +147,17 @@ export default {
   &__title {
     font-size: 25px;
     color: darkslategrey;
+  }
+
+  &__flex {
+    @include Flex(flex-start);
+    width: 250px;
+    color: darkslategrey;
+    font-size: 25px;
+  }
+
+  &__commentsIcon {
+    margin: 0 10px;
   }
 
   &__descriptionText {
@@ -197,7 +222,7 @@ export default {
     background: lighten($color: darkslategrey, $amount: 10);
   }
 
-  &__signIn {
+  &__alternative {
     font-size: 20px;
   }
 
