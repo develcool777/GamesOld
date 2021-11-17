@@ -31,7 +31,13 @@
             lang="en"
           >
           <div class="info__wrapIcon">
-            <fontAwesome icon="backspace" class="info__backspace" title="Clear Field" @click="value = ''"/>
+            <fontAwesome 
+              v-if="value !== ''"
+              icon="backspace" 
+              class="info__backspace" 
+              title="Clear Field" 
+              @click="value = ''"
+            />
           </div>
           <button class="info__post" type="button" @click="comment()">Comment</button>
         </div>
@@ -39,7 +45,12 @@
       </div>
 
       <div v-if="getGameData.comments.length !== 0" class="info__comments" >
-        <Comment v-for="(c, i) in getGameData.comments" :key="i" :comment="c"/>
+        <Comment 
+          v-for="(c, i) in getGameData.comments"
+          :key="i" 
+          :comment="Object.assign(c, {admin: getUser?.admin})"
+          v-on:delComment="delComment($event)"
+        />
       </div>
 
     </section>
@@ -62,11 +73,13 @@ export default {
   data() {
     return {
       isLoaded: false,
-      value: ''
+      value: '',
+      unsubscribe: null 
     }
   },
   async created() {
     await this.GET_DATA(this.game.name);
+    this.unsubscribe = await this.LISTENER_FOR_COMMENTS(this.game.name);
     this.isLoaded = true;
   },
   computed: {
@@ -81,7 +94,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['GET_DATA', 'POST']),
+    ...mapActions(['GET_DATA', 'POST', 'DELETE_COMMENT', 'LISTENER_FOR_COMMENTS']),
 
     async comment() {
       if (this.value === '') { return }
@@ -91,9 +104,21 @@ export default {
       obj.avatar = this.getUser.avatar;
       obj.username = this.getUser.username;
       obj.game = this.game.name;
+      obj.id = Math.floor(Date.now() * Math.random());
+      obj.created = Date.now();
       await this.POST(obj);
       this.value = '';
+    },
+
+    async delComment(id) {
+      const obj = {};
+      obj.game = this.game.name;
+      obj.id = id;
+      await this.DELETE_COMMENT(obj);
     }
+  },
+  beforeUnmount() {
+    this.unsubscribe();
   }
 }
 </script>
@@ -223,7 +248,9 @@ export default {
   }
 
   &__alternative {
+    @include Flex(center);
     font-size: 20px;
+    height: 40px;
   }
 
   &__comments {

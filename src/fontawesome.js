@@ -42,6 +42,7 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 import { faLongArrowAltLeft } from "@fortawesome/free-solid-svg-icons";
 import { faComments } from "@fortawesome/free-solid-svg-icons";
+import { faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 
 // chess
 library.add(faChessRook);
@@ -94,5 +95,6 @@ library.add(faInfoCircle);
 // comments
 library.add(faLongArrowAltLeft);
 library.add(faComments);
+library.add(faTrashAlt);
 
 export default FontAwesomeIcon;

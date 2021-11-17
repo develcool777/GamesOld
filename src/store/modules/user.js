@@ -59,7 +59,8 @@ export default {
           email: payload.email,
           avatar: avatarURl,
           password: sha256(payload.password),
-          created: userCredential.user.metadata.creationTime
+          created: userCredential.user.metadata.creationTime,
+          admin: false
         });
         return {isCreated: true};
       } 
@@ -91,7 +92,12 @@ export default {
       canvas.height = 100;
   
       // Draw background
-      const colors = ['red', 'green', 'purple', 'pink', 'blue', 'gray', 'orange']
+      const colors = [
+        'lightcoral', 'lightpink', 'lightsalmon', 'lightseagreen', 
+        'lightslategray', 'olivedrab', 'olive','darkkhaki', 'darkcyan', 
+        'darksalmon', 'darkorange', 'palevioletred', 'yellowgreen', 
+        'royalblue', 'hotpink', 'rebeccapurple'
+      ]
       context.fillStyle = colors[Math.floor(Math.random() * colors.length)];
       context.fillRect(0, 0, canvas.width, canvas.height);
   
