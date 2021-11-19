@@ -6,11 +6,11 @@
     </router-link>
 
     <section class="info__section">
-      <h1 class="info__gameName">{{ getGameData.name }}</h1>
-      <p class="info__gameCreated">created {{ getGameData.created }}</p>
+      <h1 class="info__gameName">{{ getInfo.name }}</h1>
+      <p class="info__gameCreated">created {{ getInfo.created }}</p>
       <div class="info__description">
         <h2 class="info__title">Description</h2>
-        <p class="info__descriptionText">{{ getGameData.description }}</p>
+        <p class="info__descriptionText">{{ getInfo.description }}</p>
       </div>
     </section>
 
@@ -18,7 +18,7 @@
       <div class="info__flex">
         <h2 class="info__title">Comments</h2>
         <fontAwesome icon="comments" class="info__commentsIcon"/>
-        <p title="Amount of comments">{{ amountOfComments }}</p>
+        <p title="Amount of comments">{{ getAmountOfComments }}</p>
       </div>
       <div class="info__write">
         <div v-if="getUser !== null" class="info__inputWrap" >
@@ -48,11 +48,14 @@
         <Comment 
           v-for="(c, i) in getGameData.comments"
           :key="i" 
-          :comment="Object.assign(c, {admin: getUser?.admin})"
+          :comment="Object.assign(c, {isCurrentUserAdmin: getUser?.admin})"
           v-on:delComment="delComment($event)"
         />
       </div>
 
+      <div v-if="showLoadMore" class="info__loadMoreWrap">
+        <button class="info__loadMore" @click="loadMore()">Load more</button>
+      </div>
     </section>
   </div>
 </template>
@@ -78,12 +81,10 @@ export default {
     }
   },
   async created() {
-    await this.GET_DATA(this.game.name);
-    this.unsubscribe = await this.LISTENER_FOR_COMMENTS(this.game.name);
-    this.isLoaded = true;
+    await this.init(); 
   },
   computed: {
-    ...mapGetters(['getGameData']),
+    ...mapGetters(['getGameData', 'getAmountOfComments']),
 
     getUser() {
       return this.$store.getters['user/getUser'];
@@ -91,10 +92,30 @@ export default {
 
     amountOfComments() {
       return this.getGameData.comments.length;
+    },
+
+    getInfo() {
+      return this.getGameData.info;
+    },
+
+    showLoadMore() {
+      const commentsInFirebase = this.getAmountOfComments;
+      const currentAmountOfComments = this.amountOfComments;
+      return commentsInFirebase !== currentAmountOfComments;
     }
   },
   methods: {
-    ...mapActions(['GET_DATA', 'POST', 'DELETE_COMMENT', 'LISTENER_FOR_COMMENTS']),
+    ...mapActions(['GET_DATA', 'POST', 'DELETE_COMMENT', 'LISTENER_FOR_COMMENTS', 'LOAD_MORE_COMMENTS']),
+
+    async init() {
+      const obj = {
+        gameName: this.game.name,
+        listener: false
+      }
+      await this.GET_DATA(obj);
+      this.unsubscribe = await this.LISTENER_FOR_COMMENTS(this.game.name);
+      this.isLoaded = true;
+    },
 
     async comment() {
       if (this.value === '') { return }
@@ -104,6 +125,7 @@ export default {
       obj.avatar = this.getUser.avatar;
       obj.username = this.getUser.username;
       obj.game = this.game.name;
+      obj.admin = this.getUser.admin;
       obj.id = Math.floor(Date.now() * Math.random());
       obj.created = Date.now();
       await this.POST(obj);
@@ -115,6 +137,10 @@ export default {
       obj.game = this.game.name;
       obj.id = id;
       await this.DELETE_COMMENT(obj);
+    },
+
+    async loadMore() {
+      await this.LOAD_MORE_COMMENTS(this.game.name);
     }
   },
   beforeUnmount() {
@@ -255,6 +281,26 @@ export default {
 
   &__comments {
     margin-top: 30px;
+  }
+
+  &__loadMoreWrap {
+    @include Flex(center);
+    margin-top: 30px;
+  }
+
+  &__loadMore {
+    border: none;
+    font-size: 18px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    background: darkslategrey;
+    color: white;
+    cursor: pointer;
+    transition-duration: .5s;
+  }
+
+  &__loadMore:hover {
+    background: lighten($color: darkslategrey, $amount: 10);
   }
 }
 </style>

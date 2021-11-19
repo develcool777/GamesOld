@@ -4,12 +4,13 @@
     <div class="comment__info">
       <div class="comment__block">
         <h3 class="comment__username">{{ comment.username }}</h3>
+        <fontAwesome v-if="comment.admin" icon="user-cog" title="Admin" class="comment__admin"/>
         <p class="comment__timeStamp">{{ timeStamp(comment.created) }}</p>
       </div>
       <p class="comment__text">{{ comment.text }}</p>
     </div>
     <fontAwesome 
-      v-if="comment.admin"
+      v-if="comment.isCurrentUserAdmin"
       icon="trash-alt" 
       class="comment__del" 
       @click="deleteComment(comment.id)" 
@@ -32,11 +33,13 @@ export default {
     timeStamp(seconds) {
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       const date = new Date(seconds);
-      const month = months[date.getMonth()]
+      const month = months[date.getMonth()];
       const dayOfMonth = date.getDate();
       const year = date.getFullYear();
-      const hour = date.getHours();
-      const min = date.getMinutes();
+      let hour = date.getHours();
+      hour = hour < 10 ? `0${hour}` : hour;
+      let min = date.getMinutes();
+      min = min < 10 ? `0${min}` : min;
       return `${dayOfMonth}-${month}-${year} ${hour}:${min}`;
     }
   }
@@ -67,6 +70,12 @@ export default {
 
   &__username {
     font-size: 18px;
+  }
+
+  &__admin {
+    font-size: 14px;
+    margin-left: 5px;
+    color: blue;
   }
 
   &__timeStamp {
