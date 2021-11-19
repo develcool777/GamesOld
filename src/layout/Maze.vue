@@ -20,7 +20,7 @@
       v-on:changeLevel="changeLevel($event)"
       v-on:clicked="arrowPressed($event)"
     />
-    <CommentButton :path="{ name: 'Comments', params: { name: 'maze' }}"/>
+    <GameInfoButton :path="{ name: 'Information', params: { name: 'maze' }}"/>
   </div>
   <ResultMaze
     :gameResult="gameResult"
@@ -44,13 +44,13 @@ import Game from '@/model/maze/game'
 import ResultMaze from '@/components/Maze/Result'
 import Instruction from '@/components/Maze/Instruction'
 import Loading from '@/components/Loading'
-import CommentButton from '@/components/CommentButton'
+import GameInfoButton from '@/components/GameInfoButton'
 export default {
   components: {
     Instruction,
     ResultMaze,
     Loading,
-    CommentButton
+    GameInfoButton
   },
   data() {
     return {

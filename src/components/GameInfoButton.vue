@@ -1,10 +1,10 @@
 <template>
-  <router-link tag="div" class="cBtn" :to="path">Comments</router-link>
+  <router-link tag="div" class="cBtn" :to="path">Game Info</router-link>
 </template>
 
 <script>
 export default {
-  name: 'CommentButton',
+  name: 'GameInfoButton',
   props: {
     path: Object
   }

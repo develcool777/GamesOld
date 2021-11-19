@@ -71,7 +71,7 @@
       v-on:returnMove="returnMove()"
       v-on:clearBoard="clearBoard()"
     />
-    <CommentButton :path="{ name: 'Comments', params: { name: 'chess' }}"/>
+    <GameInfoButton :path="{ name: 'Information', params: { name: 'chess' }}"/>
   </div>
   <transition name="fade">
     <Loading 
@@ -91,7 +91,7 @@ import Game from '@/model/chess/game'
 import Instruction from '@/components/Chess/Instruction'
 import Loading from '@/components/Loading'
 import MaterialRatio from '@/components/Chess/MaterialRatio'
-import CommentButton from '@/components/CommentButton'
+import GameInfoButton from '@/components/GameInfoButton'
 export default {
   name: 'Chess',
   components: {
@@ -100,7 +100,7 @@ export default {
     Instruction,
     Loading,
     MaterialRatio,
-    CommentButton
+    GameInfoButton
   },
   watch: {
     emitIndex: function(newVal) {

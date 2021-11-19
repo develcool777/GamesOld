@@ -9,8 +9,8 @@ const routes = [
     props: { id: null }
   },
   {
-    path: '/:name/comments',
-    name: 'Comments',
+    path: '/:name/info',
+    name: 'Information',
     component: Home,
     props: (route) => {
       const name = route.params.name.split('-').map(word => word.slice(0, 1).toUpperCase() + word.slice(1)).join('');

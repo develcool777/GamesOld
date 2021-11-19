@@ -76,7 +76,7 @@
       class="rps__instruction"
       v-on:clear="clearField()"
     />
-    <CommentButton :path="{ name: 'Comments', params: { name: 'rock-paper-scissors' }}"/>
+    <GameInfoButton :path="{ name: 'Information', params: { name: 'rock-paper-scissors' }}"/>
   </div>
   <transition name="fade">
     <Loading v-if="loading" class="LOADING" :step="0.6"/>
@@ -89,13 +89,13 @@ const { mapGetters, mapActions } = createNamespacedHelpers('rockPaperScissors');
 import Game from '@/model/RockPaperScissors/game';
 import Instruction from '@/components/RockPaperScissors/Instruction';
 import Loading from '@/components/Loading' 
-import CommentButton from '@/components/CommentButton'
+import GameInfoButton from '@/components/GameInfoButton'
 export default {
   name: 'RockPaperScissors',
   components: {
     Instruction,
     Loading,
-    CommentButton
+    GameInfoButton
   },
   data() {
     return {

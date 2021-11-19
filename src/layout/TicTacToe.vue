@@ -39,7 +39,7 @@
       v-on:changeSide="changeSide($event)"
       v-on:changeDifficulty="changeDifficulty($event)"
     />
-    <CommentButton :path="{ name: 'Comments', params: { name: 'tic-tac-toe' }}"/>
+    <GameInfoButton :path="{ name: 'Information', params: { name: 'tic-tac-toe' }}"/>
   </div>
   <transition name="fade">
     <Loading v-if="loading" class="LOADING" :step="0.6"/>
@@ -52,7 +52,7 @@ import Instruction from '@/components/TicTacToe/Instruction';
 import Cell from '@/components/TicTacToe/Cell';
 import Info from '@/components/TicTacToe/Info';
 import Loading from '@/components/Loading' 
-import CommentButton from '@/components/CommentButton'
+import GameInfoButton from '@/components/GameInfoButton'
 export default {
   name: 'TicTacToe',
   components: {
@@ -60,7 +60,7 @@ export default {
     Cell,
     Info,
     Loading,
-    CommentButton
+    GameInfoButton
   },
   data() {
     return {

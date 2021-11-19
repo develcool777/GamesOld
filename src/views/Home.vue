@@ -2,7 +2,7 @@
   <div class="home">
     <Header class="home__header"/>
     <HomePage          v-if="id === null"/>
-    <GameComments      v-if="id === 0" :game="game"/>
+    <GameInfo          v-if="id === 0" :game="game"/>
     <Maze              v-if="id === 1"/>
     <Memoji            v-if="id === 2"/>
     <RockPaperScissors v-if="id === 3"/>
@@ -29,7 +29,7 @@ import RockPaperScissors from '@/layout/RockPaperScissors.vue'
 import TicTacToe from '@/layout/TicTacToe.vue'
 import Chess from '@/layout/Chess.vue'
 import User from '@/layout/User.vue'
-import GameComments from '@/layout/GameComments.vue'
+import GameInfo from '@/layout/GameInfo.vue'
 export default {
   name: 'Home',
   components: {
@@ -41,7 +41,7 @@ export default {
     TicTacToe,
     Chess,
     User,
-    GameComments
+    GameInfo
   },
   props: {
     id: Number,

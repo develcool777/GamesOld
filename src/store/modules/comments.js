@@ -1,39 +1,34 @@
 import { fireStore } from "@/firebase"
 import { 
-  doc, getDoc, collection, 
-  getDocs, setDoc, onSnapshot, 
-  deleteDoc, query, orderBy, 
-  limit, startAfter,
+  doc, collection, getDocs, 
+  setDoc, onSnapshot, deleteDoc, 
+  query, orderBy, limit, startAfter,
 } from "firebase/firestore";
 
 export default {
   namespaced: true,
   state: {
-    gameData: {
-      info: null,
-      comments: null
-    },
+    comments: null,
     latestDoc: null,
     amountOfComments: null,
   },
   getters: {
-    getGameData: state => state.gameData,
+    getComments: state => state.comments,
     getLatestDoc: state => state.latestDoc,
     getAmountOfComments: state => state.amountOfComments,
   },
   mutations: {
-    setGameData(state, data) {
-      state.gameData.info = data.info;
-      state.gameData.comments = data.comments;
+    setComments(state, comments) {
+      state.comments = comments;
     },
 
     updateComments(state, payload) {
-      state.gameData.comments = payload.comments;
+      state.comments = payload.comments;
       state.amountOfComments = payload.amountOfCommentsInFirestore;
     },
 
     moreComments(state, comments) {
-      state.gameData.comments.push(...comments);
+      state.comments.push(...comments);
     },
 
     setLatestDoc(state, doc) {
@@ -47,31 +42,18 @@ export default {
   actions: {
     async GET_DATA({commit, dispatch}, payload) {
       try {
-        const info = await dispatch('GET_INFO', payload.gameName);
         const comments = await dispatch('GET_COMMENTS', payload) || [];
-        commit('setGameData', {info, comments});
+        commit('setComments', comments);
       } 
       catch (error) {
         console.error(error);
       }
     },
 
-    async GET_INFO({}, gameName) {
-      try {
-        const reference = doc(fireStore, 'Comments', gameName);
-        const gameInfo = await getDoc(reference);
-        const gameInfoData = gameInfo.data();
-        return gameInfoData;
-      } 
-      catch (error) {
-        console.error(error);
-      }
-    }, 
-
     async GET_COMMENTS({state, commit}, payload) {
       try {
-        const reference = collection(fireStore, `Comments/${payload.gameName}/comments`);
-        const decideLimit = state.gameData.comments?.length > 5 ? state.gameData.comments.length : 5
+        const reference = collection(fireStore, `Games_Info/${payload.gameName}/comments`);
+        const decideLimit = state.comments?.length > 5 ? state.comments.length : 5
         const limitOfComments = payload.listener ? decideLimit : 5
         const q = state.latestDoc === null || payload.listener
           ? query(reference, orderBy('created', 'desc'), limit(limitOfComments))
@@ -87,7 +69,7 @@ export default {
     }, 
 
     LISTENER_FOR_COMMENTS({state, dispatch, commit}, gameName) {
-      const reference = collection(fireStore, `Comments/${gameName}/comments`);
+      const reference = collection(fireStore, `Games_Info/${gameName}/comments`);
       const q = query(reference, orderBy('created', 'desc'));
       let firstTime = true;
       const unsubscribe = onSnapshot(q, async snap => {
@@ -97,7 +79,7 @@ export default {
           return
         }
 
-        const lastIndex = state.gameData.comments.length - 1;
+        const lastIndex = state.comments.length - 1;
         if (snap.docs[lastIndex]?.id !== state.latestDoc?.id || lastIndex === -1) {
           const comments = await dispatch('GET_COMMENTS', {gameName, listener: true});
           commit('updateComments', { comments, amountOfCommentsInFirestore: snap.size });
@@ -111,9 +93,9 @@ export default {
       commit('moreComments', comments);
     },
 
-    async POST({}, payload) {
+    async POST_COMMENT({}, payload) {
       try {
-        const reference = doc(fireStore, `Comments/${payload.game}/comments`, `${payload.id}`);
+        const reference = doc(fireStore, `Games_Info/${payload.game}/comments`, `${payload.id}`);
         const { avatar, text, username, id, created, admin } = payload;
         await setDoc(reference, {
           avatar, text, username, id, created, admin
@@ -126,12 +108,18 @@ export default {
 
     async DELETE_COMMENT({}, payload) {
       try {
-        const reference = doc(fireStore, `Comments/${payload.game}/comments`, `${payload.id}`);
+        const reference = doc(fireStore, `Games_Info/${payload.game}/comments`, `${payload.id}`);
         await deleteDoc(reference);
       } 
       catch (error) {
         console.error(error);
       }
+    },
+
+    CLEAR_STATE({commit}) {
+      commit('setComments', null);
+      commit('setLatestDoc', null);
+      commit('setAmountOfComments', null);
     }
   }
 }

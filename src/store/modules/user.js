@@ -71,11 +71,16 @@ export default {
       }
     },
 
-    async GET_USER_DATA_BY_UID({commit}, uid) {
+    async GET_USER_DATA_BY_UID({}, uid) {
       const dbRef = ref(database);
       try {
         const promise = await get(child(dbRef, `users/${uid}`));
-        return promise.exists() ? promise.val() : null;
+        if (promise.exists()) {
+          const userData = promise.val();
+          userData.uid = uid;
+          return userData;
+        }
+        return null;
       } 
       catch (error) {
         const errorCode = error.code;
@@ -84,7 +89,7 @@ export default {
       }
     },
 
-    async GENERATE_AVATAR({commit}, letter) {
+    async GENERATE_AVATAR({}, letter) {
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
   
