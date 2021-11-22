@@ -7,6 +7,7 @@ import games from '@/store/modules/games';
 import user from '@/store/modules/user';
 import comments from '@/store/modules/comments';
 import gameInfo from '@/store/modules/gameInfo';
+import rating from '@/store/modules/rating';
 
 export default createStore({
   modules: {
@@ -17,6 +18,7 @@ export default createStore({
     games,
     user,
     comments,
-    gameInfo
+    gameInfo,
+    rating
   }
 })

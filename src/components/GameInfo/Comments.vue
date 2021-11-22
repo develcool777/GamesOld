@@ -55,7 +55,7 @@ export default {
     Comment
   },
   props: {
-    game: Object
+    gameName: String
   },
   data() {
     return {
@@ -92,11 +92,11 @@ export default {
 
     async init() {
       const obj = {
-        gameName: this.game.name,
+        gameName: this.gameName,
         listener: false
       }
       await this.GET_DATA(obj);
-      this.unsubscribe = await this.LISTENER_FOR_COMMENTS(this.game.name);
+      this.unsubscribe = await this.LISTENER_FOR_COMMENTS(this.gameName);
       this.isLoaded = true;
     },
 
@@ -107,7 +107,7 @@ export default {
       obj.text = customFilter.clean(this.value);
       obj.avatar = this.getUser.avatar;
       obj.username = this.getUser.username;
-      obj.game = this.game.name;
+      obj.game = this.gameName;
       obj.admin = this.getUser.admin;
       obj.id = Math.floor(Date.now() * Math.random());
       obj.created = Date.now();
@@ -117,13 +117,13 @@ export default {
 
     async delComment(id) {
       const obj = {};
-      obj.game = this.game.name;
+      obj.game = this.gameName;
       obj.id = id;
       await this.DELETE_COMMENT(obj);
     },
 
     async loadMore() {
-      await this.LOAD_MORE_COMMENTS(this.game.name);
+      await this.LOAD_MORE_COMMENTS(this.gameName);
     }
   },
   beforeUnmount() {
@@ -157,6 +157,7 @@ export default {
   &__icon {
     margin: 0 10px;
   }
+  
   &__write {
     margin-top: 5px;
     width: 100%;

@@ -14,7 +14,9 @@
       </div>
     </section>
 
-    <Comments :game="game"/>
+    <Rating :gameName="game.name"/>
+    
+    <Comments :gameName="game.name"/>
   </div>
 </template>
 
@@ -22,10 +24,12 @@
 import { createNamespacedHelpers } from 'vuex'
 const { mapActions, mapGetters } = createNamespacedHelpers('gameInfo');
 import Comments from '@/components/GameInfo/Comments'
+import Rating from '@/components/GameInfo/Rating'
 export default {
   name: 'GameInfo',
   components: {
-    Comments
+    Comments,
+    Rating
   },
   props: {
     game: Object
