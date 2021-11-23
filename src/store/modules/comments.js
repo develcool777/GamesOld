@@ -1,7 +1,7 @@
 import { fireStore } from "@/firebase"
 import { 
   doc, collection, getDocs, 
-  setDoc, onSnapshot, deleteDoc, 
+  addDoc, onSnapshot, deleteDoc, 
   query, orderBy, limit, startAfter,
 } from "firebase/firestore";
 
@@ -61,7 +61,11 @@ export default {
 
         const comments = await getDocs(q);
         commit('setLatestDoc', comments.docs[comments.docs.length - 1]);
-        return comments.docs.map(doc => doc.data());
+        return comments.docs.map(doc => {
+          const data = doc.data();
+          data.id = doc.id
+          return data;
+        });
       } 
       catch (error) {
         console.error(error);
@@ -95,10 +99,10 @@ export default {
 
     async POST_COMMENT({}, payload) {
       try {
-        const reference = doc(fireStore, `Games_Info/${payload.game}/comments`, `${payload.id}`);
-        const { avatar, text, username, id, created, admin } = payload;
-        await setDoc(reference, {
-          avatar, text, username, id, created, admin
+        const reference = collection(fireStore, `Games_Info/${payload.game}/comments`);
+        const { avatar, text, username, created, admin, userUID } = payload;
+        await addDoc(reference, {
+          avatar, text, username, created, admin, userUID
         })
       } 
       catch (error) {

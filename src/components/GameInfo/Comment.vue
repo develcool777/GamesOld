@@ -1,5 +1,5 @@
 <template>
-  <div class="comment">
+  <div class="comment" :style="styleBackground">
     <img :src="comment.avatar" alt="Avatar" class="comment__avatar" draggable="false">
     <div class="comment__info">
       <div class="comment__block">
@@ -24,6 +24,13 @@ export default {
   name: 'Comment',
   props: {
     comment: Object
+  },
+  computed: {
+    styleBackground() {
+      return this.comment.currentUserUID === this.comment.userUID
+        ? { background: 'antiquewhite' }
+        : { background: '#f2f2f2' }
+    }
   },
   methods: {
     deleteComment(id) {
@@ -53,7 +60,6 @@ export default {
   justify-content: flex-start;
   align-items: flex-start;
   padding: 10px;
-  background: #f2f2f2;
   border-radius: 5px;
 
   &__avatar {

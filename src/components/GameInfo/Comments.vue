@@ -33,7 +33,7 @@
       <Comment 
         v-for="(c, i) in getComments"
         :key="i" 
-        :comment="Object.assign(c, {isCurrentUserAdmin: getUser?.admin})"
+        :comment="Object.assign(c, {isCurrentUserAdmin: getUser?.admin, currentUserUID: getUser?.uid})"
         v-on:delComment="delComment($event)"
       />
     </div>
@@ -109,7 +109,7 @@ export default {
       obj.username = this.getUser.username;
       obj.game = this.gameName;
       obj.admin = this.getUser.admin;
-      obj.id = Math.floor(Date.now() * Math.random());
+      obj.userUID = this.getUser.uid;
       obj.created = Date.now();
       await this.POST_COMMENT(obj);
       this.value = '';
