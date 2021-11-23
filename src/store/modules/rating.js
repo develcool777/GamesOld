@@ -1,5 +1,5 @@
 import { fireStore } from "@/firebase"
-import { getDocs, collection, addDoc, onSnapshot } from "firebase/firestore";
+import { getDocs, collection, addDoc, onSnapshot, doc, updateDoc } from "firebase/firestore";
 
 export default {
   namespaced: true,
@@ -39,7 +39,7 @@ export default {
     }
   },
   actions: {
-    async GET_DATA({state, commit}, gameName) {
+    async GET_DATA({state, commit, dispatch}, gameName) {
       try {
         const reference = collection(fireStore, `Games_Info/${gameName}/rating`);
         const detailsSnap = await getDocs(reference);
@@ -78,11 +78,34 @@ export default {
         commit('setData', data);
         commit('setDetails', updatedDetails);
         commit('setRating', rating);
+        await dispatch('UPDATE_RATING', { gameName, rating });
       } 
       catch (error) {
         console.error(error);
       }
     }, 
+
+    async UPDATE_RATING({}, payload) {
+      try {
+        const reference = doc(fireStore, 'Games_Info', payload.gameName);
+        await updateDoc(reference, {
+          rating: payload.rating
+        })
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    // async UPDATE_PLAYED_FIELD({}) { // param played
+    //   try {
+    //     const reference = doc(fireStore, 'Games_Info', payload.gameName);
+    //     await updateDoc(reference, {
+    //       played: payload.rating
+    //     })
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // },
 
     USER_RAITING({commit, state}, userUid) {
       const userRate = state.data.find(obj => obj.uid === userUid);

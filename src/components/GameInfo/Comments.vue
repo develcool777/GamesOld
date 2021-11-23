@@ -55,11 +55,11 @@ export default {
     Comment
   },
   props: {
-    gameName: String
+    gameName: String,
+    isLoaded: Boolean
   },
   data() {
     return {
-      isLoaded: false,
       value: '',
       unsubscribe: null 
     }
@@ -97,7 +97,7 @@ export default {
       }
       await this.GET_DATA(obj);
       this.unsubscribe = await this.LISTENER_FOR_COMMENTS(this.gameName);
-      this.isLoaded = true;
+      this.$emit('loaded');
     },
 
     async comment() {

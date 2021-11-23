@@ -53,7 +53,7 @@ export default {
     async GET_COMMENTS({state, commit}, payload) {
       try {
         const reference = collection(fireStore, `Games_Info/${payload.gameName}/comments`);
-        const decideLimit = state.comments?.length > 5 ? state.comments.length : 5
+        const decideLimit = state.comments?.length > 5 ? state.comments.length + 1 : 5
         const limitOfComments = payload.listener ? decideLimit : 5
         const q = state.latestDoc === null || payload.listener
           ? query(reference, orderBy('created', 'desc'), limit(limitOfComments))
