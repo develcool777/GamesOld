@@ -7,7 +7,7 @@ import {
   faPlayCircle, faStopCircle, faArrowUp, faArrowDown, faArrowRight, faArrowLeft, faStopwatch, 
   faLightbulb, faRobot, faEraser, faEyeSlash, faEye, faComments, faCheckCircle, 
   faKey, faInfoCircle, faSignOutAlt, faLongArrowAltLeft, faTrashAlt, faUserCog,
-  faStarHalfAlt, faStar, faSmile, faMeh, faFrown, faGrinHearts, faAngry, faTimes
+  faStarHalfAlt, faStar, faSmile, faMeh, faFrown, faGrinHearts, faAngry, faTimes, faArrowCircleLeft
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -20,7 +20,7 @@ library.add(
 
   // user
   faUserCircle, faUser, faEnvelope, faLock, faBackspace, faEyeSlash, faEye, faSignOutAlt,
-  faCheckCircle, faKey, faInfoCircle,
+  faCheckCircle, faKey, faInfoCircle, faArrowCircleLeft,
 
   // maze
   faWaveSquare, faShoePrints, faFlag, faPlayCircle, faStopCircle, faArrowUp,

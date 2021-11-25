@@ -1,30 +1,35 @@
 <template>
-  <div class="profile">
+  <div v-if="!showEdit" class="profile">
     <div class="profile__title">Account</div>
     <div class="profile__info" v-if="user !== null">
       <img :src="user.avatar" alt="Avatar" class="profile__avatar" title="Avatar" draggable="false">
       <div class="profile__block">
         <h3 class="profile__username" title="Username">{{ user.username }}</h3>
-        <button type="button" class="profile__btn">Edit Profile</button>
+        <button type="button" class="profile__btn" @click="showEdit = true">Edit Profile</button>
       </div>
     </div>
     <div class="profile__signOut" title="Sign Out" @click="signOut()">
       <fontAwesome icon="sign-out-alt" />
     </div>
   </div>
+  <EditUser v-else v-on:close="showEdit = false"/>
 </template>
 
 <script>
 import { createNamespacedHelpers } from 'vuex'
 const { mapActions, mapGetters } = createNamespacedHelpers('user');
+import EditUser from  '@/components/User/EditUser'
 export default {
   name: 'UserProfile',
+  components: {
+    EditUser
+  },
   created() {
     this.user = this.getUser;
-    // this.CHECK();
   },
   data() {
     return {
+      showEdit: false,
       user: null,
     }
   },

@@ -14,9 +14,6 @@
 <script>
 export default {
   name: 'UsernameCheck',
-  props: {
-    field: String
-  },
   data() {
     return {
       userHints: [

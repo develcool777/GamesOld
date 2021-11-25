@@ -18,7 +18,7 @@
           </transition>
 
           <transition name="fade">
-            <UsernameCheck :field="getUsernameField" v-if="focused === 'username' && key === focused"/>
+            <UsernameCheck v-if="focused === 'username' && key === focused"/>
           </transition>
 
           <transition name="fade">
@@ -61,9 +61,6 @@ export default {
   computed: {
     getPasswordField() {
       return this.dataReg.password.value;
-    },
-    getUsernameField() {
-      return this.dataReg.username.value;
     }
   },
   data() {
@@ -79,6 +76,7 @@ export default {
           icon: 'user',
           isValid: false,
           warning: '',
+          alreadyInUse: [],
           autocomplete: 'username'
         },
         email: {
@@ -88,7 +86,7 @@ export default {
           icon: 'envelope',
           isValid: false,
           warning: '',
-          alredyInUse: [],
+          alreadyInUse: [],
           autocomplete: 'email'
         },
         password: {
@@ -119,7 +117,7 @@ export default {
     this.savedValue();
   },
   methods: {
-    ...mapActions(['SET_WHAT_TO_SHOW', 'CREATE_ACCOUNT']),
+    ...mapActions(['SET_WHAT_TO_SHOW', 'CREATE_ACCOUNT', 'CHECK_AVAILABILITY', 'GENERATE_PASSWORD']),
 
     savedValue() {
       ['username', 'email'].forEach(key => {
@@ -131,18 +129,18 @@ export default {
     updateVModel(obj) {
       this.dataReg[obj.key].value = obj.str;
 
-
       switch (obj.key) {
         case 'username': 
           const usernamePattern = /^[a-zA-Z0-9]([_-](?![_-])|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$/;
-          this.dataReg.username.isValid = obj.str.match(usernamePattern) !== null;
+          const notInUseUsername = !this.dataReg.username.alreadyInUse.includes(this.dataReg.username.value);
+          this.dataReg.username.isValid = obj.str.match(usernamePattern) !== null && notInUseUsername;
           sessionStorage.setItem('username', obj.str);
           return;
 
         case 'email':
           const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          const notInUse = !this.dataReg.email.alredyInUse.includes(this.dataReg.email.value);
-          this.dataReg.email.isValid = obj.str.match(emailPattern) !== null && notInUse;
+          const notInUseEmail = !this.dataReg.email.alreadyInUse.includes(this.dataReg.email.value);
+          this.dataReg.email.isValid = obj.str.match(emailPattern) !== null && notInUseEmail;
           sessionStorage.setItem('email', obj.str);
           return;
 
@@ -150,7 +148,7 @@ export default {
           const passwordPattern = /^(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*()\\-_=+\[{}\]:;.,'"?/|`~<>]).{8,20}$/;
           this.dataReg.password.isValid = obj.str.match(passwordPattern) !== null;
 
-          if (this.dataReg.password.value !== '') {
+          if (this.dataReg.cPassword.value !== '') {
             const cond = this.dataReg.password.value === this.dataReg.cPassword.value;
             this.dataReg.cPassword.isValid = cond;
           }
@@ -182,6 +180,22 @@ export default {
       this.isSignUpRequest = true;
       event.preventDefault();
 
+      // check if 'username' or 'email' already in use
+      const isUsername = await this.CHECK_AVAILABILITY({ key: 'username', value: this.dataReg.username.value })
+      const isEmail = await this.CHECK_AVAILABILITY({ key: 'email', value: this.dataReg.email.value }) 
+
+      if (isUsername) {
+        this.dataReg.username.isValid = false;
+        this.dataReg.username.warning = `Username already in use`;
+        this.dataReg.username.alreadyInUse.push(this.dataReg.username.value);
+      }
+
+      if (isEmail) {
+        this.dataReg.email.isValid = false;
+        this.dataReg.email.warning = `Email already in use`;
+        this.dataReg.email.alreadyInUse.push(this.dataReg.email.value);
+      }
+
       if (!this.warnings()) {
         this.isSignUpRequest = false;
         return;
@@ -191,6 +205,7 @@ export default {
       for (let key in this.dataReg) {
         data[key] = this.dataReg[key].value
       }
+
       const isOK = await this.CREATE_ACCOUNT(data);
       this.isSignUpRequest = false;
 
@@ -198,12 +213,6 @@ export default {
         this.isRegistrationComplete = true;
         ['username', 'email'].forEach(key => sessionStorage.removeItem(key));
         return;
-      }
-
-      if (isOK.errorCode === 'auth/email-already-in-use') {
-        this.dataReg.email.isValid = false;
-        this.dataReg.email.warning = `Email already in use`;
-        this.dataReg.email.alredyInUse.push(this.dataReg.email.value);
       }
     },
 
@@ -222,7 +231,12 @@ export default {
           continue;
         }
 
-        if (key === 'email' && field.value !== '' && field.alredyInUse.includes(field.value)) {
+        if (key === 'username' && field.value !== '' && field.alreadyInUse.includes(field.value)) {
+          field.warning = `Username already in use`;
+          continue;
+        }
+
+        if (key === 'email' && field.value !== '' && field.alreadyInUse.includes(field.value)) {
           field.warning = `Email already in use`;
           continue;
         }
@@ -244,21 +258,12 @@ export default {
       this.warnings();
     },
 
-    passwordGeneration() {
-      const pass = [];
-      const randNumber = () => Math.floor(Math.random() * 10);
-      const randLetter = (min, max) => String.fromCharCode(Math.floor(Math.random() * (max - min)) + min);
-      const specialcharacters = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '\\', '-', '_', '=', '+', '[', '{', '}', ']', ':', ';', '.', ',', '\'', '\"', '?', '/', '|', '\`', '~', '<', '>'];
-      const randSpecialCharacter = () => specialcharacters[Math.floor(Math.random() * (specialcharacters.length - 1))];
-      pass.push(
-        randNumber(), randNumber(), randNumber(),
-        randLetter(65, 90), randLetter(65, 90), randLetter(65, 90),
-        randLetter(97, 122), randLetter(97, 122), randLetter(97, 122),
-        randSpecialCharacter(), randSpecialCharacter(), randSpecialCharacter()
-      );
-      const result = pass.sort(() => Math.random() - 0.5).join('');
-      this.dataReg.password.value = result;
+    async passwordGeneration() {
+      const pass = await this.GENERATE_PASSWORD()
+      this.dataReg.password.value = pass;
       this.dataReg.password.isValid = true;
+      this.dataReg.cPassword.value = pass;
+      this.dataReg.cPassword.isValid = true;
     }
   },
 }

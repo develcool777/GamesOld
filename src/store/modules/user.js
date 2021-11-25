@@ -1,9 +1,19 @@
 import sha256 from 'sha256';
-import { auth, database } from "@/firebase"
-import { ref, set, get, child } from "firebase/database";
+import { auth, database, fireStore } from "@/firebase"
+import { 
+  ref, set, get, child, query as queryDatabase,
+  equalTo, orderByChild, update 
+} from "firebase/database";
+
+import { 
+  collection, getDocs, query as queryFirestore,
+  where, updateDoc, doc 
+} from "firebase/firestore";
+
 import { 
   createUserWithEmailAndPassword, signInWithEmailAndPassword, 
-  signOut, onAuthStateChanged
+  signOut, onAuthStateChanged, updateEmail, updatePassword,
+  reauthenticateWithCredential, EmailAuthProvider, 
 } from "firebase/auth";
 
 
@@ -50,15 +60,101 @@ export default {
       commit('setWhatToShow', value);
     },
 
+    async CHECK_AVAILABILITY({}, payload) {
+      try {
+        const reference = ref(database, 'users');
+        const q = queryDatabase(reference, orderByChild(payload.key), equalTo(payload.value));
+        const d = await get(q);
+        return d.exists();
+      } 
+      catch (error) {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error({errorCode, errorMessage});  
+      }
+    },
+
+    CHECK_EQUALITY({state}, password) {
+      return state.user.password === sha256(password);
+    },
+
+    async UPDATE_USERNAME({dispatch}, payload) {
+      try {
+        const referenceDatabase = ref(database, 'users/' + payload.uid);
+        const avatarURl = await dispatch('GENERATE_AVATAR', payload.username[0].toUpperCase());
+        await update(referenceDatabase, {
+          username: payload.username,
+          avatar: avatarURl
+        });
+
+        const games = ['Chess', 'Maze', 'Memoji', 'RockPaperScissors', 'TicTacToe'];
+        games.forEach(async game => {
+          const referenceFirestore = collection(fireStore, `Games_Info/${game}/comments`);
+          const q = queryFirestore(referenceFirestore, where('userUID', '==', payload.uid)); 
+          const comments = await getDocs(q);
+          const ids = comments.docs.map(doc => doc.id);
+
+          if (ids.length === 0) return;
+
+          ids.forEach(async id => {
+            const commentReference = doc(fireStore, `Games_Info/${game}/comments`, id);
+            await updateDoc(commentReference, {
+              avatar: avatarURl,
+              username: payload.username,
+            });
+          })
+        })
+      } 
+      catch (error) {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error({errorCode, errorMessage});
+      }
+    },
+
+    async UPDATE_EMAIL({}, payload) {
+      try {
+        const user = auth.currentUser;
+        const credential = EmailAuthProvider.credential(payload.userData.email, payload.userData.password)
+        await reauthenticateWithCredential(user, credential);
+        await updateEmail(auth.currentUser, payload.newEmail);
+        const reference = ref(database, 'users/' + payload.userData.uid);
+        await update(reference, { email: payload.newEmail });
+      } 
+      catch (error) {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error({errorCode, errorMessage});
+      }
+    },
+
+    async UPDATE_PASSWORD({}, payload) {
+      try {
+        const shaPass = sha256(payload.newPassword);
+        const user = auth.currentUser;
+        const credential = EmailAuthProvider.credential(payload.userData.email, payload.userData.password)
+        await reauthenticateWithCredential(user, credential);
+        await updatePassword(auth.currentUser, shaPass)
+        const reference = ref(database, 'users/' + payload.userData.uid);
+        await update(reference, { password: shaPass });
+      } 
+      catch (error) {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error({errorCode, errorMessage});
+      }
+    },
+
     async CREATE_ACCOUNT({dispatch}, payload) {
       try {
-        const userCredential = await createUserWithEmailAndPassword(auth, payload.email, payload.password);
+        const shaPass = sha256(payload.password);
+        const userCredential = await createUserWithEmailAndPassword(auth, payload.email, shaPass);
         const avatarURl = await dispatch('GENERATE_AVATAR', payload.username[0].toUpperCase());
-        set(ref(database, 'users/' + userCredential.user.uid), {
+        await set(ref(database, 'users/' + userCredential.user.uid), {
           username: payload.username,
           email: payload.email,
           avatar: avatarURl,
-          password: sha256(payload.password),
+          password: shaPass,
           created: userCredential.user.metadata.creationTime,
           admin: false
         });
@@ -115,9 +211,25 @@ export default {
       return canvas.toDataURL('image/png');
     },
 
+    GENERATE_PASSWORD() {
+      const pass = [];
+      const randNumber = () => Math.floor(Math.random() * 10);
+      const randLetter = (min, max) => String.fromCharCode(Math.floor(Math.random() * (max - min)) + min);
+      const specialcharacters = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '\\', '-', '_', '=', '+', '[', '{', '}', ']', ':', ';', '.', ',', '\'', '\"', '?', '/', '|', '\`', '~', '<', '>'];
+      const randSpecialCharacter = () => specialcharacters[Math.floor(Math.random() * (specialcharacters.length - 1))];
+      pass.push(
+        randNumber(), randNumber(), randNumber(),
+        randLetter(65, 90), randLetter(65, 90), randLetter(65, 90),
+        randLetter(97, 122), randLetter(97, 122), randLetter(97, 122),
+        randSpecialCharacter(), randSpecialCharacter(), randSpecialCharacter()
+      );
+      return pass.sort(() => Math.random() - 0.5).join('');
+    },
+
     async SIGN_IN({dispatch, commit}, payload) {
       try {
-        const userCredential = await signInWithEmailAndPassword(auth, payload.email, payload.password);
+        const shaPass = sha256(payload.password);
+        const userCredential = await signInWithEmailAndPassword(auth, payload.email, shaPass);
         const userData = await dispatch('GET_USER_DATA_BY_UID', userCredential.user.uid);
         commit('setUser', userData);
         return {isLogined: true}
