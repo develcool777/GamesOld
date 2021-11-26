@@ -1,10 +1,10 @@
 <template>
   <div v-if="!showEdit" class="profile">
     <div class="profile__title">Account</div>
-    <div class="profile__info" v-if="user !== null">
-      <img :src="user.avatar" alt="Avatar" class="profile__avatar" title="Avatar" draggable="false">
+    <div class="profile__info" v-if="getUser !== null">
+      <img :src="getUser.avatar" alt="Avatar" class="profile__avatar" title="Avatar" draggable="false">
       <div class="profile__block">
-        <h3 class="profile__username" title="Username">{{ user.username }}</h3>
+        <h3 class="profile__username" title="Username">{{ getUser.username }}</h3>
         <button type="button" class="profile__btn" @click="showEdit = true">Edit Profile</button>
       </div>
     </div>
@@ -24,13 +24,9 @@ export default {
   components: {
     EditUser
   },
-  created() {
-    this.user = this.getUser;
-  },
   data() {
     return {
       showEdit: false,
-      user: null,
     }
   },
   computed: {

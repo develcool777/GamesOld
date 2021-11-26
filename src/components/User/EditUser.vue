@@ -1,76 +1,49 @@
 <template>
   <section class="edit">
+    <transition name="fade">
+      <InformationUpdated v-if="updated !== ''" :what="updated" v-on:closePopup="updated = ''"/>
+    </transition>
     <fontAwesome class="edit__close" icon="arrow-circle-left" title="Back" @click="close()"/>
     <h2 class="edit__title">Edit Profile</h2>
-    <form class="edit__form edit__form--single" novalidate>
-      <Block 
-        :block="Object.assign(username, {name: 'username'})"
-        v-on:focused="focusBlock($event)"
-        v-on:updatedInput="updateInput($event)"
-        :style="styleblock(Object.assign(username, {name: 'username'}))"
-      >
-        <transition name="fade">
-          <UsernameCheck v-if="focused === 'username'"/>
-        </transition>
-
-        <transition name="fade">
-          <div class="edit__warning" v-if="username.warning !== ''">
-            <fontAwesome icon="info-circle" class="edit__reqIcon"/>
-            <p>{{ username.warning }}</p>
-          </div>
-        </transition>
-      </Block>
-      <button class="edit__btn" type="button" @click="changeUsername()">
-        Update Username
-        <div v-if="usernameLoading" class="edit__loading"></div>
-      </button>
-    </form>
-
-    <form class="edit__form edit__form--single" novalidate>
-      <Block 
-        :block="Object.assign(email, {name: 'email'})"
-        v-on:focused="focusBlock($event)"
-        v-on:updatedInput="updateInput($event)"
-        :style="styleblock(Object.assign(email, {name: 'email'}))"
-      >
-        <transition name="fade">
-          <div class="edit__warning" v-if="email.warning !== ''">
-            <fontAwesome icon="info-circle" class="edit__reqIcon"/>
-            <p>{{ email.warning }}</p>
-          </div>
-        </transition>
-      </Block>
-      <button class="edit__btn" type="button" @click="changeEmail()">
-        Update Email
-        <div v-if="emailLoading" class="edit__loading"></div>
-      </button>
-    </form>
-
     <form class="edit__form" novalidate>
       <Block 
-        v-for="(value, key, i) in password"
+        class="edit__order"
+        v-for="(obj, i) in groupedData"
         :key="i"
-        :block="Object.assign(value, {name: key})"
+        :block="obj"
         v-on:focused="focusBlock($event)"
         v-on:updatedInput="updateInput($event)"
         v-on:eyeClicked="eyeClicked($event)"
         v-on:genPass="passwordGeneration()"
-        :style="styleblock(Object.assign(value, {name: key}))"
+        :style="styleblock(obj)"
       >
         <transition name="fade">
-          <PasswordCheck :field="value.value" v-if="focused === 'newPassword' && key === focused"/>
+          <UsernameCheck v-if="focused === 'username' && obj.name === focused"/>
         </transition>
 
         <transition name="fade">
-          <div class="edit__warning" v-if="value.warning !== ''">
+          <PasswordCheck :field="obj.value" v-if="focused === 'newPassword' && obj.name === focused"/>
+        </transition>
+
+        <transition name="fade">
+          <div class="edit__warning" v-if="obj.warning !== ''">
             <fontAwesome icon="info-circle" class="edit__reqIcon"/>
-            <p>{{ value.warning }}</p>
+            <p>{{ obj.warning }}</p>
           </div>
         </transition>
       </Block>
-      <button class="edit__btn" type="button" @click="changePassword()">
-        Update Password
-        <div v-if="passwordLoading" class="edit__loading"></div>
+
+      <button 
+        class="edit__btn edit__order" 
+        type="button" 
+        v-for="(obj, i) in buttons"
+        :key="i"
+        :style="styleButton(obj.key)"
+        @click="clickButton(obj.key)"
+
+      >
+        {{ obj.name }}
+        <div v-if="buttonClicked === obj.key" class="edit__loading"></div>
       </button>
     </form>
   </section>
@@ -82,21 +55,22 @@ const { mapActions, mapGetters } = createNamespacedHelpers('user');
 import Block from '@/components/User/Block'
 import UsernameCheck from '@/components/User/UsernameCheck'
 import PasswordCheck from '@/components/User/PasswordCheck'
+import InformationUpdated from '@/components/User/InformationUpdated'
 export default {
   name: 'EditUser',
   components: {
     Block,
     UsernameCheck,
-    PasswordCheck
+    PasswordCheck,
+    InformationUpdated
   },
   created() {
     this.initValues();
   },
   data() {
     return {
-      usernameLoading: false,
-      emailLoading: false,
-      passwordLoading: false,
+      buttonClicked: '',
+      updated: '',
       focused: '',
       username: {
         hint: 'Username',
@@ -106,7 +80,6 @@ export default {
         isValid: false,
         warning: '',
         alreadyInUse: [],
-        currentValue: '',
         autocomplete: 'off'
       },
       email: {
@@ -117,62 +90,94 @@ export default {
         isValid: false,
         warning: '',
         alreadyInUse: [],
-        currentValue: '',
         autocomplete: 'off'
       },
-      password: {
-        currentPassword: {
-          hint: 'Current Password',
-          value: '',
-          type: 'password',
-          icon: 'lock',
-          isValid: false,
-          warning: '',
-          eye: true,
-          autocomplete: 'off'
-        },
-        newPassword: {
-          hint: 'New Password',
-          value: '',
-          type: 'password',
-          icon: 'lock',
-          isValid: false,
-          warning: '',
-          eye: true,
-          generatePassword: true,
-          autocomplete: 'off'
-        },
-        confirmPassword: {
-          hint: 'Confirm Password',
-          value: '',
-          type: 'password',
-          icon: 'lock',
-          isValid: false,
-          warning: '',
-          eye: true,
-          autocomplete: 'off'
-        },
-      }
+      currentPassword: {
+        hint: 'Current Password',
+        value: '',
+        type: 'password',
+        icon: 'lock',
+        isValid: false,
+        warning: '',
+        eye: true,
+        autocomplete: 'off'
+      },
+      newPassword: {
+        hint: 'New Password',
+        value: '',
+        type: 'password',
+        icon: 'lock',
+        isValid: false,
+        warning: '',
+        eye: true,
+        generatePassword: true,
+        autocomplete: 'off'
+      },
+      confirmPassword: {
+        hint: 'Confirm Password',
+        value: '',
+        type: 'password',
+        icon: 'lock',
+        isValid: false,
+        warning: '',
+        eye: true,
+        autocomplete: 'off'
+      },
+      buttons: [
+        {name: 'Update Username', key: 'username'},
+        {name: 'Update Email', key: 'email'},
+        {name: 'Update Password', key: 'password'},
+      ]
     }
   },
   computed: {
     ...mapGetters(['getUser']),
+
+    groupedData() {
+      const func = (object, name, obj={}) => Object.assign(obj, object, {name});
+      return [
+        func(this.username, 'username'),       
+        func(this.email, 'email'), 
+        func(this.currentPassword, 'currentPassword'),
+        func(this.newPassword, 'newPassword'), 
+        func(this.confirmPassword, 'confirmPassword'),
+      ]
+    },
   },
   methods: {
     ...mapActions([
-      'UPDATE_USERNAME', 'GET_USER_DATA_BY_UID', 'UPDATE_EMAIL', 'UPDATE_PASSWORD',
+      'UPDATE_USERNAME', 'UPDATE_EMAIL', 'UPDATE_PASSWORD',
       'CHECK_EQUALITY', 'CHECK_AVAILABILITY', 'GENERATE_PASSWORD'
     ]),
 
     initValues() {
       this.username.value = this.getUser.username;
-      this.username.currentValue = this.getUser.username;
       this.email.value = this.getUser.email;
-      this.email.currentValue = this.getUser.email;
     },
 
     close() {
       this.$emit('close');
+    },
+
+    async clickButton(key) {
+      if (this.buttonClicked !== '') return;
+      this.buttonClicked = key;
+
+      switch (this.buttonClicked) {
+        case 'username':
+          await this.changeUsername();
+          break;
+
+        case 'email':
+          await this.changeEmail();
+          break;
+
+        case 'password':
+          await this.changePassword();
+          break;
+
+        default: break;
+      }
     },
 
     async updateInput(obj) {
@@ -194,29 +199,29 @@ export default {
           break;
 
         case 'currentPassword':
-          this.password.currentPassword.isValid = await this.CHECK_EQUALITY(obj.str);
-          this.password.currentPassword.value = obj.str;
-          this.warning(this.password.currentPassword)
+          this.currentPassword.isValid = await this.CHECK_EQUALITY(obj.str);
+          this.currentPassword.value = obj.str;
+          this.updated !== 'Password' && this.warning(this.currentPassword);
           break;
 
         case 'newPassword':
           const passwordPattern = /^(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*()\\-_=+\[{}\]:;.,'"?/|`~<>]).{8,20}$/;
-          this.password.newPassword.isValid = obj.str.match(passwordPattern) !== null;
-          this.password.newPassword.value = obj.str;
-          this.warning(this.password.newPassword);
+          this.newPassword.isValid = obj.str.match(passwordPattern) !== null;
+          this.newPassword.value = obj.str;
+          this.updated !== 'Password' && this.warning(this.newPassword);
 
-          if (this.password.confirmPassword.value !== '') {
-            const cond = this.password.confirmPassword.value === this.password.newPassword.value;
-            this.password.confirmPassword.isValid = cond;
-            this.warning(this.password.confirmPassword);
+          if (this.confirmPassword.value !== '') {
+            const cond = this.confirmPassword.value === this.newPassword.value;
+            this.confirmPassword.isValid = cond;
+            this.warning(this.confirmPassword);
           }
           break;
 
         case 'confirmPassword':
-          const cond = this.password.newPassword.value === obj.str;
-          this.password.confirmPassword.isValid = cond;
-          this.password.confirmPassword.value = obj.str;
-          this.warning(this.password.confirmPassword);
+          const cond = this.newPassword.value === obj.str;
+          this.confirmPassword.isValid = cond;
+          this.confirmPassword.value = obj.str;
+          this.warning(this.confirmPassword);
           break;
       
         default: break;
@@ -250,51 +255,58 @@ export default {
     },
 
     async changeUsername() {
-      if (this.username.value === this.getUser.username || !this.username.isValid) return;
-      this.usernameLoading = true;
+      if (this.username.value === this.getUser.username || !this.username.isValid || this.updated !== '') {
+        this.buttonClicked = '';
+        return;
+      }
+
       const isUsername = await this.CHECK_AVAILABILITY({ key: 'username', value: this.username.value })
       if (isUsername) {
         this.username.isValid = false;
         this.username.warning = `Username already in use`;
         this.username.alreadyInUse.push(this.username.value);
-        this.usernameLoading = false;
+        this.buttonClicked = '';
         return;
       }
       await this.UPDATE_USERNAME({uid: this.getUser.uid, username: this.username.value});
-      await this.GET_USER_DATA_BY_UID(this.getUser.uid);
-      this.usernameLoading = false;
+      this.buttonClicked = '';
+      this.updated = 'Username';
     },
 
     async changeEmail() {
-      if (this.email.value === this.getUser.email || !this.email.isValid) return;
-      this.emailLoading = true;
+      if (this.email.value === this.getUser.email || !this.email.isValid || this.updated !== '') {
+        this.buttonClicked = '';
+        return;
+      }
       const isEmail = await this.CHECK_AVAILABILITY({ key: 'email', value: this.email.value }) 
       if (isEmail) {
         this.email.isValid = false;
         this.email.warning = `Email already in use`;
         this.email.alreadyInUse.push(this.email.value);
-        this.emailLoading = false;
+        this.buttonClicked = '';
         return;
       }
       await this.UPDATE_EMAIL({userData: this.getUser, newEmail: this.email.value});
-      await this.GET_USER_DATA_BY_UID(this.getUser.uid);
-      this.emailLoading = false;
+      this.buttonClicked = '';
+      this.updated = 'Email';
     },
 
     async changePassword() {
-      const isValid = Object.values(this.password).every(obj => obj.isValid);
-      if (!isValid) return;
-      this.passwordLoading = true;
-      await this.UPDATE_PASSWORD({userData: this.getUser, newPassword: this.password.newPassword.value});
-      await this.GET_USER_DATA_BY_UID(this.getUser.uid);
-      this.passwordLoading = false;
-      this.password.currentPassword.value = '';
-      this.password.newPassword.value = '';
-      this.password.confirmPassword.value = '';
+      const isValid = this.currentPassword.isValid && this.newPassword.isValid && this.confirmPassword.isValid && this.updated === '';
+      if (!isValid) {
+        this.buttonClicked = '';
+        return;
+      }
+      await this.UPDATE_PASSWORD({userData: this.getUser, newPassword: this.newPassword.value});
+      this.currentPassword.value = '';
+      this.newPassword.value = '';
+      this.confirmPassword.value = '';
+      this.updated = 'Password';
+      this.buttonClicked = '';
     },
 
     eyeClicked(key) {
-      this.password[key].type = this.password[key].type === 'text' ? 'password' : 'text';
+      this[key].type = this[key].type === 'text' ? 'password' : 'text';
     }, 
 
     focusBlock(block) {
@@ -303,20 +315,32 @@ export default {
 
     styleblock(block) {
       const cond = ['username', 'email'].includes(block.name);
-      if (block.value === '' && !cond || this.focused === block.name || cond && block.currentValue === block.value) { 
-        return {background: 'transparent'}
+      if (block.value === '' && !cond || this.focused === block.name || cond && this.getUser[block.name] === block.value) { 
+        return { background: 'transparent' }
       }
       return block.isValid 
-        ? {background: `rgb(${204}, ${255}, ${204})`}
-        : {background: `rgb(${255}, ${204}, ${204})`}
+        ? { background: `rgb(${204}, ${255}, ${204})` }
+        : { background: `rgb(${255}, ${204}, ${204})` }
+    },
+
+    styleButton(key) {
+      const username = (this.username.value === this.getUser.username || !this.username.isValid) && key === 'username';
+      const email = (this.email.value === this.getUser.email || !this.email.isValid) && key === 'email';
+      const password = !(this.currentPassword.isValid && this.newPassword.isValid && this.confirmPassword.isValid) && key === 'password';
+      if (this.buttonClicked !== key && this.buttonClicked !== '' || username || email || password || this.updated !== '') {
+        return { background: 'darkgray', cursor: 'default' }
+      }
+      if (this.buttonClicked === key) {
+        return { cursor: 'default' } 
+      }
     },
 
     async passwordGeneration() {
       const pass = await this.GENERATE_PASSWORD();
-      this.password.newPassword.value = pass;
-      this.password.newPassword.isValid = true;
-      this.password.confirmPassword.value = pass;
-      this.password.confirmPassword.isValid = true;
+      this.newPassword.value = pass;
+      this.newPassword.isValid = true;
+      this.confirmPassword.value = pass;
+      this.confirmPassword.isValid = true;
     }
   },
 }
@@ -350,18 +374,43 @@ export default {
   &__form {
     width: 350px; 
     margin: 0 auto;
-    height: 280px;
+    height: 600px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center; 
-    &--single {
-      height: 110px;
-    }
   }
 
-  &__form:not(:last-child) {
-    margin-bottom: 30px; 
+  &__order:first-child {
+    order: 1;
+  }
+
+  &__order:nth-child(2) {
+    order: 3;
+  }
+
+  &__order:nth-child(3) {
+    order: 5;
+  }
+
+  &__order:nth-child(4) {
+    order: 6;
+  }
+
+  &__order:nth-child(5) {
+    order: 7;
+  }
+
+  &__order:nth-child(6) {
+    order: 2;
+  }
+
+  &__order:nth-child(7) {
+    order: 4;
+  }
+
+  &__order:last-child {
+    order: 8;
   }
 
   &__btn {
@@ -377,9 +426,8 @@ export default {
     transition-duration: .5s;
   }
 
-  &__btn:hover {
-    @include boxShadow(0.3);
-    background: lighten(darkslategray, 10);
+  &__btn:not(:last-child) {
+    margin-bottom: 20px;
   }
 
   &__warning {

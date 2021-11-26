@@ -78,7 +78,7 @@ export default {
       return state.user.password === sha256(password);
     },
 
-    async UPDATE_USERNAME({dispatch}, payload) {
+    async UPDATE_USERNAME({dispatch, commit}, payload) {
       try {
         const referenceDatabase = ref(database, 'users/' + payload.uid);
         const avatarURl = await dispatch('GENERATE_AVATAR', payload.username[0].toUpperCase());
@@ -103,7 +103,10 @@ export default {
               username: payload.username,
             });
           })
-        })
+        });
+
+        const newUserData = await dispatch('GET_USER_DATA_BY_UID', payload.uid);
+        commit('setUser', newUserData);
       } 
       catch (error) {
         const errorCode = error.code;
@@ -112,7 +115,7 @@ export default {
       }
     },
 
-    async UPDATE_EMAIL({}, payload) {
+    async UPDATE_EMAIL({commit, dispatch}, payload) {
       try {
         const user = auth.currentUser;
         const credential = EmailAuthProvider.credential(payload.userData.email, payload.userData.password)
@@ -120,6 +123,9 @@ export default {
         await updateEmail(auth.currentUser, payload.newEmail);
         const reference = ref(database, 'users/' + payload.userData.uid);
         await update(reference, { email: payload.newEmail });
+
+        const newUserData = await dispatch('GET_USER_DATA_BY_UID', payload.userData.uid);
+        commit('setUser', newUserData);
       } 
       catch (error) {
         const errorCode = error.code;
@@ -128,7 +134,7 @@ export default {
       }
     },
 
-    async UPDATE_PASSWORD({}, payload) {
+    async UPDATE_PASSWORD({commit, dispatch}, payload) {
       try {
         const shaPass = sha256(payload.newPassword);
         const user = auth.currentUser;
@@ -137,6 +143,9 @@ export default {
         await updatePassword(auth.currentUser, shaPass)
         const reference = ref(database, 'users/' + payload.userData.uid);
         await update(reference, { password: shaPass });
+
+        const newUserData = await dispatch('GET_USER_DATA_BY_UID', payload.userData.uid);
+        commit('setUser', newUserData);
       } 
       catch (error) {
         const errorCode = error.code;
