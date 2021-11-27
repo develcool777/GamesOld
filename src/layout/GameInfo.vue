@@ -3,7 +3,7 @@
     <GameInfoLoading v-if="isDataLoaded.length !== 3"/>
 
     <router-link v-if="isDataLoaded.length === 3" class="gameInfo__return" tag="div" :to="game.path">
-      <fontAwesome icon="long-arrow-alt-left" class="gameInfo__return--arrow"/>
+      <fontAwesome icon="angle-left" class="gameInfo__return--arrow"/>
       <p>Back to Game</p>
     </router-link>
 
@@ -47,22 +47,27 @@ export default {
     @include Flex(center);
     font-size: 20px;
     cursor: pointer;
-    width: 145px;
+    width: 170px;
+    padding: 5px 10px;
     margin: 15px 0 0 15px;
     transition-duration: .5s;
     text-decoration: none;
-    color: lightseagreen;
+    color: cadetblue;
+    border-radius: 5px;
+    border: 1px solid cadetblue;
     &--arrow {
       transition-duration: .5s;
     }
   }
 
   &__return:hover {
-    color: lighten($color: lightseagreen, $amount: 10);
+    color: lightseagreen;
+    border-color: lightseagreen;
   }
 
   &__return:hover &__return--arrow {
     transform: translateX(-5px);
+    color: lightseagreen;
   }
 }
 </style>

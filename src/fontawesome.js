@@ -6,8 +6,8 @@ import {
   faUserCircle, faUser, faEnvelope, faLock, faBackspace, faWaveSquare, faShoePrints, faFlag, 
   faPlayCircle, faStopCircle, faArrowUp, faArrowDown, faArrowRight, faArrowLeft, faStopwatch, 
   faLightbulb, faRobot, faEraser, faEyeSlash, faEye, faComments, faCheckCircle, 
-  faKey, faInfoCircle, faSignOutAlt, faLongArrowAltLeft, faTrashAlt, faUserCog,
-  faStarHalfAlt, faStar, faSmile, faMeh, faFrown, faGrinHearts, faAngry, faTimes, faArrowCircleLeft
+  faKey, faInfoCircle, faSignOutAlt, faTrashAlt, faUserCog, faStarHalfAlt, faStar,
+  faSmile, faMeh, faFrown, faGrinHearts, faAngry, faTimes, faArrowCircleLeft
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -33,7 +33,7 @@ library.add(
   faRobot, faEraser,
 
   // comments
-  faLongArrowAltLeft, faComments, faTrashAlt, faUserCog,
+  faComments, faTrashAlt, faUserCog, // faLongArrowAltLeft
 
   // rating
   faStarHalfAlt, faStar, faSmile, faGrinHearts, faMeh, 
