@@ -1,9 +1,7 @@
 <template>
   <section class="homePage">
     <SearchGame 
-      :data="parsedData" 
-      v-on:searchResult="showSearchedGames($event)"
-      v-on:showAll="showAll()"
+      v-on:isSearch="isSearch($event)"
     />
 
     <div class="homePage__text" v-if="result">{{ message }}</div>
@@ -24,7 +22,7 @@
         :block="game"
         :hovered="hoveredBlock === i"
         v-on:imgLoaded="isImgsLoaded($event)"
-        @click="updatePlayed(game.docID)"
+        @click="updatePlayed(game.docID, game.played)"
         @mouseover="hoveredBlock = i"
         @mouseleave="hoveredBlock = null"
       />
@@ -49,7 +47,6 @@ export default {
   data() {
     return {
       games: [],
-      parsedData: [],
       result: false,
       message: '',
       hoveredBlock: null,
@@ -61,37 +58,29 @@ export default {
     this.init();
   },
   computed: {
-    ...mapGetters(['getData', 'getParsedData', 'getIsDataLoaded']),
+    ...mapGetters(['getData', 'getSearchResult']),
   },
   methods: {
     ...mapActions(['INIT', 'UPDATE_PLAYED']),
 
     async init() {
-      !this.getIsDataLoaded && await this.INIT();
-      this.games = this.getData;
-      this.parsedData = this.getParsedData;
-    },
-
-    showSearchedGames(obj) {
-      this.result = true;
-      if (obj.founded) { this.result = false }
-
-      const len = obj.arrayOfIds.length;
-      this.message = len === 0 
-        ? `There is no game at '${obj.field}'`
-        : `Found ${len} ${len === 1 ? 'game' : 'games'} at '${obj.field}'`;
-
-      this.games = this.getData.filter(game => obj.arrayOfIds.includes(game.id));
-    },
-
-    showAll() {
-      this.result = false;
-      this.message = '';
+      await this.INIT();
       this.games = this.getData;
     },
 
-    async updatePlayed(docId) {
-      await this.UPDATE_PLAYED(docId);
+    isSearch(obj) {
+      const len = this.getSearchResult.length;
+      this.result = obj.isSearch;
+      this.games = obj.isSearch ? this.getSearchResult : this.getData;
+      this.message = !obj.isSearch
+        ? ''
+        : len === 0
+          ? `There is no game at '${obj.field}'`
+          : `Found ${len} ${len === 1 ? 'game' : 'games'} at '${obj.field}'`;
+    },
+
+    async updatePlayed(docID, played) {
+      await this.UPDATE_PLAYED({docID, played});
       await this.INIT();
     },
 

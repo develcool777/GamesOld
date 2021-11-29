@@ -26,6 +26,7 @@ export default {
 .skeleton {
   opacity: .7;
   animation: skeleton-loading 1s linear infinite alternate;
+  border-radius: 10px;
 
   &__block {
     @include FlexColumn(space-between, center);

@@ -1,111 +1,111 @@
 <template>
   <div class="searchBar">
-    <p class="searchBar__title">Search game</p>
-    <div class="searchBar__merge">
-      <div class="searchBar__container" :style="styleInput">
-        <input 
-          class="searchBar__input" 
-          type="text" 
-          v-model="field" 
-          maxlength="45"
-          placeholder="Name of the game..."
-          v-on:keyup.enter="searchGame()"
-        >
+    <h3 class="searchBar__title">Search game</h3>
 
-        <div class="searchBar__variants" v-if="displayVariants">
-          <div 
-            class="searchBar__variant" 
-            v-for="(variant, i) in variants" 
-            :key="i"
-            @click="foundGameInVariants(variant)"
-          >{{ variant.name }}</div>
-        </div>
+    <div class="searchBar__container" :style="styleInput">
+      <input 
+        class="searchBar__input" 
+        type="text" 
+        v-model="field" 
+        maxlength="45"
+        placeholder="Name of the game..."
+        @keyup.enter="searchGameBtn()"
+        @focus="isFocused = true"
+        @blur="isFocused = false"
+      >
 
-        <div class="searchBar__find" @click="searchGame()" :style="styleFindBtn">Find</div>
+      <div class="searchBar__variants" v-if="displayVariants"> 
+        <Variant 
+          v-for="(obj, i) in getSearchResult" 
+          :key="i"
+          :variant="obj"
+          @click="clickGame(obj.to)"
+        />
       </div>
+
+      <div class="searchBar__find" @click="searchGameBtn()" :style="styleFindBtn">Find</div>
     </div>
+
     <div class="searchBar__showAll" @click="showAll()">Show All</div>
   </div>
 </template>
 
 <script>
+import { createNamespacedHelpers } from 'vuex'
+const { mapGetters, mapActions } = createNamespacedHelpers('games');
+import Variant from '@/components/HomePage/Variant';
 export default {
   name: 'SearchGame',
-  props: {
-    data: Array
+  components: {
+    Variant
   },
   data() {
     return {
       field: '',
-      variants: [],
+      isFocused: false,
+      variantClicked: false,
       displayVariants: false,
-      lockSearch: false
+      activeVariant: null
     } 
   },
   watch: {
-    field: function(newVal) {
-      this.showVariants(newVal);
+    field: function() {
+      this.searchGame();
+    },
+    isFocused: function(newVal) {
+      if (this.variantClicked) {
+        this.variantClicked = false;
+      }
+
+      setTimeout(() => {
+        this.displayVariants = this.getSearchResult.length !== 0 && (newVal || this.variantClicked)
+      }, 100)
+
     }
   },
   computed: {
+    ...mapGetters(['getSearchResult']),
+
     styleInput() {
-      return this.displayVariants ? {borderRadius: `10px 10px 0 0`} : {borderRadius: `10px`}
+      return this.displayVariants 
+        ? { borderRadius: `10px 10px 0 0` } 
+        : { borderRadius: `10px` }
     },
 
     styleFindBtn() {
-      return this.displayVariants ? {borderRadius: `0 10px 0 0`} : {borderRadius: `0 10px 10px 0`}
-    }
+      return this.displayVariants 
+        ? { borderRadius: `0 10px 0 0` } 
+        : { borderRadius: `0 10px 10px 0` }
+    },
   },
   methods: {
-    searchGame() {
-      if (this.lockSearch) { return }
-      this.samePart(this.showVariants(this.field), this.field);
+    ...mapActions(['SEARCH_GAME', 'CLEAR_SEARCH']),
+
+    async searchGame() {
+      this.field !== '' && await this.SEARCH_GAME(this.field.toLowerCase());
+      this.field === '' && this.CLEAR_SEARCH();
+      this.displayVariants = this.getSearchResult.length !== 0 && (this.isFocused || this.variantClicked);
     },
 
-    foundGameInVariants(variant) {
-      if (this.lockSearch) { return }
-      this.lockSearch = true;
-      this.samePart([variant.id], this.field, true);
+    clickGame(path) {
+      this.variantClicked = true;
+      this.$router.push(path);
+      this.CLEAR_SEARCH();
     },
 
-    samePart(array, field, found=false) {
-      const obj = {}
-      obj.arrayOfIds = array;
-      obj.field = field;
-      obj.founded = found;
-      this.$emit('searchResult', obj);
-      this.hideVariants();
-    },
-
-    showVariants(field) {
-      if (field === '') { 
-        this.displayVariants = false;
-        return;
-      }
-      const fieldLow = field.toLowerCase();
-      this.variants = this.data.reduce((acc, item) => {
-        const name = item.name.toLowerCase();
-        if (name.substring(0, fieldLow.length) === fieldLow) {
-          acc.push(item);
-        }
-        return acc;
-      }, []);
-
-      this.displayVariants = this.variants.length > 0;  
-      this.lockSearch = false;
-      return this.variants.map(i => i.id);
+    searchGameBtn() {
+      this.$emit('isSearch', {isSearch: true, field: this.field});
+      this.field = '';
     },
 
     showAll() { 
-      this.hideVariants();
-      this.$emit('showAll');
-    },
-
-    hideVariants() {
       this.field = '';
-      this.variants = [];
-      this.displayVariants = false;
-    }
+      this.$emit('isSearch', {isSearch: false});
+      this.CLEAR_SEARCH();
+    },
+  },
+  beforeUnmount() {
+    this.CLEAR_SEARCH();
   }
 }
 </script>
@@ -124,21 +124,18 @@ export default {
     font-size: rem(30);
   }
 
-  &__merge {
-    display: flex;
-    align-items: center;
-  }
-
   &__container {
     position: relative;
+    @include Flex(center);
     width: rem(600);
     height: rem(40);
     background: $white;
     border-radius: rem(10);
+    transition-duration: .5s;
   }
 
   &__input {
-    width: 100%; 
+    flex: 1;
     height: 100%;   
     outline: none;
     border: none; 
@@ -149,35 +146,14 @@ export default {
 
   &__variants {
     position: absolute;
+    top: 100%;
     content: "";
     background: $white;
     width: 100%;
-    z-index: 20;
-  }
-
-  &__variant {
-    display: flex;
-    align-items: center;
-    font-size: rem(20);
-    padding-left: rem(20);
-    height: 40px;
-    border-bottom: 1px solid $black;
-    cursor: pointer;
-    background: lightgray;
-  }
-
-  &__variant:first-child {
-    border-top: 1px solid $black;
-  }
-
-  &__variant:hover {
-    background: $color-primary-1;
+    z-index: 10;
   }
 
   &__find {
-    position: absolute;
-    top: 0;
-    right: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -220,7 +196,7 @@ export default {
     }
 
     &__input {
-      width: calc(100% - 110px);
+      padding-right: 10px;
     }
 
     &__container {
@@ -250,7 +226,6 @@ export default {
 
     &__input {
       font-size: 18px;
-      width: calc(100% - 100px);
     }
 
     &__variant {
@@ -276,7 +251,6 @@ export default {
 
     &__input {
       font-size: 16px;
-      width: calc(100% - 90px);
     }
 
     &__variant {
@@ -308,7 +282,6 @@ export default {
 
     &__input {
       font-size: 14px;
-      width: calc(100% - 70px);
     }
 
     &__variant {
@@ -342,7 +315,6 @@ export default {
 
     &__input {
       font-size: 12px;
-      width: calc(100% - 60px);
     }
 
     &__variant {

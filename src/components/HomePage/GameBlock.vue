@@ -7,7 +7,7 @@
           v-show="hovered && isVideoAvailable"
           class="gBlock__video"
           ref="video" 
-          :src="block.videoUrl"
+          :src="block.videoURL"
           muted="muted"  
           loop
         />
@@ -16,8 +16,8 @@
           ref="img"
           v-show="!hovered && imgLoaded || hovered && !isVideoAvailable" 
           class="gBlock__poster" 
-          :src="block.imgUrl" 
-          :alt="block.imgName"
+          :src="block.imgURL" 
+          :alt="block.name"
           @load="loadedImg()"
         >
 
@@ -27,10 +27,19 @@
 
       </div>
       <div class="gBlock__title">{{ block.name }}</div>
-      <div class="gBlock__text">{{ block.text }}</div>
+      <div class="gBlock__rating" :title="`${block.rating} out of 5`">
+        <fontAwesome 
+          v-for="(n, i) in 5"
+          :key="i"
+          class="gBlock__star"
+          icon="star" 
+          :style="styleStar(n)"
+        />
+      </div>
+      <div class="gBlock__text">{{ block.shortDescription }}</div>
       <div class="gBlock__flex">
-        <div class="gBlock__created">Added: {{ block.created }}</div>
-        <div class="gBlock__played">Played: {{ block.played }}</div>
+        <div class="gBlock__created"><b>Added:</b> {{ timeStamp(block.created) }}</div>
+        <div class="gBlock__played"><b>Played:</b> {{ block.played }}</div>
       </div>
     </div>
   </router-link>
@@ -72,7 +81,23 @@ export default {
     },
 
     videoUrl() {
-      this.isVideoAvailable = this.block.videoUrl !== ''
+      this.isVideoAvailable = this.block.videoURL !== ''
+    },
+
+    timeStamp(milliseconds) {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const d = new Date(milliseconds);
+      const month = months[d.getMonth()];
+      let day = d.getDate();
+      day = day < 10 ? `0${day}` : day;
+      const year = d.getFullYear();
+      return `${day}-${month}-${year}`
+    },
+
+    styleStar(stars) {
+      return stars <= this.block.rating || this.block.rating >= 4.5
+        ? { color: 'gold' }
+        : { color: 'dimgray' }
     }
   }
 }
@@ -94,8 +119,8 @@ export default {
   }
 
   &__block:hover {
-    background: $color-primary-1;
-    @include boxShadow(0.7);
+    background: whitesmoke;
+    @include boxShadow(0.9);
   }
 
   &__container {
@@ -104,6 +129,7 @@ export default {
     height: 135px;
     background: gray;
     overflow: hidden;
+    @include boxShadow(0.05);
   }
 
   &__video, &__poster  {
@@ -121,6 +147,15 @@ export default {
     left: 0;
     text-align: center;
     color: white;
+  }
+
+  &__rating {
+    @include Flex(space-around);
+    width: 150px;
+  }
+
+  &__star {
+    font-size: 20px;
   }
 
   &__title, &__text {
@@ -141,7 +176,7 @@ export default {
   &__flex {
     width: 100%;
     @include Flex(space-between);
-    color: darkmagenta;
+    color: darkslateblue;
   }
 
   &__created, &__played {
@@ -175,6 +210,14 @@ export default {
       font-size: 25px;
     }
 
+    &__rating {
+      width: 140px;
+    }
+
+    &__star {
+      font-size: 19px;
+    }
+
     &__text {
       font-size: 18px;
       height: 80px;
@@ -202,6 +245,14 @@ export default {
       font-size: 24px;
     }
 
+    &__rating {
+      width: 130px;
+    }
+
+    &__star {
+      font-size: 18px;
+    }
+
     &__text {
       font-size: 17px;
       height: 75px;
@@ -225,6 +276,14 @@ export default {
       font-size: 23px;
     }
 
+    &__rating {
+      width: 120px;
+    }
+
+    &__star {
+      font-size: 16px;
+    }
+
     &__text {
       font-size: 16px;
       height: 70px;
@@ -246,6 +305,14 @@ export default {
 
     &__title {
       font-size: 20px;
+    }
+
+    &__rating {
+      width: 100px;
+    }
+
+    &__star {
+      font-size: 14px;
     }
 
     &__text {
