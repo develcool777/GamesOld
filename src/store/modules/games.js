@@ -56,7 +56,11 @@ export default {
         const reference = collection(fireStore, 'Games_Info');
         const q = query(reference, where('nameArray', 'array-contains', name));
         const found = await getDocs(q);
-        const data = found.docs.map(doc => doc.data());
+        const data = found.docs.map(doc => {
+          const obj = doc.data();
+          obj.docID = doc.id;
+          return obj;
+        });
         commit('setSearchResult', data);
       } 
       catch (error) {

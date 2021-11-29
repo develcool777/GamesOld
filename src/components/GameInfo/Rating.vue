@@ -99,7 +99,7 @@ export default {
     async init() {
       await this.GET_DATA(this.gameName);
       this.unsubscribe = await this.LISTENER(this.gameName);
-      this.USER_RAITING(this.getUser?.uid);
+      this.getUser && this.USER_RAITING(this.getUser.uid);
       this.$emit('loaded');
     },
 
