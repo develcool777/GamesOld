@@ -52,15 +52,33 @@ export default {
     }
   },
   actions: {
-    SET_SHOW_USER({commit}, value) {
-      commit('setShowUser', value);
+    SET_SHOW_USER({commit}, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`user.actions.SET_SHOW_USER({commit}, bool) bool must Boolean`);
+      }
+      commit('setShowUser', bool);
     },
 
     SET_WHAT_TO_SHOW({commit}, value) {
+      if (typeof value !== 'string') {
+        throw Error(`user.actions.SET_WHAT_TO_SHOW({commit}, value) value must String`);
+      }
       commit('setWhatToShow', value);
     },
 
     async CHECK_AVAILABILITY({}, payload) {
+      if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
+        throw Error(`user.actions.CHECK_AVAILABILITY({}, payload) payload must be Object`);
+      }
+      if (!['key', 'value'].every(prop => Object.prototype.hasOwnProperty.call(payload, prop))) {
+        throw Error(`user.actions.CHECK_AVAILABILITY({}, payload) payload must be Object with keys: 'key', 'value'`);
+      }
+      if (typeof payload.key !== 'string') {
+        throw Error(`user.actions.CHECK_AVAILABILITY({}, payload) payload.key must be String`);
+      }
+      if (typeof payload.value !== 'string') {
+        throw Error(`user.actions.CHECK_AVAILABILITY({}, payload) payload.value must be String`);
+      }
       try {
         const reference = ref(database, 'users');
         const q = queryDatabase(reference, orderByChild(payload.key), equalTo(payload.value));
@@ -75,10 +93,25 @@ export default {
     },
 
     CHECK_EQUALITY({state}, password) {
+      if (typeof password !== 'string') {
+        throw Error(`user.actions.CHECK_EQUALITY({state}, password) password must be String`);
+      }
       return state.user.password === sha256(password);
     },
 
     async UPDATE_USERNAME({dispatch, commit}, payload) {
+      if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
+        throw Error(`user.actions.UPDATE_USERNAME({dispatch, commit}, payload) payload must be Object`);
+      }
+      if (!['uid', 'username'].every(prop => Object.prototype.hasOwnProperty.call(payload, prop))) {
+        throw Error(`user.actions.UPDATE_USERNAME({dispatch, commit}, payload) payload must be Object with keys: 'uid', 'username'`);
+      }
+      if (typeof payload.uid !== 'string') {
+        throw Error(`user.actions.UPDATE_USERNAME({dispatch, commit}, payload) payload.uid must be String`);
+      }
+      if (typeof payload.username !== 'string') {
+        throw Error(`user.actions.UPDATE_USERNAME({dispatch, commit}, payload) payload.username must be String`);
+      }
       try {
         const referenceDatabase = ref(database, 'users/' + payload.uid);
         const avatarURl = await dispatch('GENERATE_AVATAR', payload.username[0].toUpperCase());
@@ -116,6 +149,39 @@ export default {
     },
 
     async UPDATE_EMAIL({commit, dispatch}, payload) {
+      if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload must be Object`);
+      }
+      if (!['userData', 'newEmail'].every(prop => Object.prototype.hasOwnProperty.call(payload, prop))) {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload must be Object with keys: 'userData', 'newEmail'`);
+      }
+      if (typeof payload.newEmail !== 'string') {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload.newEmail must be String`);
+      }
+      if (typeof payload.userData !== 'object' || payload.userData === null || Array.isArray(payload.userData)) {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload.userData must be Object`);
+      }
+      if (!['username', 'email', 'password', 'avatar', 'created', 'admin'].every(prop => Object.prototype.hasOwnProperty.call(payload.userData, prop))) {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload must be Object with keys: 'username', 'email', 'password', 'avatar', 'created', 'admin'`);
+      }
+      if (typeof payload.userData.username !== 'string') {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload.userData.username must be String`);
+      }
+      if (typeof payload.userData.email !== 'string') {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload.userData.email must be String`);
+      }
+      if (typeof payload.userData.password !== 'string') {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload.userData.password must be String`);
+      }
+      if (typeof payload.userData.avatar !== 'string') {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload.userData.avatar must be String`);
+      }
+      if (typeof payload.userData.created !== 'string') {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload.userData.created must be String`);
+      }
+      if (typeof payload.userData.admin !== 'boolean') {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload.userData.admin must be Boolean`);
+      }
       try {
         const user = auth.currentUser;
         const credential = EmailAuthProvider.credential(payload.userData.email, payload.userData.password)
@@ -135,6 +201,39 @@ export default {
     },
 
     async UPDATE_PASSWORD({commit, dispatch}, payload) {
+      if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload must be Object`);
+      }
+      if (!['userData', 'newPassword'].every(prop => Object.prototype.hasOwnProperty.call(payload, prop))) {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload must be Object with keys: 'userData', 'newPassword'`);
+      }
+      if (typeof payload.newPassword !== 'string') {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload.newPassword must be String`);
+      }
+      if (typeof payload.userData !== 'object' || payload.userData === null || Array.isArray(payload.userData)) {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload.userData must be Object`);
+      }
+      if (!['username', 'email', 'password', 'avatar', 'created', 'admin'].every(prop => Object.prototype.hasOwnProperty.call(payload.userData, prop))) {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload must be Object with keys: 'username', 'email', 'password', 'avatar', 'created', 'admin'`);
+      }
+      if (typeof payload.userData.username !== 'string') {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload.userData.username must be String`);
+      }
+      if (typeof payload.userData.email !== 'string') {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload.userData.email must be String`);
+      }
+      if (typeof payload.userData.password !== 'string') {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload.userData.password must be String`);
+      }
+      if (typeof payload.userData.avatar !== 'string') {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload.userData.avatar must be String`);
+      }
+      if (typeof payload.userData.created !== 'string') {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload.userData.created must be String`);
+      }
+      if (typeof payload.userData.admin !== 'boolean') {
+        throw Error(`user.actions.UPDATE_EMAIL({commit, dispatch}, payload) payload.userData.admin must be Boolean`);
+      }
       try {
         const shaPass = sha256(payload.newPassword);
         const user = auth.currentUser;
@@ -155,6 +254,21 @@ export default {
     },
 
     async CREATE_ACCOUNT({dispatch}, payload) {
+      if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
+        throw Error(`user.actions.CREATE_ACCOUNT({dispatch}, payload) payload must be Object`);
+      }
+      if (!['password', 'username', 'email'].every(prop => Object.prototype.hasOwnProperty.call(payload, prop))) {
+        throw Error(`user.actions.CREATE_ACCOUNT({dispatch}, payload) payload must be Object with keys: 'password', 'username', 'email'`);
+      }
+      if (typeof payload.password !== 'string') {
+        throw Error(`user.actions.CREATE_ACCOUNT({dispatch}, payload) payload.password must be String`);
+      }
+      if (typeof payload.username !== 'string') {
+        throw Error(`user.actions.CREATE_ACCOUNT({dispatch}, payload) payload.username must be String`);
+      }
+      if (typeof payload.email !== 'string') {
+        throw Error(`user.actions.CREATE_ACCOUNT({dispatch}, payload) payload.email must be String`);
+      }
       try {
         const shaPass = sha256(payload.password);
         const userCredential = await createUserWithEmailAndPassword(auth, payload.email, shaPass);
@@ -177,6 +291,9 @@ export default {
     },
 
     async GET_USER_DATA_BY_UID({}, uid) {
+      if (typeof uid !== 'string') {
+        throw Error(`user.actions.GET_USER_DATA_BY_UID({}, uid) uid must be String`);
+      }
       const dbRef = ref(database);
       try {
         const promise = await get(child(dbRef, `users/${uid}`));
@@ -195,9 +312,15 @@ export default {
     },
 
     async GENERATE_AVATAR({}, letter) {
+      if (typeof letter !== 'string') {
+        throw Error(`user.actions.GENERATE_AVATAR({}, letter) letter must be String`);
+      }
+      if (letter.length !== 1) {
+        throw Error(`user.actions.GENERATE_AVATAR({}, letter) letter length must be 1`);
+      }
+
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
-  
       canvas.width = 100;
       canvas.height = 100;
   
@@ -236,6 +359,18 @@ export default {
     },
 
     async SIGN_IN({dispatch, commit}, payload) {
+      if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
+        throw Error(`user.actions.SIGN_IN({dispatch, commit}, payload) payload must be Object`);
+      }
+      if (!['password', 'email'].every(prop => Object.prototype.hasOwnProperty.call(payload, prop))) {
+        throw Error(`user.actions.SIGN_IN({dispatch, commit}, payload) payload must be Object with keys: 'password', 'email'`);
+      }
+      if (typeof payload.password !== 'string') {
+        throw Error(`user.actions.SIGN_IN({dispatch, commit}, payload) payload.password must be String`);
+      }
+      if (typeof payload.email !== 'string') {
+        throw Error(`user.actions.SIGN_IN({dispatch, commit}, payload) payload.email must be String`);
+      }
       try {
         const shaPass = sha256(payload.password);
         const userCredential = await signInWithEmailAndPassword(auth, payload.email, shaPass);

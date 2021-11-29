@@ -150,7 +150,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['GET_DATA']),
+    ...mapActions(['GET_DATA', 'CLEAR_STATE']),
 
     async init() {
       await this.GET_DATA();
@@ -274,6 +274,9 @@ export default {
     displayIsFlipped(card) {
       return card.isFlipped ? 'isFlipped' : '';
     }
+  },
+  beforeUnmount() {
+    this.CLEAR_STATE();
   }
 }
 </script>

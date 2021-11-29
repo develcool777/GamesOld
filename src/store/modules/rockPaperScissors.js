@@ -56,27 +56,46 @@ export default {
       commit('changeShowAnalitics', false);
     },
 
-    CHANGE_SHOW_HISTORY({commit}, boolean) {
-      commit('changeShowHistory', boolean);     
+    CHANGE_SHOW_HISTORY({commit}, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`rockPaperScissors.actions.CHANGE_SHOW_HISTORY({commit}, bool) bool must be Boolean`);
+      }
+      commit('changeShowHistory', bool);     
     },
 
-    CHANGE_SHOW_ANALITICS({commit}, boolean) {
-      commit('changeShowAnalitics', boolean);     
+    CHANGE_SHOW_ANALITICS({commit}, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`rockPaperScissors.actions.CHANGE_SHOW_ANALITICS({commit}, bool) bool must be Boolean`);
+      }
+      commit('changeShowAnalitics', bool);     
     },
 
     async SET_CHOICES({commit}) {
-      const DATA = [];
-      const reference = collection(fireStore, 'rockPaperScissors');
-      const rps = await getDocs(reference);
-      rps.docs.forEach(doc => {
-        const data = doc.data();
-        DATA.push(data)
-      })
-      commit('setChoices', DATA);
+      try {
+        const reference = collection(fireStore, 'rockPaperScissors');
+        const rps = await getDocs(reference);
+        const data = rps.docs.map(doc => doc.data())
+        commit('setChoices', data);
+      } 
+      catch (error) {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error({errorCode, errorMessage});
+      }
     },
 
     SET_MODE({commit}, mode) {
+      if (typeof mode !== 'string') {
+        throw Error(`rockPaperScissors.actions.SET_MODE({commit}, mode) mode must be String`);
+      }
       commit('setMode', mode);
+    },
+
+    CLEAR_STATE({commit}) {
+      commit('setChoices', []);
+      commit('setMode', '');
+      commit('changeShowHistory', false);
+      commit('changeShowAnalitics', false);
     }
   }
 }

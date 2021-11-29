@@ -31,18 +31,26 @@ export default {
   },
   actions: {    
     async SET_FIGURES({commit}) {
-      const DATA = [];
-      const reference = collection(fireStore, 'Chess');
-      const chess = await getDocs(reference);
-      chess.docs.forEach(doc => {
-        const data = doc.data();
-        DATA.push(data)
-      })
-      commit('setFigures', DATA);
+      try {
+        const reference = collection(fireStore, 'Chess');
+        const chess = await getDocs(reference);
+        const data = chess.docs.map(doc => doc.data())
+        commit('setFigures', data);
+      } 
+      catch (error) {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error({errorCode, errorMessage});
+      }
     },
 
     CHANGE_EMIT_INDEX({commit}, value) {
       commit('setEmitIndex', value);
+    },
+
+    CLEAR_STATE({commit}) {
+      commit('setEmitIndex', 0);
+      commit('setFigures', []);
     }
   }
 }

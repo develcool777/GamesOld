@@ -112,7 +112,7 @@ export default {
     await this.init();
   },
   methods: {
-    ...mapActions(['INIT_STATE', 'CHANGE_ARROW', 'SET_DATA', 'CHANGE_SHOW_HINT']),
+    ...mapActions(['INIT_STATE', 'CHANGE_ARROW', 'SET_DATA', 'CHANGE_SHOW_HINT', 'CLEAR_STATE']),
 
     async init() {
       await this.SET_DATA();
@@ -222,6 +222,9 @@ export default {
         window.removeEventListener('keyup', this.arrowPressed);
       }
     }
+  },
+  beforeUnmount() {
+    this.CLEAR_STATE();
   }
 }
 </script>

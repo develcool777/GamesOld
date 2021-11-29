@@ -175,7 +175,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['SET_FIGURES', 'CHANGE_EMIT_INDEX']),
+    ...mapActions(['SET_FIGURES', 'CHANGE_EMIT_INDEX', 'CLEAR_STATE']),
 
     async init() {
       this.GAME = new Game();
@@ -317,6 +317,9 @@ export default {
       if (cell.figure === null || this.GAME.gameStatus !== 'start') { return 'default' }
       return cell.figure.color === this.GAME.whoMoves ? 'pointer' : 'default';
     }
+  },
+  beforeUnmount() {
+    this.CLEAR_STATE();
   }
 }
 </script>

@@ -167,7 +167,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['CHANGE_SHOW_HISTORY', 'CHANGE_RESULT_OF_MOVE', 'SET_CHOICES']), 
+    ...mapActions(['CHANGE_SHOW_HISTORY', 'CHANGE_RESULT_OF_MOVE', 'SET_CHOICES', 'CLEAR_STATE']), 
 
     async init() {
       await this.SET_CHOICES()
@@ -271,6 +271,9 @@ export default {
         return c;
       })
     }
+  },
+  beforeUnmount() {
+    this.CLEAR_STATE();
   }
 }
 </script>

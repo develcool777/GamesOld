@@ -12,22 +12,32 @@ export default {
   mutations: {
     setData(state, arr=[]) {
       if (!Array.isArray(arr)) {
-        throw Error(`memoji.mutation.setData arr must Array`);
+        throw Error(`memoji.mutation.setData(state, arr=[]) arr must Array`);
       }
       state.data = arr;
     }
   },
   actions: {
     async GET_DATA({commit}) {
-      const DATA = [];
-      const reference = collection(fireStore, 'Memoji_levels');
-      const levels = await getDocs(reference);
-      levels.docs.forEach(doc => {
-        const data = doc.data();
-        data.level = +doc.id;
-        DATA.push(data)
-      })
-      commit('setData', DATA);
+      try {
+        const reference = collection(fireStore, 'Memoji_levels');
+        const levels = await getDocs(reference);
+        const data = levels.docs.map(doc => {
+          const obj = doc.data();
+          obj.level = +doc.id;
+          return obj;
+        })
+        commit('setData', data);
+      } 
+      catch (error) {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error({errorCode, errorMessage});
+      }
+    },
+
+    CLEAR_STATE({commit}) {
+      commit('setData', []);
     }
   } 
 }

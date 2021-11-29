@@ -23,10 +23,16 @@ export default {
   },
   mutations: {
     setRating(state, rating) {
+      if (typeof rating !== 'number') {
+        throw Error(`rating.mutation.setRating(state, rating) rating must be Number`);
+      }
       state.rating = rating;
     },
 
     setDetails(state, details) {
+      if (!Array.isArray(details)) {
+        throw Error(`rating.mutation.setDetails(state, details) details must be Array`);
+      }
       state.details = details;
     },
 
@@ -35,11 +41,17 @@ export default {
     },
 
     setData(state, data) {
+      if (!Array.isArray(data)) {
+        throw Error(`rating.mutation.setData(state, data) data must be Array`);
+      }
       state.data = data;
     }
   },
   actions: {
     async GET_DATA({state, commit, dispatch}, gameName) {
+      if (typeof gameName !== 'string') {
+        throw Error(`rating.actions.GET_DATA({state, commit, dispatch}, gameName) gameName must be String`);
+      }
       try {
         const reference = collection(fireStore, `Games_Info/${gameName}/rating`);
         const detailsSnap = await getDocs(reference);
@@ -51,11 +63,9 @@ export default {
           if (acc.amount === undefined) {
             acc.amount = data.length;
           }
-          
           acc[obj.stars] = acc[obj.stars] === undefined
             ? 1
             : acc[obj.stars] + 1
-
           return acc;
         }, {});
 
@@ -81,49 +91,77 @@ export default {
         await dispatch('UPDATE_RATING', { gameName, rating });
       } 
       catch (error) {
-        console.error(error);
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error({errorCode, errorMessage});
       }
     }, 
 
     async UPDATE_RATING({}, payload) {
+      if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
+        throw Error(`rating.actions.UPDATE_RATING({}, payload) payload must be Object`);
+      }
+      if (!['gameName', 'rating'].every(prop => Object.prototype.hasOwnProperty.call(payload, prop))) {
+        throw Error(`rating.actions.UPDATE_RATING({}, payload) payload must be Object with keys: 'gameName', 'rating'`);
+      }
+      if (typeof payload.gameName !== 'string') {
+        throw Error(`rating.actions.UPDATE_RATING({}, payload) payload.gameName must be String`);
+      }
+      if (typeof payload.rating !== 'number') {
+        throw Error(`rating.actions.UPDATE_RATING({}, payload) payload.rating must be Number`);
+      }
       try {
         const reference = doc(fireStore, 'Games_Info', payload.gameName);
         await updateDoc(reference, {
           rating: payload.rating
         })
       } catch (error) {
-        console.error(error);
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error({errorCode, errorMessage});
       }
     },
 
-    // async UPDATE_PLAYED_FIELD({}) { // param played
-    //   try {
-    //     const reference = doc(fireStore, 'Games_Info', payload.gameName);
-    //     await updateDoc(reference, {
-    //       played: payload.rating
-    //     })
-    //   } catch (error) {
-    //     console.error(error);
-    //   }
-    // },
-
     USER_RAITING({commit, state}, userUid) {
+      if (typeof userUid !== 'string') {
+        throw Error(`rating.actions.USER_RAITING({commit, state}, payload) userUid must be String`);
+      }
       const userRate = state.data.find(obj => obj.uid === userUid);
       userRate && commit('setCurrentUserRating', userRate);
     },
 
     async POST({}, payload) {
+      if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
+        throw Error(`rating.actions.POST({}, payload) payload must be Object`);
+      }
+      if (!['gameName', 'uid', 'stars'].every(prop => Object.prototype.hasOwnProperty.call(payload, prop))) {
+        throw Error(`rating.actions.POST({}, payload) payload must be Object with keys: 'gameName', 'uid', 'stars'`);
+      }
+      if (typeof payload.gameName !== 'string') {
+        throw Error(`rating.actions.POST({}, payload) payload.gameName must be String`);
+      }
+      if (typeof payload.uid !== 'string') {
+        throw Error(`rating.actions.POST({}, payload) payload.uid must be String`);
+      }
+      if (!Number.isInteger(payload.stars)) {
+        throw Error(`rating.actions.POST({}, payload) payload.stars must be Integer`);
+      }
       try {
         const reference = collection(fireStore, `Games_Info/${payload.gameName}/rating`);
         const { uid, stars } = payload;
         await addDoc(reference, { uid, stars });
       } 
       catch (error) {
-        console.error(error);
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error({errorCode, errorMessage});
       }
     }, 
 
     LISTENER({state, dispatch}, gameName) {
+      if (typeof gameName !== 'string') {
+        throw Error(`rating.actions.LISTENER({state, dispatch}, gameName) gameName must be String`);
+      }
       const reference = collection(fireStore, `Games_Info/${gameName}/rating`);
       let firstTime = true;
       const unsubscribe = onSnapshot(reference, async snap => {
@@ -153,7 +191,7 @@ export default {
         { stars: 1, quantity: 0, procent: 0, name: 'Worst', color: 'red' },
       ]);
       commit('setCurrentUserRating', null);
-      commit('setData', null);
+      commit('setData', []);
     }
   }
 }

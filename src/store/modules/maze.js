@@ -18,28 +18,28 @@ export default {
   mutations: {  
     changeArrowClicked(state, number) {
       if (!Number.isInteger(number)) {
-        throw Error(`maze.mutation.changeArrowClicked number must Integer`);
+        throw Error(`maze.mutation.changeArrowClicked(state, number) number must Integer`);
       }
       state.arrowClicked = number;
     }, 
 
     changeShowPath(state, bool) {
       if (typeof bool !== 'boolean') {
-        throw Error(`maze.mutation.changeShowPath bool must Boolean`);
+        throw Error(`maze.mutation.changeShowPath(state, bool) bool must Boolean`);
       }
       state.showPath = bool;
     },
 
     changeShowHint(state, bool) {
       if (typeof bool !== 'boolean') {
-        throw Error(`maze.mutation.changeShowHint bool must Boolean`);
+        throw Error(`maze.mutation.changeShowHint(state, bool) bool must Boolean`);
       }
       state.showHint = bool;
     },
 
     setData(state, arr=[]) {
       if (!Array.isArray(arr)) {
-        throw Error(`maze.mutation.setData arr must Array`);
+        throw Error(`maze.mutation.setData(state, arr=[]) arr must Array`);
       }
       state.data = arr;
     },
@@ -52,28 +52,50 @@ export default {
     },
 
     CHANGE_ARROW({commit}, arrow) {
+      if (!Number.isInteger(arrow)) {
+        throw Error(`maze.actions.CHANGE_ARROW({commit}, arrow) arrow must Integer`);
+      }
       commit('changeArrowClicked', arrow);
     },
 
-    CHANGE_SHOW_PATH({commit}, boolean) {
-      commit('changeShowPath', boolean);
+    CHANGE_SHOW_PATH({commit}, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`maze.actions.CHANGE_SHOW_PATH({commit}, bool) bool must Boolean`);
+      }
+      commit('changeShowPath', bool);
     },
 
-    CHANGE_SHOW_HINT({commit}, boolean) {
-      commit('changeShowHint', boolean);
+    CHANGE_SHOW_HINT({commit}, bool) {
+      if (typeof bool !== 'boolean') {
+        throw Error(`maze.actions.CHANGE_SHOW_HINT({commit}, bool) bool must Boolean`);
+      }
+      commit('changeShowHint', bool);
     },
 
     async SET_DATA({commit}) {
-      const DATA = [];
-      const reference = collection(fireStore, 'Maze_levels');
-      const levels = await getDocs(reference);
-      levels.docs.forEach(doc => {
-        const data = doc.data();
-        data.field = data.field.map(obj => Object.values(obj).pop());
-        data.level = +doc.id
-        DATA.push(data)
-      })
-      commit('setData', DATA);
+      try {
+        const reference = collection(fireStore, 'Maze_levels');
+        const levels = await getDocs(reference);
+        const data = levels.docs.map(doc => {
+          const object = doc.data();
+          object.field = object.field.map(obj => Object.values(obj).pop());
+          object.level = +doc.id;
+          return object;
+        })
+        commit('setData', data);
+      } 
+      catch (error) {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error({errorCode, errorMessage});
+      }
+    },
+
+    CLEAR_STATE({commit}) {
+      commit('setData', []);
+      commit('changeArrowClicked', 0);
+      commit('changeShowPath', false);
+      commit('changeShowHint', false);
     }
   } 
 }

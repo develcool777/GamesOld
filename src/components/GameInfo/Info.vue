@@ -52,10 +52,10 @@ export default {
     ...mapGetters(['getInfo']),
   },
   methods: {
-    ...mapActions(['GET_DATA', 'CLEAR_STATE']),
+    ...mapActions(['GET_INFO', 'CLEAR_STATE']),
 
     async init() {
-      await this.GET_DATA(this.gameName);
+      await this.GET_INFO(this.gameName);
       this.$emit('loaded');
     },
 
