@@ -8,6 +8,7 @@
     <RockPaperScissors v-if="id === 3"/>
     <TicTacToe         v-if="id === 4"/>
     <Chess             v-if="id === 5"/>
+    <Snake             v-if="id === 6"/>
 
     <transition name="user">
       <User class="home__user" v-if="getShowUser"/>
@@ -28,6 +29,7 @@ import Memoji from '@/layout/Memoji.vue'
 import RockPaperScissors from '@/layout/RockPaperScissors.vue'
 import TicTacToe from '@/layout/TicTacToe.vue'
 import Chess from '@/layout/Chess.vue'
+import Snake from '@/layout/Snake.vue'
 import User from '@/layout/User.vue'
 import GameInfo from '@/layout/GameInfo.vue'
 export default {
@@ -40,6 +42,7 @@ export default {
     RockPaperScissors,
     TicTacToe,
     Chess,
+    Snake,
     User,
     GameInfo
   },
