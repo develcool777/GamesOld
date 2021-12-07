@@ -48,35 +48,50 @@ export default class Snake {
       direction: this.direction,
       head: this.head,
       tail: this.tail,
-      body: this.body
+      body: this.body,
+      fieldSize: this.fieldSize
     })
   }
 
-  addPart(obj) {
-    this.body.push(obj);
-  }
-
-  move() {
+  move(foodPosition) {
     const left = this.head.y - 1 < 0 && this.direction === 'left';
     const up = this.head.x - 1 < 0 && this.direction === 'up';
     const right = this.head.y + 1 === this.fieldSize.width && this.direction === 'right';
     const down = this.head.x + 1 === this.fieldSize.height && this.direction === 'down';
 
-    if (left || up || right || down) {
-      return false;
-    }
+    let wall = left || up || right || down 
+      ? this.direction
+      : ''
 
-    const dictionary = {
+    const moves = {
       up: -1,
       down: 1,
       left: -1,
-      right: 1
+      right: 1,
     }
+
+    const walls = {
+      up: this.fieldSize.height - 1,
+      down: 0,
+      left: this.fieldSize.width - 1,
+      right: 0
+    }
+
     const tail = this.body.pop();
-    const func = (a, b) => [a, b].includes(this.direction) ? dictionary[this.direction] : 0
-    const newHeadX = this.head.x + func('up', 'down');
-    const newHeadY = this.head.y + func('left', 'right'); 
+    const func = (a, b, headPos) => headPos + ([a, b].includes(this.direction) ? moves[this.direction] : 0);
+    const func2 = (a, b, headPos) => [a, b].includes(wall) ? walls[wall] : headPos;
+    const newHeadX = wall === '' 
+      ? func('up', 'down', this.head.x)
+      : func2('up', 'down', this.head.x);
+    const newHeadY = wall === '' 
+      ? func('left', 'right', this.head.y)
+      : func2('left', 'right', this.head.y); 
+
     this.body.unshift({ x: newHeadX, y: newHeadY });
-    return true;
+
+    // food
+    if (this.head.x !== foodPosition.x || this.head.y !== foodPosition.y) return 'moved';
+    this.body.push(tail);
+    return 'moved and ate';
   }
 }

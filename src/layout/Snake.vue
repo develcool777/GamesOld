@@ -8,6 +8,8 @@
         :style="decideColor(cell)"
       ></div>
     </div>
+    <button @click="start()">start</button>
+    <button @click="stop()">stop</button>
   </div>
 </template>
 
@@ -18,12 +20,11 @@ export default {
   created() {
     this.GAME = new Game(40, 20);
     this.GAME.init();
-    // this.GAME.gameLoop();
-    // this.GAME.gameControl();
+    this.GAME.gameControl();
   },
   data() {
     return {
-      GAME: {}
+      GAME: {},
     }
   },
   computed: {
@@ -36,6 +37,14 @@ export default {
       if (cell.food) return { background: 'red' }
       if (cell.hasSnakePart) return { background: 'blue' }
       return { background: '#40b381' }
+    },
+
+    stop() {
+      window.cancelAnimationFrame(this.GAME.requestID);
+    },
+
+    start() {
+      this.GAME.requestID = window.requestAnimationFrame(() => this.GAME.gameLoop(Date.now()))
     }
   }
 }

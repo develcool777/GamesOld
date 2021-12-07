@@ -4,14 +4,17 @@ import Food from "./food"
 
 export default class Game {
   constructor(width, height) {
-    const FPS = 60;
+    const snakeSpeed = 25;
     const field = [];
     const snakeInstance = new Snake(width, height);
     const foodInstance = new Food(width, height, snakeInstance.body);
+    let lastRenderTime = 0;
+    let requestID;
     Object.defineProperties(this, {
-      FPS: {
-        get: () => FPS
+      snakeSpeed: {
+        get: () => snakeSpeed
       },
+
       field: {
         get: () => field,
         set: (value) => {
@@ -36,14 +39,34 @@ export default class Game {
 
       height: {
         get: () => height
+      },
+
+      requestID: {
+        get: () => requestID,
+        set: (value) => {
+          requestID = value;
+        }
+      },
+
+      lastRenderTime: {
+        get: () => lastRenderTime,
+        set: (value) => {
+          lastRenderTime = value;
+        }
       }
     });
   }
 
   get log() {
     return console.log({
+      width: this.width,
+      height: this,height,
       field: this.field,
-      snakeInstance: this.snakeInstance
+      snakeInstance: this.snakeInstance,
+      foodInstance: this.foodInstance,
+      snakeSpeed: this.snakeSpeed,
+      requestID: this.requestID,
+      lastRenderTime: this.lastRenderTime
     });
   }
 
@@ -79,10 +102,19 @@ export default class Game {
   }
 
   updateSnakePosition() {
-    const isMoved = this.snakeInstance.move();
+    const status = this.snakeInstance.move(this.foodInstance.position);
     this.field.forEach(row => row.forEach(cell => cell.hasSnakePart = false))
     this.snakeInstance.body.forEach(pos => this.field[pos.x][pos.y].hasSnakePart = true); 
-    return isMoved;
+
+    if (status === 'moved') return;
+    
+    if (status === 'moved and ate') {
+      const posOld = this.foodInstance.position;
+      this.field[posOld.x][posOld.y].food = false;
+      this.foodInstance.generatePosition();
+      const posNew = this.foodInstance.position;
+      this.field[posNew.x][posNew.y].food = true;
+    }
   }
 
   keyPressed(event) {
@@ -111,11 +143,12 @@ export default class Game {
     }
   }
 
-  gameLoop() {
-    const interval = setInterval(() => {
-      const isMoved = this.updateSnakePosition();
-      !isMoved && clearInterval(interval)
-    }, Math.floor(1000 / 15));
+  gameLoop(currentTime) {
+    this.requestID = window.requestAnimationFrame(() => this.gameLoop(Date.now()));
+    const secondsSinceLastRender = (currentTime - this.lastRenderTime) / 1000;
+    if (secondsSinceLastRender < 1 / this.snakeSpeed ) return;
+    this.updateSnakePosition();
+    this.lastRenderTime = currentTime;
   }
 
   gameControl() {

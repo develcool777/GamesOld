@@ -25,6 +25,15 @@ export default class Food {
     })
   }
 
+  get log() {
+    return console.log({
+      position: this.position,
+      fieldSize: this.fieldSize,
+      snakeBody: this.snakeBody,
+      allCells: this.allCells
+    })
+  }
+
   generateAllCells() {
     for (let x = 0; x < this.fieldSize.height; x++) {
       const row = [];
