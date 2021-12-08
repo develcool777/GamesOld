@@ -1,26 +1,48 @@
 export default class Cell {
   constructor(x, y) {
-    const position = {x, y};
-    let food = false;
-    let hasSnakePart = false;
-    
+    const position = { x, y };
+    let cellContain = '';
+    let isGuidingLine = false;
+    let adjustSnakeBodyOnTurn = '';
     Object.defineProperties(this, {
       position: {
         get: () => position
       },
 
-      food: {
-        get: () => food,
+      cellContain: {
+        get: () => cellContain,
         set: (value) => {
-          food = value;
+          if (typeof value !== 'string') {
+            throw Error(`Cell.cellContain.set(value) value must be String`);
+          }
+          if (!['body', 'tail', 'head', 'food', ''].includes(value)) {
+            throw Error(`Cell.cellContain.set(value) value must be 'body', 'tail', 'head', 'food', ''`);
+          }
+          cellContain = value
         }
       },
 
-      hasSnakePart: {
-        get: () => hasSnakePart,
+      isGuidingLine: {
+        get: () => isGuidingLine,
         set: (value) => {
-          hasSnakePart = value;
+          if (typeof value !== 'boolean') {
+            throw Error(`Cell.isGuidingLine.set(value) value must be Boolean`);
+          }
+          isGuidingLine = value;
         }
+      },
+
+      adjustSnakeBodyOnTurn: {
+        get: () => adjustSnakeBodyOnTurn,
+        set: (value) => {
+          if (typeof value !== 'string') {
+            throw Error(`Cell.adjustSnakeBodyOnTurn.set(value) value must be String`);
+          }
+          if (!['top-left', 'top-right', 'bottom-left', 'bottom-right', ''].includes(value)) {
+            throw Error(`Cell.adjustSnakeBodyOnTurn.set(value) value must be 'top-left', 'top-right', 'bottom-left', 'bottom-right', ''`);
+          }
+          adjustSnakeBodyOnTurn = value;
+        } 
       }
     });
   }

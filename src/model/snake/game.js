@@ -4,7 +4,7 @@ import Food from "./food"
 
 export default class Game {
   constructor(width, height) {
-    const snakeSpeed = 25;
+    const snakeSpeed = 10;
     const field = [];
     const snakeInstance = new Snake(width, height);
     const foodInstance = new Food(width, height, snakeInstance.body);
@@ -59,6 +59,7 @@ export default class Game {
 
   get log() {
     return console.log({
+      snakeSpeed: this.snakeSpeed,
       width: this.width,
       height: this,height,
       field: this.field,
@@ -73,6 +74,7 @@ export default class Game {
   init() {
     this.createField();
     this.addSnake();
+    this.foodInstance.generateAllCells();
     this.addFood();
   }
 
@@ -91,51 +93,75 @@ export default class Game {
   }
 
   addSnake() {
-    this.snakeInstance.body.forEach(pos => this.field[pos.x][pos.y].hasSnakePart = true);
+    this.snakeInstance.body.forEach((pos, i) => {
+      this.field[pos.x][pos.y].cellContain = i === 0
+        ? 'head'
+        : i === this.snakeInstance.body.length - 1
+          ? 'tail'
+          : 'body'
+
+      if (this.snakeInstance.adjustSnakeBodyOnTurn.length === 0) return;
+
+      const borderRadius = this.snakeInstance.adjustSnakeBodyOnTurn.find(obj => obj.x === pos.x && obj.y === pos.y)?.borderRadius;
+      this.field[pos.x][pos.y].adjustSnakeBodyOnTurn = borderRadius || '';
+    });
   }
 
   addFood() {
-    this.foodInstance.generateAllCells();
     this.foodInstance.generatePosition();
+    this.foodInstance.generateGuidingLines();
+    // food position
     const pos = this.foodInstance.position;
-    this.field[pos.x][pos.y].food = true;
+    this.field[pos.x][pos.y].cellContain = 'food';
+
+    // Guiding lines
+    this.foodInstance.guidingLines.forEach(pos => {
+      this.field[pos.x][pos.y].isGuidingLine = true;
+    });
   }
 
   updateSnakePosition() {
     const status = this.snakeInstance.move(this.foodInstance.position);
-    this.field.forEach(row => row.forEach(cell => cell.hasSnakePart = false))
-    this.snakeInstance.body.forEach(pos => this.field[pos.x][pos.y].hasSnakePart = true); 
 
-    if (status === 'moved') return;
-    
-    if (status === 'moved and ate') {
-      const posOld = this.foodInstance.position;
-      this.field[posOld.x][posOld.y].food = false;
-      this.foodInstance.generatePosition();
-      const posNew = this.foodInstance.position;
-      this.field[posNew.x][posNew.y].food = true;
-    }
+    if (status === 'hit itself') return window.cancelAnimationFrame(this.requestID);
+
+    this.field.forEach(row => row.forEach(cell => {
+      const foodCond = status === 'moved and ate' && cell.cellContain === 'food';
+      const snakeCond = ['head', 'body', 'tail'].includes(cell.cellContain);
+      const empty = cell.cellContain === '';
+      cell.cellContain = foodCond || snakeCond || empty
+        ? ''
+        : 'food'
+      cell.isGuidingLine = cell.isGuidingLine && status === 'moved and ate' 
+        ? false 
+        : cell.isGuidingLine
+      cell.adjustSnakeBodyOnTurn = '';
+    }));
+
+    this.snakeInstance.adjustBody();
+    this.addSnake();
+    status === 'moved and ate' && this.addFood();
   }
 
   keyPressed(event) {
     switch (event.keyCode) {
       case 37:
-        if (this.snakeInstance.direction === 'right') break;
+        if (this.snakeInstance.lastDirection === 'right') break;
         this.snakeInstance.direction = 'left'
         break;
 
       case 38:
-        if (this.snakeInstance.direction === 'down') break;
+        if (this.snakeInstance.lastDirection === 'down') break;
         this.snakeInstance.direction = 'up'
         break;
 
       case 39:
-        if (this.snakeInstance.direction === 'left') break;
+        if (this.snakeInstance.lastDirection === 'left') break;
         this.snakeInstance.direction = 'right'
         break;
 
       case 40:
-        if (this.snakeInstance.direction === 'up') break;
+        if (this.snakeInstance.lastDirection === 'up') break;
         this.snakeInstance.direction = 'down'
         break;
     
@@ -152,8 +178,6 @@ export default class Game {
   }
 
   gameControl() {
-    window.addEventListener('keyup', (event) => {
-      this.keyPressed(event);
-    })
+    window.addEventListener('keyup', event => this.keyPressed(event));
   }
 }

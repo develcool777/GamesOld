@@ -7,7 +7,7 @@ import {
   faPlayCircle, faStopCircle, faArrowUp, faArrowDown, faArrowRight, faArrowLeft, faStopwatch, 
   faLightbulb, faRobot, faEraser, faEyeSlash, faEye, faComments, faCheckCircle, 
   faKey, faInfoCircle, faSignOutAlt, faTrashAlt, faUserCog, faStarHalfAlt, faStar,
-  faSmile, faMeh, faFrown, faGrinHearts, faAngry, faTimes, faArrowCircleLeft
+  faSmile, faMeh, faFrown, faGrinHearts, faAngry, faTimes, faArrowCircleLeft, faAppleAlt
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -38,6 +38,9 @@ library.add(
   // rating
   faStarHalfAlt, faStar, faSmile, faGrinHearts, faMeh, 
   faFrown, faAngry, faTimes,
+
+  // snake
+  faAppleAlt
 )
 
 export default FontAwesomeIcon;
