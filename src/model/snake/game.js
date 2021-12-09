@@ -1,28 +1,60 @@
 import Cell from "./cell";
 import Snake from "./snake";
-import Food from "./food"
+import Food from "./food";
+import Walls from "./walls";
 
 export default class Game {
   constructor(width, height) {
     const snakeSpeed = 10;
-    const field = [];
+    const fieldForRender = [];
+    const allCells = [];
     const snakeInstance = new Snake(width, height);
     const foodInstance = new Food(width, height, snakeInstance.body);
+    const wallsInstance = new Walls(width, height, snakeInstance.body);
     let lastRenderTime = 0;
     let requestID;
+    let direction = 'left';
+    let score = 0;
     Object.defineProperties(this, {
       snakeSpeed: {
         get: () => snakeSpeed
       },
 
-      field: {
-        get: () => field,
+      fieldForRender: {
+        get: () => fieldForRender,
         set: (value) => {
           if (!Array.isArray(value)) {
-            throw Error(`Game.field.set(value) value must be Array`);
+            throw Error(`Game.fieldForRender.set(value) value must be Array`);
           }
-          field = value;
+          fieldForRender = value;
         }
+      },
+
+      direction: {
+        get: () => direction,
+        set: (value) => {
+          if (typeof direction !== 'string') {
+            throw Error(`Game.direction.set(value) value must be String`);
+          }
+          if (!['right', 'left', 'up', 'down', ''].includes(value)) {
+            throw Error(`Game.direction.set(value) value must be 'right', 'left', 'up', 'down', ''`);
+          }
+          direction = value;
+        }
+      },
+
+      score: {
+        get: () => score,
+        set: (value) => {
+          if (!Number.isInteger(value)) {
+            throw Error(`Game.score.set(value) value must be Integer`);
+          }
+          score = value;
+        }
+      },
+
+      allCells: {
+        get: () => allCells
       },
 
       snakeInstance: {
@@ -31,6 +63,10 @@ export default class Game {
 
       foodInstance: {
         get: () => foodInstance
+      },
+
+      wallsInstance: {
+        get: () => wallsInstance
       },
 
       width: {
@@ -59,42 +95,46 @@ export default class Game {
 
   get log() {
     return console.log({
-      snakeSpeed: this.snakeSpeed,
+      snakeSpeed: this.snakeSpeed, 
       width: this.width,
       height: this,height,
-      field: this.field,
+      fieldForRender: this.fieldForRender,
       snakeInstance: this.snakeInstance,
       foodInstance: this.foodInstance,
-      snakeSpeed: this.snakeSpeed,
+      wallsInstance: this.wallsInstance,
       requestID: this.requestID,
-      lastRenderTime: this.lastRenderTime
+      lastRenderTime: this.lastRenderTime,
+      direction: this.direction,
+      score: this.score
     });
   }
 
   init() {
-    this.createField();
+    this.createFieldForRender();
     this.addSnake();
-    this.foodInstance.generateAllCells();
     this.addFood();
+    // this.addWall();
   }
 
-  createField() {
-    if (this.field.length !== 0) {
-      throw Error(`Game.createField() field alredy created`);
+  createFieldForRender() {
+    if (this.fieldForRender.length !== 0) {
+      throw Error(`Game.createField() fieldForRender alredy created`);
     }
 
     for (let i = 0; i < this.height; i++) {
       const row = [];
       for (let j = 0; j < this.width; j++) {
+        this.allCells.push({x: i, y: j})
         row.push(new Cell(i, j));
       }
-      this.field.push(row);
+      this.fieldForRender.push(row);
     }
   }
 
   addSnake() {
+    this.snakeInstance.adjustBody();
     this.snakeInstance.body.forEach((pos, i) => {
-      this.field[pos.x][pos.y].cellContain = i === 0
+      this.fieldForRender[pos.x][pos.y].cellContain = i === 0
         ? 'head'
         : i === this.snakeInstance.body.length - 1
           ? 'tail'
@@ -103,66 +143,79 @@ export default class Game {
       if (this.snakeInstance.adjustSnakeBodyOnTurn.length === 0) return;
 
       const borderRadius = this.snakeInstance.adjustSnakeBodyOnTurn.find(obj => obj.x === pos.x && obj.y === pos.y)?.borderRadius;
-      this.field[pos.x][pos.y].adjustSnakeBodyOnTurn = borderRadius || '';
+      this.fieldForRender[pos.x][pos.y].adjustSnakeBodyOnTurn = borderRadius || '';
     });
   }
 
   addFood() {
-    this.foodInstance.generatePosition();
-    this.foodInstance.generateGuidingLines();
+    this.foodInstance.generatePosition(this.allCells, this.wallsInstance.positions);
+    this.foodInstance.generateGuidingLines(this.wallsInstance.positions);
     // food position
     const pos = this.foodInstance.position;
-    this.field[pos.x][pos.y].cellContain = 'food';
+    this.fieldForRender[pos.x][pos.y].cellContain = 'food';
 
     // Guiding lines
     this.foodInstance.guidingLines.forEach(pos => {
-      this.field[pos.x][pos.y].isGuidingLine = true;
+      this.fieldForRender[pos.x][pos.y].isGuidingLine = true;
+    });
+  }
+
+  addWall() {
+    this.wallsInstance.generatePosition(this.allCells, this.foodInstance.position);
+    this.wallsInstance.positions.forEach(pos => {
+      this.fieldForRender[pos.x][pos.y].cellContain = 'wall';
     });
   }
 
   updateSnakePosition() {
-    const status = this.snakeInstance.move(this.foodInstance.position);
+    const status = this.snakeInstance.move(this.foodInstance.position, this.wallsInstance.positions, this.direction);
 
-    if (status === 'hit itself') return window.cancelAnimationFrame(this.requestID);
+    if (status === 'hit itself' || status === 'hit wall') return window.cancelAnimationFrame(this.requestID);
 
-    this.field.forEach(row => row.forEach(cell => {
+    this.fieldForRender.forEach(row => row.forEach(cell => {
       const foodCond = status === 'moved and ate' && cell.cellContain === 'food';
       const snakeCond = ['head', 'body', 'tail'].includes(cell.cellContain);
       const empty = cell.cellContain === '';
       cell.cellContain = foodCond || snakeCond || empty
         ? ''
-        : 'food'
+        : cell.cellContain
+
       cell.isGuidingLine = cell.isGuidingLine && status === 'moved and ate' 
         ? false 
         : cell.isGuidingLine
+
       cell.adjustSnakeBodyOnTurn = '';
     }));
 
-    this.snakeInstance.adjustBody();
     this.addSnake();
-    status === 'moved and ate' && this.addFood();
+
+    if (status === 'moved and ate') {
+      this.addFood();
+      this.score++;
+      this.score % 2 === 0 && this.addWall();
+    }
   }
 
   keyPressed(event) {
     switch (event.keyCode) {
       case 37:
-        if (this.snakeInstance.lastDirection === 'right') break;
-        this.snakeInstance.direction = 'left'
+        if (this.snakeInstance.direction === 'right') break;
+        this.direction = 'left';
         break;
 
       case 38:
-        if (this.snakeInstance.lastDirection === 'down') break;
-        this.snakeInstance.direction = 'up'
+        if (this.snakeInstance.direction === 'down') break;
+        this.direction = 'up';
         break;
 
       case 39:
-        if (this.snakeInstance.lastDirection === 'left') break;
-        this.snakeInstance.direction = 'right'
+        if (this.snakeInstance.direction === 'left') break;
+        this.direction = 'right';
         break;
 
       case 40:
-        if (this.snakeInstance.lastDirection === 'up') break;
-        this.snakeInstance.direction = 'down'
+        if (this.snakeInstance.direction === 'up') break;
+        this.direction = 'down';
         break;
     
       default: break;

@@ -3,7 +3,7 @@
     <div class="snake__game">
       <div 
         class="snake__cell" 
-        v-for="(cell, i) in gameField.flat()"
+        v-for="(cell, i) in gameField"
         :key="i"
       >
         <div v-if="cell.cellContain === 'head'" class="snake__head" :style="rotateHead">
@@ -11,14 +11,14 @@
         </div>
         <div v-if="cell.cellContain === 'body'" class="snake__body" :style="styleBody(cell)"></div>
         <div v-if="cell.cellContain === 'tail'" class="snake__tail" :style="rotateTail"></div>
-        <div v-if="cell.cellContain === 'food'" class="snake__food">
-          <fontAwesome icon="apple-alt" />
-        </div>
+        <div v-if="cell.cellContain === 'food'" class="snake__food"><fontAwesome icon="apple-alt"/></div>
+        <div v-if="cell.cellContain === 'wall'" class="snake__wall"><fontAwesome icon="th"/></div>
         <div v-if="cell.isGuidingLine && !['head', 'body', 'tail'].includes(cell.cellContain)" class="snake__lines"></div>
       </div>
     </div>
     <button @click="start()">start</button>
     <button @click="stop()">stop</button>
+    <div class="snake__score">{{ getScore }}</div>
   </div>
 </template>
 
@@ -38,26 +38,24 @@ export default {
   },
   computed: {
     gameField() {
-      return this.GAME?.field;
+      return this.GAME?.fieldForRender.flat();
+    },
+
+    getScore() {
+      return this.GAME?.score;
     },
 
     rotateHead() {
       const angle = this.GAME?.snakeInstance.rotateHead();
-      return {transform: `rotate(${angle}deg)`}
+      return { transform: `rotate(${angle}deg)` }
     },
 
     rotateTail() {
       const angle = this.GAME?.snakeInstance.rotateTail();
-      return {transform: `rotate(${angle}deg)`}
+      return { transform: `rotate(${angle}deg)` }
     }
   },
   methods: {
-    decideColor(cell) {
-      if (cell.food) return { background: 'red' }
-      if (cell.hasSnakePart) return { background: 'blue' }
-      return { background: '#40b381' }
-    },
-
     styleBody(cell) {
       switch (cell.adjustSnakeBodyOnTurn) {
         case 'top-left':
@@ -133,6 +131,15 @@ export default {
     font-size: 25px;
     animation: food .5s infinite alternate;
     z-index: 1;
+  }
+
+  &__wall {
+    @include Flex(center);
+    color: red;
+    background: whitesmoke;
+    font-size: 25px;
+    border-radius: 2px;
+    @include boxShadow(0.1);
   }
 
   &__head {

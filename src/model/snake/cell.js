@@ -15,8 +15,8 @@ export default class Cell {
           if (typeof value !== 'string') {
             throw Error(`Cell.cellContain.set(value) value must be String`);
           }
-          if (!['body', 'tail', 'head', 'food', ''].includes(value)) {
-            throw Error(`Cell.cellContain.set(value) value must be 'body', 'tail', 'head', 'food', ''`);
+          if (!['body', 'tail', 'head', 'food', 'wall', ''].includes(value)) {
+            throw Error(`Cell.cellContain.set(value) value must be 'body', 'tail', 'head', 'food', 'wall', ''`);
           }
           cellContain = value
         }

@@ -7,7 +7,6 @@ export default class Snake {
       { x: 10, y: 22 },
     ];
     let direction = 'left';
-    let lastDirection = '';
     let adjustSnakeBodyOnTurn = [];
     Object.defineProperties(this, {
       body: {
@@ -30,19 +29,6 @@ export default class Snake {
             throw Error(`Snake.direction.set(value) value must be 'right', 'left', 'up', 'down'`);
           }
           direction = value;
-        }
-      },
-
-      lastDirection: {
-        get: () => lastDirection,
-        set: (value) => {
-          if (typeof lastDirection !== 'string') {
-            throw Error(`Snake.lastDirection.set(value) value must be String`);
-          }
-          if (!['right', 'left', 'up', 'down', ''].includes(value)) {
-            throw Error(`Snake.lastDirection.set(value) value must be 'right', 'left', 'up', 'down', ''`);
-          }
-          lastDirection = value;
         }
       },
 
@@ -82,8 +68,8 @@ export default class Snake {
     })
   }
 
-  move(foodPosition) {
-    this.lastDirection = this.direction;
+  move(foodPosition={}, wallsPosition=[], direction='') {
+    this.direction = direction;
 
     const moves = {
       up: -1,
@@ -121,8 +107,12 @@ export default class Snake {
       : func2('left', 'right', this.head.y); 
 
     // hit itself
-    if (this.body.some(part => part.x === newHeadX && part.y === newHeadY)) return 'hit itself';
+    if (this.body.some(pos => pos.x === newHeadX && pos.y === newHeadY)) return 'hit itself';
 
+    // hit wall
+    if (wallsPosition.some(pos => pos.x === newHeadX && pos.y === newHeadY)) return 'hit wall';
+
+    // move
     this.body.unshift({ x: newHeadX, y: newHeadY });
 
     // food
@@ -133,7 +123,6 @@ export default class Snake {
 
   getAngleForRotation(direction) {
     switch (direction) {
-      case '':
       case 'left': return 0;
       case 'right': return 180;
       case 'up': return 90;
@@ -143,7 +132,7 @@ export default class Snake {
   }
 
   rotateHead() {
-    return this.getAngleForRotation(this.lastDirection);
+    return this.getAngleForRotation(this.direction);
   }
 
   rotateTail() {
@@ -164,10 +153,10 @@ export default class Snake {
 
   adjustBody() {
     const matching = {
-      'top-left': { x: 1, y: 1},
-      'top-right': { x: 1, y: -1},
-      'bottom-left': { x: -1, y: 1},
-      'bottom-right': { x: -1, y: -1}
+      'top-left': { x: 1, y: 1 },
+      'top-right': { x: 1, y: -1 },
+      'bottom-left': { x: -1, y: 1 },
+      'bottom-right': { x: -1, y: -1 }
     }
 
     const difference = (prev, current, next) => {
