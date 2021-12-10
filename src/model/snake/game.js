@@ -113,7 +113,6 @@ export default class Game {
     this.createFieldForRender();
     this.addSnake();
     this.addFood();
-    // this.addWall();
   }
 
   createFieldForRender() {
@@ -190,9 +189,9 @@ export default class Game {
     this.addSnake();
 
     if (status === 'moved and ate') {
-      this.addFood();
       this.score++;
       this.score % 2 === 0 && this.addWall();
+      this.addFood();
     }
   }
 

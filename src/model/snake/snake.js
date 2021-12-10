@@ -144,10 +144,16 @@ export default class Snake {
       right: { x: 0, y: 1 },
     }
 
+    const x = Math.abs(beforeTail.x - this.tail.x) <= 1
+      ? beforeTail.x - this.tail.x
+      : (beforeTail.x - this.fieldSize.height + this.tail.x) * (beforeTail.x === 0 ? -1 : 1) 
+
+    const y = Math.abs(beforeTail.y - this.tail.y) <= 1
+      ? beforeTail.y - this.tail.y
+      : (beforeTail.y - this.fieldSize.width + this.tail.y) * (beforeTail.y === 0 ? -1 : 1)
+   
     for (const key in coords) {
-      const x = this.tail.x + coords[key].x;
-      const y = this.tail.y + coords[key].y;
-      if (beforeTail.x === x && beforeTail.y === y) return this.getAngleForRotation(key);
+      if (coords[key].x === x && coords[key].y === y) return this.getAngleForRotation(key);
     }
   }
 
@@ -168,20 +174,36 @@ export default class Snake {
         : Object.assign({}, prevDiff, nextDiff)
     }
 
+    const checkMatching = (diff, current) => {
+      const x = Math.abs(diff.x - current.x) === 1
+        ? diff.x - current.x
+        : Math.abs(this.fieldSize.height - current.x) === 1
+          ? this.fieldSize.height - current.x
+          : diff.x - this.fieldSize.height
+
+      const y = Math.abs(diff.y - current.y) === 1
+        ? diff.y - current.y
+        : Math.abs(this.fieldSize.width - current.y) === 1
+          ? this.fieldSize.width - current.y
+          : diff.y - this.fieldSize.width
+      
+      for (let key in matching) {
+        if (matching[key].x === x && matching[key].y === y) return key;
+      }
+
+      return false;
+    }
+
     this.adjustSnakeBodyOnTurn = this.body.reduce((acc, current, i) => {
       if (i === 0 || i === this.body.length - 1) return acc;
 
       const diff = difference(this.body[i - 1], current, this.body[i + 1])
       if (!diff) return acc;
 
-      for (let key in matching) {
-        if (matching[key].x === diff.x - current.x && matching[key].y === diff.y - current.y) {
-          acc.push({ x: current.x, y: current.y, borderRadius: key });
-          return acc;
-        }
-      }
+      const key = checkMatching(diff, current)
+      key && acc.push({ x: current.x, y: current.y, borderRadius: key });
 
-      return acc; // return here if there is difference but diff.x - current.x and diff.y - current.y wont return -1 or 1. This happens when crossing border and part of the snake 'teleports' on this.fieldSize.width or this.fieldSize.height distance 
+      return acc;
     }, []);
   }
 }
