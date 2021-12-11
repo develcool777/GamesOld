@@ -1,13 +1,8 @@
 export default class Snake {
   constructor(width, height) {
     const fieldSize = { width, height }
-    const body = [
-      { x: 10, y: 20 },
-      { x: 10, y: 21 },
-      { x: 10, y: 22 },
-    ];
+    let body = [];
     let direction = 'left';
-    let adjustSnakeBodyOnTurn = [];
     Object.defineProperties(this, {
       body: {
         get: () => body,
@@ -32,16 +27,6 @@ export default class Snake {
         }
       },
 
-      adjustSnakeBodyOnTurn: {
-        get: () => adjustSnakeBodyOnTurn,
-        set: (value) => {
-          if (!Array.isArray(value)) {
-            throw Error(`Snake.adjustSnakeBodyOnTurn.set(value) value must be Array`);
-          }
-          adjustSnakeBodyOnTurn = value
-        }
-      },
-
       head: {
         get: () => body[0]
       },
@@ -59,13 +44,31 @@ export default class Snake {
   get log() { 
     return console.log({
       direction: this.direction,
-      lastDirection: this.lastDirection,
-      adjustSnakeBodyOnTurn: this.adjustSnakeBodyOnTurn,
       head: this.head,
       tail: this.tail,
       body: this.body,
       fieldSize: this.fieldSize
     })
+  }
+
+  clear() {
+    this.direction = 'left';
+    this.body = [];
+  }
+
+  generateSnake() {
+    if (this.body.length !== 0) {
+      throw Error(`Snake.generateSnake() body already created`);
+    }
+
+    const centerX = Math.floor(this.fieldSize.height / 2);
+    const centerY = Math.floor(this.fieldSize.width / 2);
+
+    this.body.push(
+      { x: centerX, y: centerY }, // head
+      { x: centerX, y: centerY + 1 }, // body
+      { x: centerX, y: centerY + 2 }, // tail
+    )
   }
 
   move(foodPosition={}, wallsPosition=[], direction='') {
@@ -194,7 +197,7 @@ export default class Snake {
       return false;
     }
 
-    this.adjustSnakeBodyOnTurn = this.body.reduce((acc, current, i) => {
+    return this.body.reduce((acc, current, i) => {
       if (i === 0 || i === this.body.length - 1) return acc;
 
       const diff = difference(this.body[i - 1], current, this.body[i + 1])

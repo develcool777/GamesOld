@@ -31,6 +31,10 @@ export default class Walls {
     })
   }
 
+  clear() {
+    this.positions = [];
+  }
+
   generatePosition(allCells, foodPosition) {
     let array = [...this.snakeBody, foodPosition, ...this.positions];
 

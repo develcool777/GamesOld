@@ -6,15 +6,17 @@ import Walls from "./walls";
 export default class Game {
   constructor(width, height) {
     const snakeSpeed = 10;
-    const fieldForRender = [];
-    const allCells = [];
     const snakeInstance = new Snake(width, height);
     const foodInstance = new Food(width, height, snakeInstance.body);
     const wallsInstance = new Walls(width, height, snakeInstance.body);
+    let fieldForRender = [];
+    let allCells = [];
     let lastRenderTime = 0;
     let requestID;
     let direction = 'left';
     let score = 0;
+    let gameStatus = '';
+    this.eventHandler = this.keyPressed.bind(this);
     Object.defineProperties(this, {
       snakeSpeed: {
         get: () => snakeSpeed
@@ -36,8 +38,8 @@ export default class Game {
           if (typeof direction !== 'string') {
             throw Error(`Game.direction.set(value) value must be String`);
           }
-          if (!['right', 'left', 'up', 'down', ''].includes(value)) {
-            throw Error(`Game.direction.set(value) value must be 'right', 'left', 'up', 'down', ''`);
+          if (!['right', 'left', 'up', 'down'].includes(value)) {
+            throw Error(`Game.direction.set(value) value must be 'right', 'left', 'up', 'down'`);
           }
           direction = value;
         }
@@ -53,8 +55,27 @@ export default class Game {
         }
       },
 
+      gameStatus: {
+        get: () => gameStatus,
+        set: (value) => {
+          if (typeof value !== 'string') {
+            throw Error(`Game.gameStatus.set(value) value must be String`);
+          }
+          if (!['', 'start', 'stop'].includes(value)) {
+            throw Error(`Game.gameStatus.set(value) value must be '', 'start', 'stop'`);
+          }
+          gameStatus = value;
+        } 
+      },
+
       allCells: {
-        get: () => allCells
+        get: () => allCells,
+        set: (value) => {
+          if (!Array.isArray(value)) {
+            throw Error(`Game.allCells.set(value) value must be Array`);
+          }
+          allCells = value;
+        }
       },
 
       snakeInstance: {
@@ -105,14 +126,51 @@ export default class Game {
       requestID: this.requestID,
       lastRenderTime: this.lastRenderTime,
       direction: this.direction,
-      score: this.score
+      score: this.score,
+      gameStatus: this.gameStatus
     });
   }
 
   init() {
     this.createFieldForRender();
+    this.snakeInstance.generateSnake();
     this.addSnake();
     this.addFood();
+  }
+
+  startGame() {
+    if (this.gameStatus === 'start') return;
+    this.requestID = window.requestAnimationFrame(() => this.gameLoop(Date.now()));
+    this.gameStatus = 'start';
+    window.addEventListener('keyup', this.eventHandler);
+  }
+
+  stopGame() {
+    if (this.gameStatus === 'stop') return;
+    window.cancelAnimationFrame(this.requestID);
+    this.gameStatus = 'stop';
+    window.removeEventListener('keyup', this.eventHandler);
+  }
+
+  finishGame() {
+    if (this.gameStatus === '') return;
+    this.clear();
+    this.init();
+  }
+
+  clear() {
+    if (this.gameStatus === '') return;
+    window.cancelAnimationFrame(this.requestID);
+    window.removeEventListener('keyup', this.eventHandler);
+    this.gameStatus = '';
+    this.fieldForRender = [];
+    this.allCells = [];
+    this.direction = 'left';
+    this.score = 0;
+    this.lastRenderTime = 0;
+    this.snakeInstance.clear();
+    this.foodInstance.clear();
+    this.wallsInstance.clear();
   }
 
   createFieldForRender() {
@@ -120,29 +178,37 @@ export default class Game {
       throw Error(`Game.createField() fieldForRender alredy created`);
     }
 
-    for (let i = 0; i < this.height; i++) {
+    for (let x = 0; x < this.height; x++) {
       const row = [];
-      for (let j = 0; j < this.width; j++) {
-        this.allCells.push({x: i, y: j})
-        row.push(new Cell(i, j));
+      for (let y = 0; y < this.width; y++) {
+        this.allCells.push({ x, y })
+        row.push(new Cell(x, y));
       }
       this.fieldForRender.push(row);
     }
   }
 
   addSnake() {
-    this.snakeInstance.adjustBody();
+    const adjustSnakeBodyOnTurn = this.snakeInstance.adjustBody();
     this.snakeInstance.body.forEach((pos, i) => {
-      this.fieldForRender[pos.x][pos.y].cellContain = i === 0
-        ? 'head'
-        : i === this.snakeInstance.body.length - 1
-          ? 'tail'
-          : 'body'
+      const cell = this.fieldForRender[pos.x][pos.y];
 
-      if (this.snakeInstance.adjustSnakeBodyOnTurn.length === 0) return;
+      if (i === 0) {
+        cell.rotationAngle = this.snakeInstance.rotateHead();
+        cell.cellContain = 'head';
+      }
+      else if (i === this.snakeInstance.body.length - 1) {
+        cell.rotationAngle = this.snakeInstance.rotateTail();
+        cell.cellContain = 'tail';
+      }
+      else {
+        cell.cellContain = 'body';
+      }
 
-      const borderRadius = this.snakeInstance.adjustSnakeBodyOnTurn.find(obj => obj.x === pos.x && obj.y === pos.y)?.borderRadius;
-      this.fieldForRender[pos.x][pos.y].adjustSnakeBodyOnTurn = borderRadius || '';
+      if (adjustSnakeBodyOnTurn.length === 0) return;
+
+      const borderRadius = adjustSnakeBodyOnTurn.find(obj => obj.x === pos.x && obj.y === pos.y)?.borderRadius;
+      cell.adjustSnakeBodyOnTurn = borderRadius || '';
     });
   }
 
@@ -184,6 +250,7 @@ export default class Game {
         : cell.isGuidingLine
 
       cell.adjustSnakeBodyOnTurn = '';
+      cell.rotationAngle = null;
     }));
 
     this.addSnake();
@@ -196,6 +263,7 @@ export default class Game {
   }
 
   keyPressed(event) {
+    console.log(event, this);
     switch (event.keyCode) {
       case 37:
         if (this.snakeInstance.direction === 'right') break;
@@ -227,9 +295,5 @@ export default class Game {
     if (secondsSinceLastRender < 1 / this.snakeSpeed ) return;
     this.updateSnakePosition();
     this.lastRenderTime = currentTime;
-  }
-
-  gameControl() {
-    window.addEventListener('keyup', event => this.keyPressed(event));
   }
 }

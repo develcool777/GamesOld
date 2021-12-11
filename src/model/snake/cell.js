@@ -4,6 +4,7 @@ export default class Cell {
     let cellContain = '';
     let isGuidingLine = false;
     let adjustSnakeBodyOnTurn = '';
+    let rotationAngle = null;
     Object.defineProperties(this, {
       position: {
         get: () => position
@@ -43,6 +44,16 @@ export default class Cell {
           }
           adjustSnakeBodyOnTurn = value;
         } 
+      },
+
+      rotationAngle: {
+        get: () => rotationAngle,
+        set: (value) => {
+          // if (!Number.isInteger(value)) {
+          //   throw Error(`Cell.rotationAngle.set(value) value must be Integer`);
+          // }
+          rotationAngle = value;
+        }
       }
     });
   }

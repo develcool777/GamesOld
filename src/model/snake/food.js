@@ -40,6 +40,11 @@ export default class Food {
     })
   }
 
+  clear() {
+    this.position = {};
+    this.guidingLines = [];
+  }
+
   generatePosition(allCells=[], wallsPosition=[]) {
     let array = [...this.snakeBody, ...wallsPosition, this.position];
 
