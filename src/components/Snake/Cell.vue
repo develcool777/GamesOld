@@ -5,7 +5,8 @@
       </div>
       <div v-if="cell.cellContain === 'body'" class="cell__body" :style="styleBody(cell)"></div>
       <div v-if="cell.cellContain === 'tail'" class="cell__tail" :style="rotate(cell)"></div>
-      <div v-if="cell.cellContain === 'food'" class="cell__food"><fontAwesome icon="apple-alt"/></div>
+      <div v-if="cell.cellContain === 'apple'" class="cell__food cell__food--apple"><fontAwesome icon="apple-alt"/></div>
+      <div v-if="cell.cellContain === 'cookie'" class="cell__food cell__food--cookie"><fontAwesome icon="cookie"/></div>
       <div v-if="cell.cellContain === 'wall'" class="cell__wall"><fontAwesome icon="th"/></div>
       <div v-if="cell.isGuidingLine && !['head', 'body', 'tail'].includes(cell.cellContain)" class="cell__lines"></div>
   </div>
@@ -111,10 +112,21 @@ export default {
 
   &__food {
     @include Flex(center);
-    color: red;
     font-size: 25px;
     animation: food .5s infinite alternate;
-    z-index: 1;
+    &--apple {
+      color: red;
+    }
+    &--cookie {
+      border-radius: 50%;
+      color: goldenrod;
+      background: black;
+      box-shadow:
+        inset 1px 1px 10px yellow,
+        inset -1px -1px 10px yellow,
+        1px 1px 10px goldenrod,
+        -1px -1px 10px goldenrod;
+    }
   }
 
   &__wall {

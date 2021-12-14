@@ -1,8 +1,16 @@
 export default class Snake {
-  constructor(width, height) {
+  constructor(width=0, height=0) {
+    if (!Number.isInteger(width)) {
+      throw Error(`Snake.constructor(width=0, height=0) width must be Integer`);
+    }
+    if (!Number.isInteger(height)) {
+      throw Error(`Snake.constructor(width=0, height=0) height must be Integer`);
+    }
+
     const fieldSize = { width, height }
     let body = [];
     let direction = 'left';
+
     Object.defineProperties(this, {
       body: {
         get: () => body,
@@ -71,7 +79,23 @@ export default class Snake {
     )
   }
 
-  move(foodPosition={}, wallsPosition=[], direction='') {
+  move(applePosition={}, cookiePosition={}, wallsPosition=[], direction='') {
+    if (typeof applePosition !== 'object' || applePosition === null || Array.isArray(applePosition)) {
+      throw Error(`Snake.move(applePosition={}, cookiePosition={}, wallsPosition=[], direction='') applePosition must be Object`);
+    }
+    if (typeof cookiePosition !== 'object' || cookiePosition === null || Array.isArray(cookiePosition)) {
+      throw Error(`Snake.move(applePosition={}, cookiePosition={}, wallsPosition=[], direction='') cookiePosition must be Object`);
+    }
+    if (!Array.isArray(wallsPosition)) {
+      throw Error(`Snake.move(applePosition={}, cookiePosition={}, wallsPosition=[], direction='') wallsPosition must be Array`);
+    }
+    if (typeof direction !== 'string') {
+      throw Error(`Snake.move(applePosition={}, cookiePosition={}, wallsPosition=[], direction='') direction must be String`);
+    }
+    if (!['left', 'right', 'up', 'down'].includes(direction)) {
+      throw Error(`Snake.move(applePosition={}, cookiePosition={}, wallsPosition=[], direction='') direction must be 'left', 'right', 'up', 'down'`);
+    }
+
     this.direction = direction;
 
     const moves = {
@@ -115,22 +139,37 @@ export default class Snake {
     // hit wall
     if (wallsPosition.some(pos => pos.x === newHeadX && pos.y === newHeadY)) return 'hit wall';
 
-    // move
+    // moved
     this.body.unshift({ x: newHeadX, y: newHeadY });
 
-    // food
-    if (this.head.x !== foodPosition.x || this.head.y !== foodPosition.y) return 'moved';
-    this.body.push(tail);
-    return 'moved and ate';
+    // apple
+    if (newHeadX === applePosition.x && newHeadY === applePosition.y) {
+      this.body.push(tail);
+      return 'moved and ate apple';
+    }
+
+    // cookie
+    if (newHeadX === cookiePosition.x && newHeadY === cookiePosition.y) {
+      this.body.push(tail);
+      return 'moved and ate cookie';
+    }
+
+    return 'moved';
   }
 
-  getAngleForRotation(direction) {
+  getAngleForRotation(direction='') {
+    if (typeof direction !== 'string') {
+      throw Error(`Snake.getAngleForRotation(direction='') direction must be String`);
+    }
+    if (!['left', 'right', 'up', 'down'].includes(direction)) {
+      throw Error(`Snake.getAngleForRotation(direction='') direction must be 'left', 'right', 'up', 'down'`);
+    }
+
     switch (direction) {
       case 'left': return 0;
       case 'right': return 180;
       case 'up': return 90;
       case 'down': return -90;
-      default: return null;
     }
   }
 

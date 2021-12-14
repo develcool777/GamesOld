@@ -8,6 +8,8 @@
     <Instruction 
       class="snake__instruction" 
       :score="getScore"
+      :cookieScore="getCookieScore"
+      :isCookieExist="getIsCookieExist"
       v-on:start="start()"
       v-on:stop="stop()"
       v-on:finish="finish()"
@@ -42,6 +44,14 @@ export default {
     getScore() {
       return this.GAME?.score;
     },
+
+    getCookieScore() {
+      return this.GAME?.cookieInstance.maxScore;
+    },
+
+    getIsCookieExist() {
+      return this.GAME?.cookieInstance.isPositionExist;
+    }
   },
   methods: {
     start() {

@@ -1,7 +1,18 @@
 export default class Walls {
   constructor(width, height, snakeBody) {
+    if (!Number.isInteger(width)) {
+      throw Error(`Walls.constructor(width=0, height=0, snakeBody=[]) width must be Integer`);
+    }
+    if (!Number.isInteger(height)) {
+      throw Error(`Walls.constructor(width=0, height=0, snakeBody=[]) height must be Integer`);
+    }
+    if (!Array.isArray(snakeBody)) {
+      throw Error(`Walls.constructor(width=0, height=0, snakeBody=[]) snakeBody must be Array`);
+    }
+
     const fieldSize = { width, height }
     let positions = [];
+
     Object.defineProperties(this, {
       positions: {
         get: () => positions,
@@ -35,8 +46,18 @@ export default class Walls {
     this.positions = [];
   }
 
-  generatePosition(allCells, foodPosition) {
-    let array = [...this.snakeBody, foodPosition, ...this.positions];
+  generatePosition(allCells=[], applePosition={}, cookiePosition={}) {
+    if (!Array.isArray(allCells)) {
+      throw Error(`Walls.generatePosition(allCells=[], applePosition={}, cookiePosition={}) allCells must be Array`);
+    }
+    if (typeof applePosition !== 'object' || applePosition === null || Array.isArray(applePosition)) {
+      throw Error(`Walls.generatePosition(allCells=[], applePosition={}, cookiePosition={}) applePosition must be Object`);
+    }
+    if (typeof cookiePosition !== 'object' || cookiePosition === null || Array.isArray(cookiePosition)) {
+      throw Error(`Walls.generatePosition(allCells=[], applePosition={}, cookiePosition={}) cookiePosition must be Object`);
+    }
+
+    let array = [...this.snakeBody, applePosition, cookiePosition, ...this.positions];
 
     const findAndDelete = (cell) => {
       const lenBeforeFilter = array.length;

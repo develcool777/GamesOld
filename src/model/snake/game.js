@@ -1,13 +1,22 @@
 import Cell from "./cell";
 import Snake from "./snake";
-import Food from "./food";
 import Walls from "./walls";
+import Apple from "./apple";
+import Cookie from "./cookie";
 
 export default class Game {
-  constructor(width, height) {
+  constructor(width=0, height=0) {
+    if (!Number.isInteger(width)) {
+      throw Error(`Game.constructor(width=0, height=0) width must be Integer`);
+    }
+    if (!Number.isInteger(height)) {
+      throw Error(`Game.constructor(width=0, height=0) height must be Integer`);
+    }
+
     const snakeSpeed = 10;
     const snakeInstance = new Snake(width, height);
-    const foodInstance = new Food(width, height, snakeInstance.body);
+    const appleInstance = new Apple(width, height, snakeInstance.body);
+    const cookieInstance = new Cookie(width, height, snakeInstance.body);
     const wallsInstance = new Walls(width, height, snakeInstance.body);
     let fieldForRender = [];
     let allCells = [];
@@ -17,6 +26,7 @@ export default class Game {
     let score = 0;
     let gameStatus = '';
     this.eventHandler = this.keyPressed.bind(this);
+
     Object.defineProperties(this, {
       snakeSpeed: {
         get: () => snakeSpeed
@@ -82,8 +92,12 @@ export default class Game {
         get: () => snakeInstance
       },
 
-      foodInstance: {
-        get: () => foodInstance
+      appleInstance: {
+        get: () => appleInstance
+      },
+
+      cookieInstance: {
+        get: () => cookieInstance
       },
 
       wallsInstance: {
@@ -121,7 +135,8 @@ export default class Game {
       height: this,height,
       fieldForRender: this.fieldForRender,
       snakeInstance: this.snakeInstance,
-      foodInstance: this.foodInstance,
+      appleInstance: this.appleInstance,
+      cookieInstance: this.cookieInstance,
       wallsInstance: this.wallsInstance,
       requestID: this.requestID,
       lastRenderTime: this.lastRenderTime,
@@ -135,21 +150,23 @@ export default class Game {
     this.createFieldForRender();
     this.snakeInstance.generateSnake();
     this.addSnake();
-    this.addFood();
+    this.addApple();
   }
 
   startGame() {
     if (this.gameStatus === 'start') return;
     this.requestID = window.requestAnimationFrame(() => this.gameLoop(Date.now()));
-    this.gameStatus = 'start';
     window.addEventListener('keyup', this.eventHandler);
+    this.cookieInstance.isPositionExist && this.cookieInstance.startTimer();
+    this.gameStatus = 'start';
   }
 
   stopGame() {
     if (this.gameStatus === 'stop') return;
     window.cancelAnimationFrame(this.requestID);
-    this.gameStatus = 'stop';
     window.removeEventListener('keyup', this.eventHandler);
+    this.cookieInstance.isPositionExist && this.cookieInstance.stopTimer();
+    this.gameStatus = 'stop';
   }
 
   finishGame() {
@@ -159,7 +176,6 @@ export default class Game {
   }
 
   clear() {
-    if (this.gameStatus === '') return;
     window.cancelAnimationFrame(this.requestID);
     window.removeEventListener('keyup', this.eventHandler);
     this.gameStatus = '';
@@ -169,7 +185,8 @@ export default class Game {
     this.score = 0;
     this.lastRenderTime = 0;
     this.snakeInstance.clear();
-    this.foodInstance.clear();
+    this.appleInstance.clear();
+    this.cookieInstance.clear();
     this.wallsInstance.clear();
   }
 
@@ -212,58 +229,95 @@ export default class Game {
     });
   }
 
-  addFood() {
-    this.foodInstance.generatePosition(this.allCells, this.wallsInstance.positions);
-    this.foodInstance.generateGuidingLines(this.wallsInstance.positions);
-    // food position
-    const pos = this.foodInstance.position;
-    this.fieldForRender[pos.x][pos.y].cellContain = 'food';
-
+  addApple() {
+    const wallsPos = this.wallsInstance.positions;
+    const cookiePos = this.cookieInstance.position;
+    this.appleInstance.generatePosition(this.allCells, wallsPos, cookiePos);
+    const guidingLines = this.appleInstance.generateGuidingLines(this.wallsInstance.positions, cookiePos);
+    // apple position
+    const pos = this.appleInstance.position;
+    this.fieldForRender[pos.x][pos.y].cellContain = 'apple';
     // Guiding lines
-    this.foodInstance.guidingLines.forEach(pos => {
+    guidingLines.forEach(pos => {
       this.fieldForRender[pos.x][pos.y].isGuidingLine = true;
     });
   }
 
+  addCookie() {
+    const wallsPos = this.wallsInstance.positions;
+    const applePos = this.appleInstance.position;
+    this.cookieInstance.generatePosition(this.allCells, wallsPos, applePos);
+    // cookie position
+    const pos = this.cookieInstance.position;
+    this.fieldForRender[pos.x][pos.y].cellContain = 'cookie';
+    // startTimer 
+    this.cookieInstance.startTimer();
+  }
+
   addWall() {
-    this.wallsInstance.generatePosition(this.allCells, this.foodInstance.position);
+    const applePos = this.appleInstance.position;
+    const cookiePos = this.cookieInstance.position;
+    this.wallsInstance.generatePosition(this.allCells, applePos, cookiePos);
     this.wallsInstance.positions.forEach(pos => {
       this.fieldForRender[pos.x][pos.y].cellContain = 'wall';
     });
   }
 
-  updateSnakePosition() {
-    const status = this.snakeInstance.move(this.foodInstance.position, this.wallsInstance.positions, this.direction);
+  update() {
+    const applePos = this.appleInstance.position;
+    const cookiePos = this.cookieInstance.position;
+    const wallsPos = this.wallsInstance.positions;
 
-    if (status === 'hit itself' || status === 'hit wall') return window.cancelAnimationFrame(this.requestID);
+    const status = this.snakeInstance.move(applePos, cookiePos, wallsPos, this.direction);
+
+    if (status === 'hit itself' || status === 'hit wall') {
+      window.cancelAnimationFrame(this.requestID);
+      window.removeEventListener('keyup', this.eventHandler);
+      this.cookieInstance.stopTimer();
+      return;
+    }
+
+    this.clearFieldForRender(status);
+    this.addSnake();
+
+    if (status === 'moved and ate apple') {
+      const apples = ++this.appleInstance.amountOfEatenApples;
+      this.score++;
+      apples % 2 === 0 && this.addWall();
+      apples % 5 === 0 && this.addCookie();
+      this.addApple();
+    }
+
+    if (status === 'moved and ate cookie') {
+      this.score += this.cookieInstance.removeCookie();
+    }
+  }
+
+  clearFieldForRender(status='') {
+    if (typeof status !== 'string') {
+      throw Error(`Game.clearFieldForRender(status='') status must be String`);
+    }
 
     this.fieldForRender.forEach(row => row.forEach(cell => {
-      const foodCond = status === 'moved and ate' && cell.cellContain === 'food';
+      const appleCond = status === 'moved and ate apple' && cell.cellContain === 'apple';
+      const cookieCond = status === 'moved and ate cookie' && cell.cellContain === 'cookie'
+        || !this.cookieInstance.isPositionExist && cell.cellContain === 'cookie'
       const snakeCond = ['head', 'body', 'tail'].includes(cell.cellContain);
       const empty = cell.cellContain === '';
-      cell.cellContain = foodCond || snakeCond || empty
+      cell.cellContain = appleCond || cookieCond || snakeCond || empty
         ? ''
         : cell.cellContain
 
-      cell.isGuidingLine = cell.isGuidingLine && status === 'moved and ate' 
+      cell.isGuidingLine = cell.isGuidingLine && status === 'moved and ate apple' 
         ? false 
         : cell.isGuidingLine
 
       cell.adjustSnakeBodyOnTurn = '';
       cell.rotationAngle = null;
     }));
-
-    this.addSnake();
-
-    if (status === 'moved and ate') {
-      this.score++;
-      this.score % 2 === 0 && this.addWall();
-      this.addFood();
-    }
   }
 
   keyPressed(event) {
-    console.log(event, this);
     switch (event.keyCode) {
       case 37:
         if (this.snakeInstance.direction === 'right') break;
@@ -290,10 +344,14 @@ export default class Game {
   }
 
   gameLoop(currentTime) {
+    if (!Number.isInteger(currentTime)) {
+      throw Error(`Game.gameLoop(currentTime) currentTime must be Integer`);
+    }
+    
     this.requestID = window.requestAnimationFrame(() => this.gameLoop(Date.now()));
     const secondsSinceLastRender = (currentTime - this.lastRenderTime) / 1000;
     if (secondsSinceLastRender < 1 / this.snakeSpeed ) return;
-    this.updateSnakePosition();
+    this.update();
     this.lastRenderTime = currentTime;
   }
 }

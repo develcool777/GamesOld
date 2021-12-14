@@ -1,10 +1,18 @@
 export default class Cell {
-  constructor(x, y) {
+  constructor(x=0, y=0) {
+    if (!Number.isInteger(x)) {
+      throw Error(`Cell.constructor(x=0, y=0) x must be Integer`);
+    }
+    if (!Number.isInteger(y)) {
+      throw Error(`Cell.constructor(x=0, y=0) y must be Integer`);
+    }
+
     const position = { x, y };
     let cellContain = '';
     let isGuidingLine = false;
     let adjustSnakeBodyOnTurn = '';
     let rotationAngle = null;
+
     Object.defineProperties(this, {
       position: {
         get: () => position
@@ -16,8 +24,8 @@ export default class Cell {
           if (typeof value !== 'string') {
             throw Error(`Cell.cellContain.set(value) value must be String`);
           }
-          if (!['body', 'tail', 'head', 'food', 'wall', ''].includes(value)) {
-            throw Error(`Cell.cellContain.set(value) value must be 'body', 'tail', 'head', 'food', 'wall', ''`);
+          if (!['body', 'tail', 'head', 'apple', 'cookie', 'wall', ''].includes(value)) {
+            throw Error(`Cell.cellContain.set(value) value must be 'body', 'tail', 'head', 'apple', 'cookie', 'wall', ''`);
           }
           cellContain = value
         }
