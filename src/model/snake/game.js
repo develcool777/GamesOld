@@ -71,8 +71,8 @@ export default class Game {
           if (typeof value !== 'string') {
             throw Error(`Game.gameStatus.set(value) value must be String`);
           }
-          if (!['', 'start', 'stop'].includes(value)) {
-            throw Error(`Game.gameStatus.set(value) value must be '', 'start', 'stop'`);
+          if (!['', 'start', 'stop', 'finish'].includes(value)) {
+            throw Error(`Game.gameStatus.set(value) value must be '', 'start', 'stop', 'finish'`);
           }
           gameStatus = value;
         } 
@@ -132,7 +132,7 @@ export default class Game {
     return console.log({
       snakeSpeed: this.snakeSpeed, 
       width: this.width,
-      height: this,height,
+      height: this.height,
       fieldForRender: this.fieldForRender,
       snakeInstance: this.snakeInstance,
       appleInstance: this.appleInstance,
@@ -154,7 +154,7 @@ export default class Game {
   }
 
   startGame() {
-    if (this.gameStatus === 'start') return;
+    if (['start', 'finish'].includes(this.gameStatus)) return;
     this.requestID = window.requestAnimationFrame(() => this.gameLoop(Date.now()));
     window.addEventListener('keyup', this.eventHandler);
     this.cookieInstance.isPositionExist && this.cookieInstance.startTimer();
@@ -162,7 +162,7 @@ export default class Game {
   }
 
   stopGame() {
-    if (this.gameStatus === 'stop') return;
+    if (['stop', 'finish'].includes(this.gameStatus)) return;
     window.cancelAnimationFrame(this.requestID);
     window.removeEventListener('keyup', this.eventHandler);
     this.cookieInstance.isPositionExist && this.cookieInstance.stopTimer();
@@ -214,6 +214,9 @@ export default class Game {
         cell.rotationAngle = this.snakeInstance.rotateHead();
         cell.cellContain = 'head';
       }
+      else if (i === 1) {
+        cell.cellContain = 'neck';
+      }
       else if (i === this.snakeInstance.body.length - 1) {
         cell.rotationAngle = this.snakeInstance.rotateTail();
         cell.cellContain = 'tail';
@@ -233,13 +236,13 @@ export default class Game {
     const wallsPos = this.wallsInstance.positions;
     const cookiePos = this.cookieInstance.position;
     this.appleInstance.generatePosition(this.allCells, wallsPos, cookiePos);
-    const guidingLines = this.appleInstance.generateGuidingLines(this.wallsInstance.positions, cookiePos);
+    const guidingLines = this.appleInstance.generateGuidingLines(wallsPos, cookiePos);
     // apple position
     const pos = this.appleInstance.position;
     this.fieldForRender[pos.x][pos.y].cellContain = 'apple';
     // Guiding lines
     guidingLines.forEach(pos => {
-      this.fieldForRender[pos.x][pos.y].isGuidingLine = true;
+      this.fieldForRender[pos.x][pos.y].isAppleGuidingLine = true;
     });
   }
 
@@ -247,9 +250,14 @@ export default class Game {
     const wallsPos = this.wallsInstance.positions;
     const applePos = this.appleInstance.position;
     this.cookieInstance.generatePosition(this.allCells, wallsPos, applePos);
+    const guidingLines = this.cookieInstance.generateGuidingLines(wallsPos, applePos);
     // cookie position
     const pos = this.cookieInstance.position;
     this.fieldForRender[pos.x][pos.y].cellContain = 'cookie';
+    // Guiding lines
+    guidingLines.forEach(pos => {
+      this.fieldForRender[pos.x][pos.y].isCookieGuidingLine = true;
+    });
     // startTimer 
     this.cookieInstance.startTimer();
   }
@@ -270,16 +278,22 @@ export default class Game {
 
     const status = this.snakeInstance.move(applePos, cookiePos, wallsPos, this.direction);
 
+    this.isSnakeDead(status);
+    this.clearFieldForRender(status);
+    this.addSnake();
+    this.calculateScore(status)
+  }
+
+  isSnakeDead(status='') {
     if (status === 'hit itself' || status === 'hit wall') {
       window.cancelAnimationFrame(this.requestID);
       window.removeEventListener('keyup', this.eventHandler);
       this.cookieInstance.stopTimer();
-      return;
+      this.gameStatus = 'finish';
     }
+  }
 
-    this.clearFieldForRender(status);
-    this.addSnake();
-
+  calculateScore(status='') {
     if (status === 'moved and ate apple') {
       const apples = ++this.appleInstance.amountOfEatenApples;
       this.score++;
@@ -297,20 +311,24 @@ export default class Game {
     if (typeof status !== 'string') {
       throw Error(`Game.clearFieldForRender(status='') status must be String`);
     }
-
+    
     this.fieldForRender.forEach(row => row.forEach(cell => {
       const appleCond = status === 'moved and ate apple' && cell.cellContain === 'apple';
       const cookieCond = status === 'moved and ate cookie' && cell.cellContain === 'cookie'
         || !this.cookieInstance.isPositionExist && cell.cellContain === 'cookie'
-      const snakeCond = ['head', 'body', 'tail'].includes(cell.cellContain);
+      const snakeCond = ['head', 'neck' ,'body', 'tail'].includes(cell.cellContain);
       const empty = cell.cellContain === '';
       cell.cellContain = appleCond || cookieCond || snakeCond || empty
         ? ''
         : cell.cellContain
 
-      cell.isGuidingLine = cell.isGuidingLine && status === 'moved and ate apple' 
+      cell.isAppleGuidingLine = cell.isAppleGuidingLine && status === 'moved and ate apple' 
         ? false 
-        : cell.isGuidingLine
+        : cell.isAppleGuidingLine
+
+      cell.isCookieGuidingLine = cell.isCookieGuidingLine && status === 'moved and ate cookie' || !this.cookieInstance.isPositionExist
+        ? false 
+        : cell.isCookieGuidingLine
 
       cell.adjustSnakeBodyOnTurn = '';
       cell.rotationAngle = null;
@@ -318,23 +336,23 @@ export default class Game {
   }
 
   keyPressed(event) {
-    switch (event.keyCode) {
-      case 37:
+    switch (event.key) {
+      case 'ArrowLeft':
         if (this.snakeInstance.direction === 'right') break;
         this.direction = 'left';
         break;
 
-      case 38:
+      case 'ArrowUp':
         if (this.snakeInstance.direction === 'down') break;
         this.direction = 'up';
         break;
 
-      case 39:
+      case 'ArrowRight':
         if (this.snakeInstance.direction === 'left') break;
         this.direction = 'right';
         break;
 
-      case 40:
+      case 'ArrowDown':
         if (this.snakeInstance.direction === 'up') break;
         this.direction = 'down';
         break;

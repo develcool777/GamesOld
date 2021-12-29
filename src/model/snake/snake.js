@@ -74,7 +74,7 @@ export default class Snake {
 
     this.body.push(
       { x: centerX, y: centerY }, // head
-      { x: centerX, y: centerY + 1 }, // body
+      { x: centerX, y: centerY + 1 }, // neck
       { x: centerX, y: centerY + 2 }, // tail
     )
   }

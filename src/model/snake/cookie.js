@@ -1,3 +1,5 @@
+import { GEN_POSITION, GEN_GUIDING_LINES } from './utils'
+
 export default class Cookie {
   constructor(width, height, snakeBody) {
     if (!Number.isInteger(width)) {
@@ -93,19 +95,7 @@ export default class Cookie {
       throw Error(`Cookie.generatePosition(allCells=[], wallsPosition=[], applePosition={}) applePosition must be Object`);
     }
 
-    let array = [...this.snakeBody, ...wallsPosition, applePosition, this.position];
-
-    const findAndDelete = (cell) => {
-      const lenBeforeFilter = array.length;
-      array = array.filter(pos => pos.x !== cell.x || pos.y !== cell.y);
-      return lenBeforeFilter === array.length;
-    }
-
-    const availableCells = allCells.filter(cell => findAndDelete(cell));
-
-    const chooseCell = availableCells[Math.floor(Math.random() * availableCells.length)];
-    
-    this.position = chooseCell;
+    this.position = GEN_POSITION(allCells, wallsPosition, applePosition);
     this.isPositionExist = true;
   }
 
@@ -119,6 +109,10 @@ export default class Cookie {
     }, 100);
   }
 
+  stopTimer() {
+    clearInterval(this.intervalID);
+  }
+
   removeCookie() {
     this.stopTimer();
     this.position = {};
@@ -127,43 +121,14 @@ export default class Cookie {
     return this.maxScore;
   }
 
-  stopTimer() {
-    clearInterval(this.intervalID);
+  generateGuidingLines(wallsPosition=[], applePosition={}) {
+    if (!Array.isArray(wallsPosition)) {
+      throw Error(`Cookie.generateGuidingLines(wallsPosition=[], applePosition={}) wallsPosition must be Array`);
+    }
+    if (typeof applePosition !== 'object' || applePosition === null || Array.isArray(applePosition)) {
+      throw Error(`Cookie.generateGuidingLines(wallsPosition=[], applePosition={}) applePosition must be Object`);
+    }
+
+    return GEN_GUIDING_LINES(this.position, this.fieldSize, wallsPosition, applePosition)
   }
-
-  // generateGuidingLines(wallsPosition=[], applePosition={}) {
-  //   if (!Array.isArray(wallsPosition)) {
-  //     throw Error(`Cookie.generateGuidingLines(wallsPosition=[]) wallsPosition must be Array`);
-  //   }
-
-  //   const array = [...wallsPosition, applePosition];
-  //   const y = this.position.y;
-  //   const x = this.position.x;
-
-  //   const up = [];
-  //   for (let x = this.position.x - 1; x >= 0; x--) {
-  //     if (array.some(pos => pos.x === x && pos.y === y)) break;
-  //     up.push({ x, y });
-  //   }
-
-  //   const down = [];
-  //   for (let x = this.position.x + 1; x < this.fieldSize.height; x++) {
-  //     if (array.some(pos => pos.x === x && pos.y === y)) break;
-  //     down.push({ x, y });
-  //   }
-
-  //   const left = [];
-  //   for (let y = this.position.y - 1; y >= 0; y--) {
-  //     if (array.some(pos => pos.x === x && pos.y === y)) break;
-  //     left.push({ x, y });
-  //   }
-
-  //   const right = [];
-  //   for (let y = this.position.y + 1; y < this.fieldSize.width; y++) {
-  //     if (array.some(pos => pos.x === x && pos.y === y)) break;
-  //     right.push({ x, y });
-  //   }
-
-  //   return [...up, ...down, ...left, ...right];
-  // }
 }

@@ -1,3 +1,5 @@
+import { GEN_POSITION, GEN_GUIDING_LINES } from './utils'
+
 export default class Apple {
   constructor(width=0, height=0, snakeBody=[]) {
     if (!Number.isInteger(width)) {
@@ -70,16 +72,7 @@ export default class Apple {
       throw Error(`Apple.generatePosition(allCells=[], wallsPosition=[], cookiePosition={}) cookiePosition must be Object`);
     }
 
-    let array = [...this.snakeBody, ...wallsPosition, cookiePosition, this.position];
-
-    const findAndDelete = (cell) => {
-      const lenBeforeFilter = array.length;
-      array = array.filter(pos => pos.x !== cell.x || pos.y !== cell.y);
-      return lenBeforeFilter === array.length;
-    }
-
-    const availableCells = allCells.filter(cell => findAndDelete(cell));
-    this.position = availableCells[Math.floor(Math.random() * availableCells.length)];
+    this.position = GEN_POSITION(allCells, wallsPosition, cookiePosition);
   }
 
   generateGuidingLines(wallsPosition=[], cookiePosition={}) {
@@ -90,34 +83,6 @@ export default class Apple {
       throw Error(`Apple.generateGuidingLines(wallsPosition=[], cookiePosition={}) cookiePosition must be Object`);
     }
 
-    const array = [...wallsPosition, cookiePosition];
-    const y = this.position.y;
-    const x = this.position.x;
-
-    const up = [];
-    for (let x = this.position.x - 1; x >= 0; x--) {
-      if (array.some(pos => pos.x === x && pos.y === y)) break;
-      up.push({ x, y });
-    }
-
-    const down = [];
-    for (let x = this.position.x + 1; x < this.fieldSize.height; x++) {
-      if (array.some(pos => pos.x === x && pos.y === y)) break;
-      down.push({ x, y });
-    }
-
-    const left = [];
-    for (let y = this.position.y - 1; y >= 0; y--) {
-      if (array.some(pos => pos.x === x && pos.y === y)) break;
-      left.push({ x, y });
-    }
-
-    const right = [];
-    for (let y = this.position.y + 1; y < this.fieldSize.width; y++) {
-      if (array.some(pos => pos.x === x && pos.y === y)) break;
-      right.push({ x, y });
-    }
-
-    return [...up, ...down, ...left, ...right];
+    return GEN_GUIDING_LINES(this.position, this.fieldSize, wallsPosition, cookiePosition);
   }
 }

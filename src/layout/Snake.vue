@@ -2,11 +2,18 @@
   <div class="snake">
     <div class="snake__game">
       <div class="snake__field">
-        <Cell v-for="(cell, i) in gameField" :key="i" :cell="cell"/>
+        <Cell 
+          v-for="(cell, i) in gameField" 
+          :key="i" 
+          :cell="cell"
+          :headDirection="getSnakeDirection"
+          :gameStatus="getGameStatus"
+        />
       </div>
     </div>
     <Instruction 
       class="snake__instruction" 
+      :gameStatus="getGameStatus"
       :score="getScore"
       :cookieScore="getCookieScore"
       :isCookieExist="getIsCookieExist"
@@ -41,6 +48,10 @@ export default {
       return this.GAME?.fieldForRender.flat();
     },
 
+    getGameStatus() {
+      return this.GAME?.gameStatus;
+    },
+
     getScore() {
       return this.GAME?.score;
     },
@@ -51,6 +62,10 @@ export default {
 
     getIsCookieExist() {
       return this.GAME?.cookieInstance.isPositionExist;
+    },
+
+    getSnakeDirection() {
+      return this.GAME?.snakeInstance.direction;
     }
   },
   methods: {

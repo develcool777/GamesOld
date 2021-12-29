@@ -1,3 +1,5 @@
+import { GEN_POSITION } from './utils'
+
 export default class Walls {
   constructor(width, height, snakeBody) {
     if (!Number.isInteger(width)) {
@@ -57,16 +59,7 @@ export default class Walls {
       throw Error(`Walls.generatePosition(allCells=[], applePosition={}, cookiePosition={}) cookiePosition must be Object`);
     }
 
-    let array = [...this.snakeBody, applePosition, cookiePosition, ...this.positions];
-
-    const findAndDelete = (cell) => {
-      const lenBeforeFilter = array.length;
-      array = array.filter(pos => pos.x !== cell.x || pos.y !== cell.y);
-      return lenBeforeFilter === array.length;
-    }
-
-    const availableCells = allCells.filter(cell => findAndDelete(cell));
-
-    this.positions.push(availableCells[Math.floor(Math.random() * availableCells.length)]);
+    const position = GEN_POSITION(allCells, applePosition, cookiePosition);
+    this.positions.push(position);
   }
 }
