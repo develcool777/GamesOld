@@ -63,7 +63,6 @@ export default {
       }
       this.$emit('updatedInput', obj);
     },
-
     getBlockValue: function(newVal) {
       this.string = newVal;
     }
@@ -78,26 +77,21 @@ export default {
     showHint() {
       return this.string !== '' ? this.block.hint : '';
     },
-
     chooseEye() {
       return this.block.type === 'password' ? 'eye' : 'eye-slash';
     },
-
     showEye() {
       return this.block.eye !== undefined && this.string !== '';
     },
-
     chooseHintTitle() {
       return this.block.type === 'password' ? 'Show password' : 'Hide password'
     },
-
     styleHintText() {
       if (this.block.eye === undefined) {
         return {paddingLeft: `${30}px`}
       }
       return {paddingLeft: `${10}px`};
     },
-
     getBlockValue() {
       return this.block.value;
     }
@@ -107,15 +101,12 @@ export default {
       this.isFocused = isFocus;
       this.$emit('focused', this.isFocused ? this.block.name : '');
     },
-
     deleteString() {
       this.string = '';
     },
-
     clickEye() {
       this.$emit('eyeClicked', this.block.name);
     },
-
     genPass() {
       this.$emit('genPass');
     }
@@ -131,7 +122,6 @@ export default {
   padding: 5px;
   border-bottom: 1px solid lightslategray;
   transition-duration: .5s;
-
   &__hint {
     @include Flex(flex-start);
     height: 20px;
@@ -139,19 +129,16 @@ export default {
     color: gray;
     user-select: none;
   }
-
   &__hintIcon {
     width: 20px;
     @include Flex(center);
     color: darkslategray;
     cursor: pointer;
   }
-
   &__field {
     @include Flex(flex-start);
     height: 30px;
   }
-
   &__wrapperDiv {
     display: flex;
     align-items: center;
@@ -160,14 +147,12 @@ export default {
     font-size: 20px;
     color: darkslategray;
   }
-
   &__wrapperInput {
     flex: 1;
     position: relative;
     height: 100%;
     padding-right: 30px;
   }
-
   &__input {
     width: 100%;
     height: 100%;
@@ -177,7 +162,6 @@ export default {
     color: darkslategray;
     font-size: 20px;
   }
-
   &__backspace {
     position: absolute;
     top: 50%;
@@ -188,16 +172,13 @@ export default {
     cursor: pointer;
     transition-duration: .5s;
   }
-
   &__backspace:hover {
     color: darkslategray
   }
 }
-
 .block:hover {
   @include boxShadow(0.3);
 }
-
 .focused {
   @include boxShadow(0.3);
 }

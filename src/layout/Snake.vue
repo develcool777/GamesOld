@@ -17,10 +17,13 @@
       :score="getScore"
       :cookieScore="getCookieScore"
       :isCookieExist="getIsCookieExist"
+      :arrowClicked="getArrowPressed"
       v-on:start="start()"
       v-on:stop="stop()"
       v-on:finish="finish()"
+      v-on:arrowBtn="arrowBtnClicked($event)"
     />
+
   </div>
 </template>
 
@@ -33,6 +36,11 @@ export default {
   components: {
     Instruction,
     Cell
+  },
+  watch: {
+    getArrowPressed: function(n) {
+      console.log(n, 'watch');
+    }
   },
   created() {
     this.GAME = new Game(40, 25);
@@ -65,7 +73,13 @@ export default {
     },
 
     getSnakeDirection() {
+      console.log('getDirection', this.GAME?.arrowPressed);
       return this.GAME?.snakeInstance.direction;
+    },
+
+    getArrowPressed() {
+      console.log('get', this.GAME?.arrowPressed);
+      return this.GAME?.arrowPressed;
     }
   },
   methods: {
@@ -79,6 +93,10 @@ export default {
 
     finish() {
       this.GAME.finishGame();
+    },
+
+    arrowBtnClicked(arrow) {
+      console.log(arrow, 'snake');
     }
   }
 }

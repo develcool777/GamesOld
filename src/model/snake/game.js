@@ -23,6 +23,7 @@ export default class Game {
     let lastRenderTime = 0;
     let requestID;
     let direction = 'left';
+    let arrowPressed = 'ArrowDown';
     let score = 0;
     let gameStatus = '';
     this.eventHandler = this.keyPressed.bind(this);
@@ -52,6 +53,19 @@ export default class Game {
             throw Error(`Game.direction.set(value) value must be 'right', 'left', 'up', 'down'`);
           }
           direction = value;
+        }
+      },
+
+      arrowPressed: {
+        get: () => arrowPressed,
+        set: (value) => {
+          if (typeof arrowPressed !== 'string') {
+            throw Error(`Game.arrowPressed.set(value) value must be String`);
+          }
+          if (!['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', ''].includes(value)) {
+            throw Error(`Game.arrowPressed.set(value) value must be 'ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', ''`);
+          }
+          arrowPressed = value;
         }
       },
 
@@ -141,6 +155,7 @@ export default class Game {
       requestID: this.requestID,
       lastRenderTime: this.lastRenderTime,
       direction: this.direction,
+      arrowPressed: this.arrowPressed,
       score: this.score,
       gameStatus: this.gameStatus
     });
@@ -188,6 +203,7 @@ export default class Game {
     this.appleInstance.clear();
     this.cookieInstance.clear();
     this.wallsInstance.clear();
+    this.arrowPressed = '';
   }
 
   createFieldForRender() {
@@ -336,7 +352,15 @@ export default class Game {
   }
 
   keyPressed(event) {
-    switch (event.key) {
+    const key = typeof event === 'string' ? event : event.key;
+
+    this.arrowPressed = key;
+    // setTimeout(() => {
+    //   this.arrowPressed = '';
+    // }, 250);
+
+    console.log(this.arrowPressed, 'game');
+    switch (key) {
       case 'ArrowLeft':
         if (this.snakeInstance.direction === 'right') break;
         this.direction = 'left';
